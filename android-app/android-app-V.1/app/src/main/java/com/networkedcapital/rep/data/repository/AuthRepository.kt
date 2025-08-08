@@ -118,6 +118,8 @@ class AuthRepository @Inject constructor(
         }
     }
 
+    suspend fun getCurrentUser(): Flow<Result<User>> = getProfile()
+
     suspend fun updateProfile(user: User): Flow<Result<User>> = flow {
         try {
             val response = authApiService.updateProfile(user)

@@ -81,7 +81,67 @@ data class Portal(
     val leadId: Int? = null,
     val usersId: Int? = null,
     val usersCount: Int? = null,
-    val mainImageUrl: String? = null
+    val mainImageUrl: String? = null,
+    val description: String = "",
+    val location: String = "",
+    val isSafe: Boolean = false,
+    val imageUrl: String? = null
+) : Parcelable
+
+@Parcelize
+data class PortalDetail(
+    val id: Int,
+    val name: String,
+    val subtitle: String? = null,
+    val about: String? = null,
+    val categoriesId: Int? = null,
+    val citiesId: Int? = null,
+    val leadId: Int? = null,
+    val usersId: Int? = null,
+    val usersCount: Int? = null,
+    val mainImageUrl: String? = null,
+    val aGoals: List<Goal>? = null,
+    val aPortalUsers: List<PortalUser>? = null,
+    val aTexts: List<PortalText>? = null,
+    val aSections: List<PortalSection>? = null,
+    val aUsers: List<User>? = null,
+    val aLeads: List<User>? = null
+) : Parcelable
+
+@Parcelize
+data class PortalUser(
+    val id: Int
+) : Parcelable
+
+@Parcelize
+data class PortalText(
+    val id: Int,
+    val portalId: Int,
+    val title: String? = null,
+    val text: String? = null,
+    val section: String? = null,
+    val createdAt: String? = null,
+    val updatedAt: String? = null
+) : Parcelable
+
+@Parcelize
+data class PortalSection(
+    val id: Int,
+    val title: String,
+    val aFiles: List<PortalFile>
+) : Parcelable
+
+@Parcelize
+data class PortalFile(
+    val id: Int,
+    val url: String? = null
+) : Parcelable
+
+@Parcelize
+data class ReportingIncrement(
+    val id: Int,
+    val name: String,
+    val value: String
 ) : Parcelable
 
 @Parcelize
@@ -161,3 +221,77 @@ data class Team(
     val members: List<User> = emptyList(),
     val goals: List<Goal> = emptyList()
 ) : Parcelable
+
+// Chat models for main screen
+@Parcelize
+data class ActiveChat(
+    val id: String, // "direct-<userId>" or "group-<chatId>"
+    val type: String, // "direct" or "group"
+    val user: User? = null,
+    val chat: ChatModel? = null,
+    val last_message: MessageModel? = null,
+    val last_message_time: String? = null
+) : Parcelable
+
+@Parcelize
+data class ChatModel(
+    val id: Int,
+    val name: String? = null
+) : Parcelable
+
+@Parcelize
+data class MessageModel(
+    val id: Int,
+    val text: String? = null,
+    val created_at: String? = null,
+    val read: String? = null
+) : Parcelable
+
+// Auth models
+data class LoginRequest(
+    val email: String,
+    val password: String
+)
+
+data class RegisterRequest(
+    val firstName: String,
+    val lastName: String,
+    val email: String,
+    val password: String,
+    val phone: String? = null
+)
+
+data class AuthResponse(
+    val token: String,
+    val user: User
+)
+
+// API Response wrappers
+data class ApiResponse<T>(
+    val result: T,
+    val message: String? = null
+)
+
+data class UsersApiResponse(
+    val result: List<User>
+)
+
+data class PortalsApiResponse(
+    val result: List<Portal>
+)
+
+data class ActiveChatApiResponse(
+    val result: List<ActiveChat>
+)
+
+data class UserProfileApiResponse(
+    val result: User
+)
+
+data class PortalDetailApiResponse(
+    val result: PortalDetail
+)
+
+data class PortalGoalsApiResponse(
+    val aGoals: List<Goal>
+)

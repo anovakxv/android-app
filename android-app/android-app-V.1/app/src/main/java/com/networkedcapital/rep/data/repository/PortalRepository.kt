@@ -28,6 +28,58 @@ class PortalRepository @Inject constructor(
         }
     }
 
+    suspend fun getFilteredPortals(userId: Int, tab: String, safeOnly: Boolean = false): List<Portal> {
+        val limitParam = if (tab == "all") 50 else null
+        val response = portalApiService.getFilteredPortals(userId, tab, limitParam, safeOnly)
+        
+        if (response.isSuccessful) {
+            return response.body()?.result ?: emptyList()
+        } else {
+            throw Exception("Failed to get filtered portals: ${response.message()}")
+        }
+    }
+
+    suspend fun getFilteredPeople(userId: Int, tab: String): List<User> {
+        val limitParam = if (tab == "all") 50 else null
+        val response = portalApiService.getFilteredPeople(userId, tab, limitParam)
+        
+        if (response.isSuccessful) {
+            return response.body()?.result ?: emptyList()
+        } else {
+            throw Exception("Failed to get filtered people: ${response.message()}")
+        }
+    }
+
+    suspend fun getActiveChats(userId: Int): List<ActiveChat> {
+        val response = portalApiService.getActiveChats(userId)
+        
+        if (response.isSuccessful) {
+            return response.body()?.result ?: emptyList()
+        } else {
+            throw Exception("Failed to get active chats: ${response.message()}")
+        }
+    }
+
+    suspend fun searchPortals(query: String, limit: Int = 50): List<Portal> {
+        val response = portalApiService.searchPortals(query, limit)
+        
+        if (response.isSuccessful) {
+            return response.body()?.result ?: emptyList()
+        } else {
+            throw Exception("Failed to search portals: ${response.message()}")
+        }
+    }
+
+    suspend fun searchPeople(query: String, limit: Int = 50): List<User> {
+        val response = portalApiService.searchPeople(query, limit)
+        
+        if (response.isSuccessful) {
+            return response.body()?.result ?: emptyList()
+        } else {
+            throw Exception("Failed to search people: ${response.message()}")
+        }
+    }
+
     suspend fun filterPortals(
         searchTerm: String? = null,
         category: String? = null,
@@ -185,6 +237,70 @@ class PortalRepository @Inject constructor(
                 emit(Result.success(Unit))
             } else {
                 emit(Result.failure(Exception("Failed to leave portal: ${response.message()}")))
+            }
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
+    suspend fun getPortalDetail(portalId: Int, userId: Int): Flow<Result<PortalDetail>> = flow {
+        try {
+            val response = portalApiService.getPortalDetail(portalId, userId)
+            if (response.isSuccessful) {
+                val portalDetailResponse = response.body()
+                if (portalDetailResponse != null) {
+                    emit(Result.success(portalDetailResponse.result))
+                } else {
+                    emit(Result.failure(Exception("Portal detail not found")))
+                }
+            } else {
+                emit(Result.failure(Exception("Failed to get portal detail: ${response.message()}")))
+            }
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
+    suspend fun getPortalGoals(portalId: Int): Flow<Result<List<Goal>>> = flow {
+        try {
+            val response = portalApiService.getPortalGoals(portalId)
+            if (response.isSuccessful) {
+                val goalsResponse = response.body()
+                if (goalsResponse != null) {
+                    emit(Result.success(goalsResponse.aGoals))
+                } else {
+                    emit(Result.success(emptyList()))
+                }
+            } else {
+                emit(Result.failure(Exception("Failed to get portal goals: ${response.message()}")))
+            }
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
+    suspend fun getReportingIncrements(): Flow<Result<List<ReportingIncrement>>> = flow {
+        try {
+            val response = portalApiService.getReportingIncrements()
+            if (response.isSuccessful) {
+                val increments = response.body() ?: emptyList()
+                emit(Result.success(increments))
+            } else {
+                emit(Result.failure(Exception("Failed to get reporting increments: ${response.message()}")))
+            }
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
+    suspend fun flagPortal(portalId: Int, reason: String = ""): Flow<Result<Unit>> = flow {
+        try {
+            val request = FlagPortalRequest(portalId, reason)
+            val response = portalApiService.flagPortal(request)
+            if (response.isSuccessful) {
+                emit(Result.success(Unit))
+            } else {
+                emit(Result.failure(Exception("Failed to flag portal: ${response.message()}")))
             }
         } catch (e: Exception) {
             emit(Result.failure(e))
