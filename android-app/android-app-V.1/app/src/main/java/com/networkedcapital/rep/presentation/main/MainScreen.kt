@@ -363,7 +363,7 @@ fun PortalItem(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Portal Image
+            // Portal Image using Coil
             AsyncImage(
                 model = portal.imageUrl,
                 contentDescription = portal.name,
@@ -435,7 +435,7 @@ fun PersonItem(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Profile Image
+            // Profile Image using Coil
             AsyncImage(
                 model = person.profileImageUrl,
                 contentDescription = "${person.firstName} ${person.lastName}",

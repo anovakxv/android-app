@@ -1,137 +1,191 @@
 package com.networkedcapital.rep.presentation.auth
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.networkedcapital.rep.presentation.theme.RepGreen
+import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    onNavigateToRegister: () -> Unit,
     onLoginSuccess: () -> Unit,
-    onNavigateToApiTest: (() -> Unit)? = null,
+    onNavigateToSignUp: () -> Unit,
+    onNavigateToForgotPassword: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    
     val authState by viewModel.authState.collectAsState()
-    
+    val focusManager = LocalFocusManager.current
+    val coroutineScope = rememberCoroutineScope()
+    var showAlert by remember { mutableStateOf(false) }
+
     // Navigate on successful login
     LaunchedEffect(authState.jwtToken) {
         if (authState.jwtToken.isNotEmpty() && authState.userId > 0) {
             onLoginSuccess()
         }
     }
-    
-    Column(
+
+    // Show error message alert
+    LaunchedEffect(authState.errorMessage) {
+        if (authState.errorMessage != null) showAlert = true
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .background(Color.White)
     ) {
-        // Rep Logo placeholder
-        Card(
-            modifier = Modifier.size(80.dp),
-            colors = CardDefaults.cardColors(containerColor = RepGreen)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start
         ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+            Spacer(modifier = Modifier.height(32.dp))
+            Text("Welcome Back,", fontSize = 32.sp, color = Color.Black)
+            Text("Sign in to continue", fontSize = 14.sp, color = Color.Gray)
+            Spacer(modifier = Modifier.height(32.dp))
+            StyledLoginTextField(
+                placeholder = "Email",
+                value = authState.email,
+                onValueChange = viewModel::onEmailChange,
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next,
+                onNext = { viewModel.focusPasswordField() }
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            StyledLoginTextField(
+                placeholder = "Password",
+                value = authState.password,
+                onValueChange = viewModel::onPasswordChange,
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done,
+                isPassword = true,
+                onNext = { focusManager.clearFocus(); viewModel.login() }
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
             ) {
                 Text(
-                    text = "REP",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold
+                    text = "Forgot Password?",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .clickable { onNavigateToForgotPassword() }
+                        .padding(8.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(
+                onClick = { viewModel.login() },
+                enabled = authState.email.isNotBlank() && authState.password.isNotBlank() && !authState.isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                if (authState.isLoading) {
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Login", fontSize = 16.sp)
+                }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text("New?")
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Sign Up",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 16.sp,
+                    modifier = Modifier
+                        .clickable { onNavigateToSignUp() }
+                        .padding(4.dp)
                 )
             }
         }
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        Text(
-            text = "Welcome Back",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        // Email field
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            singleLine = true
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Password field
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true
-        )
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        // Error message
-        authState.errorMessage?.let { error ->
-            Text(
-                text = error,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
+        if (showAlert && authState.errorMessage != null) {
+            AlertDialog(
+                onDismissRequest = { showAlert = false; viewModel.clearError() },
+                confirmButton = {
+                    TextButton(onClick = { showAlert = false; viewModel.clearError() }) {
+                        Text("OK")
+                    }
+                },
+                title = { Text("Error") },
+                text = { Text(authState.errorMessage ?: "") }
             )
         }
-        
-        // Login button
-        Button(
-            onClick = { viewModel.login(email, password) },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !authState.isLoading && email.isNotBlank() && password.isNotBlank()
-        ) {
-            if (authState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Text("Login")
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Navigate to register
-        TextButton(onClick = onNavigateToRegister) {
-            Text("Don't have an account? Register")
-        }
-        
-        // API Test button (for development)
-        if (onNavigateToApiTest != null) {
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedButton(onClick = onNavigateToApiTest) {
-                Text("API Connection Test")
-            }
-        }
     }
+}
+
+@Composable
+fun StyledLoginTextField(
+    placeholder: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    keyboardType: KeyboardType,
+    imeAction: ImeAction,
+    isPassword: Boolean = false,
+    onNext: () -> Unit = {}
+) {
+    val focusRequester = remember { FocusRequester() }
+    var passwordVisible by remember { mutableStateOf(false) }
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = { Text(placeholder, color = Color(0xFF59595F), fontSize = 16.sp) },
+        singleLine = true,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFFF2F2F2), RoundedCornerShape(14.dp))
+            .focusRequester(focusRequester),
+        shape = RoundedCornerShape(14.dp),
+        visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = keyboardType,
+            imeAction = imeAction,
+            autoCorrect = false
+        ),
+        trailingIcon = if (isPassword) {
+            {
+                val icon = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(imageVector = icon, contentDescription = null)
+                }
+            }
+        } else null,
+        onImeActionPerformed = { action, softKeyboardController ->
+            if (action == imeAction) {
+                onNext()
+                softKeyboardController?.hideSoftwareKeyboard()
+            }
+        }
+    )
 }

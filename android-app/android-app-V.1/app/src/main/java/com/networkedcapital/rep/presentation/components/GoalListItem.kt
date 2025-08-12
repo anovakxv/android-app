@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
 import com.networkedcapital.rep.domain.model.Goal
 
 @Composable
-fun GoalListItem(
+fun GoalListItemComponent(
     goal: Goal,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
