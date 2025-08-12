@@ -1,10 +1,12 @@
 package com.networkedcapital.rep.presentation.main
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -264,6 +266,135 @@ fun MainScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PortalDetailScreen(
+    portal: Portal,
+    leads: List<User>,
+    sections: List<PortalSection>,
+    storyBlocks: List<PortalText>,
+    onBack: () -> Unit
+) {
+    var selectedTab by remember { mutableStateOf(0) }
+    val tabTitles = listOf("Goal Teams", "Story")
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(portal.name) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+        ) {
+            // Image carousel (first section images)
+            val images = sections.flatMap { it.aFiles }
+            if (images.isNotEmpty()) {
+                PortalImageCarousel(images = images)
+            }
+            // Segmented control (tabs)
+            TabRow(selectedTabIndex = selectedTab) {
+                tabTitles.forEachIndexed { idx, title ->
+                    Tab(
+                        selected = selectedTab == idx,
+                        onClick = { selectedTab = idx },
+                        text = { Text(title) }
+                    )
+                }
+            }
+            when (selectedTab) {
+                0 -> {
+                    // Goal Teams tab (show goals if available)
+                    // For demo, just show a placeholder
+                    Text("Goal Teams content goes here", modifier = Modifier.padding(16.dp))
+                }
+                1 -> {
+                    // Story tab
+                    PortalStorySectionAndroid(leads = leads, storyBlocks = storyBlocks)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PortalImageCarousel(images: List<PortalFile>) {
+    // Simple horizontal scroll of images
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .horizontalScroll(rememberScrollState())
+    ) {
+        images.forEach { file ->
+            AsyncImage(
+                model = file.url,
+                contentDescription = "Portal Image",
+                modifier = Modifier
+                    .padding(8.dp)
+                    .size(180.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop
+            )
+        }
+    }
+}
+
+@Composable
+fun PortalStorySectionAndroid(leads: List<User>, storyBlocks: List<PortalText>) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text("Leads", style = MaterialTheme.typography.titleMedium)
+        Row(
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+                .padding(vertical = 8.dp)
+        ) {
+            leads.forEach { user ->
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(end = 12.dp)) {
+                    if (user.profileImageUrl != null) {
+                        AsyncImage(
+                            model = user.profileImageUrl,
+                            contentDescription = "${user.firstName} ${user.lastName}",
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(Color.Gray, CircleShape)
+                        )
+                    }
+                    Text(
+                        text = "${user.firstName.firstOrNull() ?: ""}${user.lastName.firstOrNull() ?: ""}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        }
+        Divider()
+        // Story text blocks
+        storyBlocks.filter { it.section == "story" }.forEach { block ->
+            if (!block.title.isNullOrBlank()) {
+                Text(block.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            }
+            if (!block.text.isNullOrBlank()) {
+                Text(block.text, style = MaterialTheme.typography.bodyMedium)
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+}
+
 @Composable
 fun SegmentedControl(
     sections: List<String>,
@@ -347,6 +478,7 @@ fun PeopleList(
     }
 }
 
+// Update PortalItem to show leads and subtitle, similar to Swift
 @Composable
 fun PortalItem(
     portal: Portal,
@@ -384,7 +516,15 @@ fun PortalItem(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                
+                if (portal.subtitle?.isNotBlank() == true) {
+                    Text(
+                        text = portal.subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
                 if (portal.description.isNotBlank()) {
                     Text(
                         text = portal.description,
@@ -394,15 +534,36 @@ fun PortalItem(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-
-                if (portal.location.isNotBlank()) {
-                    Text(
-                        text = portal.location,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                // Leads row (if available)
+                if (portal.leads != null && portal.leads.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier.padding(top = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        portal.leads.take(3).forEach { user ->
+                            if (user.profileImageUrl != null) {
+                                AsyncImage(
+                                    model = user.profileImageUrl,
+                                    contentDescription = "${user.firstName} ${user.lastName}",
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .clip(CircleShape)
+                                        .padding(end = 2.dp),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .background(Color.Gray, CircleShape)
+                                        .padding(end = 2.dp)
+                                )
+                            }
+                        }
+                        if (portal.leads.size > 3) {
+                            Text("+${portal.leads.size - 3}", fontSize = 12.sp)
+                        }
+                    }
                 }
             }
 
