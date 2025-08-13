@@ -1,0 +1,2 @@
+C:\Users\tntsu\OneDrive\Documents\wanKA\android-app\android-app-V.1\app\src\test\kotlin\org\example\AppTest.kt
+C:\Users\tntsu\OneDrive\Documents\wanKA\android-app\android-app-V.1\app\src\test\java\com\networkedcapital\rep\ExampleUnitTest.kt
