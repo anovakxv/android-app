@@ -57,3 +57,6 @@ my-ios-app/
 *.db
 *.plist
 *.storyboard
+
+# Ignore Gradle build output directory
+build
