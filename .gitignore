@@ -60,3 +60,4 @@ my-ios-app/
 *.lock
 android-app/android-app-V.1/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin.android/org.jetbrains.kotlin.android.gradle.plugin/1.9.22/4b01d6843a0d3c4810d04b00d1521e2ce674f8fa/org.jetbrains.kotlin.android.gradle.plugin-1.9.22.pom
 /android-app/android-app-V.1/gradle/caches/8.2
+/android-app/android-app-V.1/gradle/caches
