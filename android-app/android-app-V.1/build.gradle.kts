@@ -9,6 +9,8 @@ allprojects {
         mavenCentral()
     }
 }
+
+android {
     compileSdk = 34
 
     defaultConfig {
