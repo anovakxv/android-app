@@ -20,4 +20,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Rep"
-include(":app",  ':networkcapmodule')
+include(":app")
