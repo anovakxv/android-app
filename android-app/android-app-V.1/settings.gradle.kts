@@ -15,9 +15,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "Rep"
 include(":app")
-        mavenCentral()
-    }
-}
 
-rootProject.name = "Rep"
-include(":app")
+
+
