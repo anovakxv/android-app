@@ -1,44 +1,44 @@
-# Android
+# Gradle files
+.gradle/
+build/
+*/build/
+
+# Local configuration files (IDE, etc)
+.idea/
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
+*.ipr
+*.iws
 
 # Android Studio
-*.iml
-.gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/libraries
-/.idea/caches
-/.idea/modules.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-
-# Kotlin
-*.kt~
-*.tmp
-
-# Logs
-*.log
+local.properties
+.cxx/
+captures/
+.externalNativeBuild/
+*.apk
+*.ap_
+*.dex
+*.class
 
 # OS generated files
 .DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Keystore files
+*.jks
+*.keystore
+
+# NDK
+obj/
+
+# Misc
+*.orig
+
+# Ignore generated files
+gen/
+out/
 .DS_Store?
 ._*
 .Spotlight-V100
