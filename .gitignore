@@ -1,42 +1,42 @@
-# Gradle files
-.gradle/
-build/
+# Ignore Gradle build outputs
+/build/
 */build/
+.gradle/
 
-# Local configuration files (IDE, etc)
+# Ignore IDE files
 .idea/
 *.iml
 *.ipr
 *.iws
 
-# Android Studio
+# Ignore local configuration
 local.properties
+
+# Ignore generated files and OS files
+.DS_Store
+Thumbs.db
+*.log
+
+# Ignore dependency caches and NDK/obj
 .cxx/
 captures/
 .externalNativeBuild/
+obj/
+gen/
+out/
+
+# Ignore APKs and binaries
 *.apk
 *.ap_
 *.dex
 *.class
 
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Log files
-*.log
-
-# Keystore files
+# Ignore keystore files
 *.jks
 *.keystore
 
-# NDK
-obj/
-
 # Misc
 *.orig
-
-# Ignore generated files
 gen/
 out/
 .DS_Store?
