@@ -3,6 +3,8 @@ plugins {
     id("org.jetbrains.kotlin.android") version "1.9.22"
 }
 
+apply(plugin = "org.jetbrains.kotlin.kapt")
+
 android {
     namespace = "com.networkedcapital.rep"
     compileSdk = 34
@@ -66,7 +68,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
     implementation("com.google.dagger:hilt-android:2.48")
-    kapt("com.google.dagger:hilt-android-compiler:2.48")
+    annotationProcessor("com.google.dagger:hilt-android-compiler:2.48")
     // Add other dependencies as needed
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
