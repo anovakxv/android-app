@@ -1,5 +1,6 @@
 # Ignore Gradle build outputs and caches
 .gradle/
+gradle/
 **/build/
 build/
 !gradle/wrapper/gradle-wrapper.jar
