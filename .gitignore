@@ -1,7 +1,17 @@
-# Ignore Gradle build outputs
-/build/
-*/build/
+# Ignore Gradle build outputs and caches
 .gradle/
+**/build/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# Ignore Gradle caches (dependencies, execution history, etc)
+gradle/caches/
+gradle/dependency-cache/
+gradle/daemon/
+gradle/native/
+gradle/notifications/
+gradle/wrapper/dists/
 
 # Ignore IDE files
 .idea/
@@ -17,7 +27,7 @@ local.properties
 Thumbs.db
 *.log
 
-# Ignore dependency caches and NDK/obj
+# Ignore NDK/obj and CMake
 .cxx/
 captures/
 .externalNativeBuild/
@@ -37,16 +47,6 @@ out/
 
 # Misc
 *.orig
-gen/
-out/
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Temporary files from Swift/iOS (since they're here for reference)
 Swift FrontEnd/
 Python_Backend/
 my-ios-app/
