@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.Rep" parent="Theme.Material3.Light.NoActionBar">
-        <!-- Customize your light theme here. -->
+    <style name="Base.Theme.Rep" parent="Theme.Material3">
+        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/rep_green</item>
     </style>
 
