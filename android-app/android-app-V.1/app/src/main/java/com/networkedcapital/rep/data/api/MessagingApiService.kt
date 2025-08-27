@@ -45,4 +45,4 @@ data class UnreadCountResponse(
     val totalUnreadCount: Int,
     val conversationCounts: Map<String, Int> // userId to unread count
 )
-)
+
