@@ -23,6 +23,11 @@ interface MessagingApiService {
     
     @GET("api/messaging/unread_count")
     suspend fun getUnreadCount(): Response<UnreadCountResponse>
+
+    @GET("messages")
+    suspend fun getMessages(
+        @Query("chatId") chatId: Int
+    ): Response<List<Message>>
 }
 
 data class Conversation(

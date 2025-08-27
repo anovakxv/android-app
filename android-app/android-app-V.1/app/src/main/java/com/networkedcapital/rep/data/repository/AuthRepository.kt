@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.flow
 import okhttp3.MultipartBody
 import javax.inject.Inject
 import javax.inject.Singleton
+import okhttp3.RequestBody.Companion.toRequestBody
 
 @Singleton
 class AuthRepository @Inject constructor(
@@ -45,8 +46,6 @@ class AuthRepository @Inject constructor(
         city: String? = null
     ): Flow<Result<User>> = flow {
         try {
-            import okhttp3.RequestBody.Companion.toRequestBody
-            
             val emailBody = email.toRequestBody()
             val passwordBody = password.toRequestBody()
             val firstNameBody = firstName.toRequestBody()
@@ -174,3 +173,4 @@ class AuthRepository @Inject constructor(
         }
     }
 }
+
