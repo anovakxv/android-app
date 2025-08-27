@@ -6,11 +6,11 @@ apply plugin: 'kotlin-parcelize'
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 android {
-    namespace 'com.example.myapplication'
+    namespace 'com.networkedcapital.rep'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.myapplication"
+        applicationId "com.networkedcapital.rep"
         minSdk 21
         targetSdk 34
         versionCode 1
