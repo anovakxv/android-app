@@ -13,4 +13,6 @@
     <color name="purple_40">#6650a4</color>
     <color name="purple_grey_40">#625b71</color>
     <color name="pink_40">#7D5260</color>
+
+    <color name="your_primary_color">#6200EE</color>
 </resources>
