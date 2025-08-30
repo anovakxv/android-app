@@ -34,6 +34,10 @@ fun LoginScreen(
     val coroutineScope = rememberCoroutineScope()
     var showAlert by remember { mutableStateOf(false) }
 
+    // Add these lines to provide local state for email and password fields
+    var email by remember { mutableStateOf(authState.email) }
+    var password by remember { mutableStateOf(authState.password) }
+
     // Navigate on successful login
     LaunchedEffect(authState.jwtToken) {
         if (authState.jwtToken.isNotEmpty() && authState.userId > 0) {
@@ -62,19 +66,27 @@ fun LoginScreen(
             Text("Welcome Back,", fontSize = 32.sp, color = Color.Black)
             Text("Sign in to continue", fontSize = 14.sp, color = Color.Gray)
             Spacer(modifier = Modifier.height(32.dp))
+            // Update the StyledLoginTextField for email
             StyledLoginTextField(
                 placeholder = "Email",
-                value = authState.email,
-                onValueChange = viewModel::onEmailChange,
+                value = email,
+                onValueChange = {
+                    email = it
+                    viewModel.onEmailChange(it)
+                },
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next,
                 onNext = { viewModel.focusPasswordField() }
             )
             Spacer(modifier = Modifier.height(24.dp))
+            // Update the StyledLoginTextField for password
             StyledLoginTextField(
                 placeholder = "Password",
-                value = authState.password,
-                onValueChange = viewModel::onPasswordChange,
+                value = password,
+                onValueChange = {
+                    password = it
+                    viewModel.onPasswordChange(it)
+                },
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Done,
                 isPassword = true,
