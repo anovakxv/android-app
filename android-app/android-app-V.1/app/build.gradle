@@ -106,6 +106,12 @@ dependencies {
 
     // Compose UI (for KeyboardActions)
     implementation 'androidx.compose.ui:ui:1.5.4'
+
+    // JavaMail API for advanced email validation (optional, not required for basic validation)
+    // implementation 'com.sun.mail:android-mail:1.6.7'
+    // implementation 'com.sun.mail:android-activation:1.6.7'
+
+    // No dependency is needed for basic email validation using android.util.Patterns
 }
 
 tasks.withType(KotlinCompile).configureEach {

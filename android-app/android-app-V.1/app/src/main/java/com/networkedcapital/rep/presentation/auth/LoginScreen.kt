@@ -206,11 +206,8 @@ fun StyledLoginTextField(
     )
 }
 
-// If you want to validate or parse emails, add this import:
-// import android.util.Patterns
-
-// If you want to use email validation, you can use:
-// Patterns.EMAIL_ADDRESS.matcher(email).matches()
+// Example usage in your LoginScreen (for validation):
+// if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) { /* valid email */ }
 
 // No extra dependency is needed for handling email as a String in Compose.
 // If you want to use a third-party library for email validation, you can add it, but for most Android apps, android.util.Patterns is sufficient.
