@@ -22,10 +22,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.ui.text.input.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.ui.text.input.KeyboardActions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,8 +41,8 @@ fun LoginScreen(
     var showAlert by remember { mutableStateOf(false) }
 
     // Specify type explicitly to fix type inference errors
-    var email by remember { mutableStateOf<String>(authState.email) }
-    var password by remember { mutableStateOf<String>(authState.password) }
+    var email by remember { mutableStateOf(authState.email) }
+    var password by remember { mutableStateOf(authState.password) }
 
     // Navigate on successful login
     LaunchedEffect(authState.jwtToken) {
@@ -72,29 +72,21 @@ fun LoginScreen(
             Text("Welcome Back,", fontSize = 32.sp, color = Color.Black)
             Text("Sign in to continue", fontSize = 14.sp, color = Color.Gray)
             Spacer(modifier = Modifier.height(32.dp))
-            // Update the StyledLoginTextField for email
+            // Email field
             StyledLoginTextField(
                 placeholder = "Email",
                 value = email,
-                onValueChange = {
-                    email = it
-                    // Call viewModel.onEmailChange if it exists, else remove this line
-                    if (viewModel::onEmailChange.isInitialized) viewModel.onEmailChange(it)
-                },
+                onValueChange = { email = it },
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next,
-                onNext = { /* If you have a focusPasswordField, call it here, else remove this */ }
+                onNext = { /* Optionally move focus to password */ }
             )
             Spacer(modifier = Modifier.height(24.dp))
-            // Update the StyledLoginTextField for password
+            // Password field
             StyledLoginTextField(
                 placeholder = "Password",
                 value = password,
-                onValueChange = {
-                    password = it
-                    // Call viewModel.onPasswordChange if it exists, else remove this line
-                    if (viewModel::onPasswordChange.isInitialized) viewModel.onPasswordChange(it)
-                },
+                onValueChange = { password = it },
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Done,
                 isPassword = true,
@@ -207,6 +199,14 @@ fun StyledLoginTextField(
         )
     )
 }
+
+// Example usage in your LoginScreen (for validation):
+// if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) { /* valid email */ }
+
+// No extra dependency is needed for handling email as a String in Compose.
+// If you want to use a third-party library for email validation, you can add it, but for most Android apps, android.util.Patterns is sufficient.
+    
+
 
 // Example usage in your LoginScreen (for validation):
 // if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) { /* valid email */ }
