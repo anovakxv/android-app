@@ -7,7 +7,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class RepApp : Application() {
+class RepApp: Application() {
     override fun onCreate() {
         super.onCreate()
         // Initialize Firebase
