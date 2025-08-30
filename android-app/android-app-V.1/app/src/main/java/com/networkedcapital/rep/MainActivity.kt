@@ -56,7 +56,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items // <-- Add this import for LazyRow items
+import androidx.compose.foundation.lazy.items
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -94,8 +94,6 @@ class MainActivity : ComponentActivity() {
                             val chatId = backStackEntry.arguments?.getString("chatId")?.toIntOrNull() ?: 0
                             val currentUserId = backStackEntry.arguments?.getString("currentUserId")?.toIntOrNull() ?: 0
                             val viewModel = GroupChatViewModel(chatId, currentUserId)
-                            // Remove 'viewModel =' if GroupChatScreen does not take a 'viewModel' parameter,
-                            // or pass all required parameters as per its definition.
                             GroupChatScreen(
                                 groupName = "Group Name",
                                 groupMembers = emptyList(),
@@ -111,8 +109,6 @@ class MainActivity : ComponentActivity() {
                             val otherUserId = backStackEntry.arguments?.getString("otherUserId")?.toIntOrNull() ?: 0
                             val currentUserId = backStackEntry.arguments?.getString("currentUserId")?.toIntOrNull() ?: 0
                             val viewModel = IndividualChatViewModel(otherUserId, currentUserId)
-                            // Remove 'viewModel =' if IndividualChatScreen does not take a 'viewModel' parameter,
-                            // or pass all required parameters as per its definition.
                             IndividualChatScreen(
                                 userName = "User Name",
                                 userPhotoUrl = "",
@@ -490,6 +486,10 @@ fun HorizontalListDemo(items: List<String>) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(text = item)
+            }
+        }
+    }
+}
             }
         }
     }
