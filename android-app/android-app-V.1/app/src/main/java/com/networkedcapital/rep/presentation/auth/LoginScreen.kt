@@ -36,8 +36,8 @@ fun LoginScreen(
     var showAlert by remember { mutableStateOf(false) }
 
     // Add these lines to provide local state for email and password fields
-    var email by remember { mutableStateOf(authState.email) }
-    var password by remember { mutableStateOf(authState.password) }
+    var email by remember { mutableStateOf<String>(authState.email) }
+    var password by remember { mutableStateOf<String>(authState.password) }
 
     // Navigate on successful login
     LaunchedEffect(authState.jwtToken) {
