@@ -153,7 +153,6 @@ fun MainScreen(authViewModel: AuthViewModel, onNavigateToGoals: () -> Unit, onNa
                     // TODO: Fetch data for new page
                 }
             ) {
-                // TODO: Use your logo here
                 Icon(Icons.Filled.SwapHoriz, contentDescription = "Switch Page")
             }
         }
