@@ -178,7 +178,7 @@ data class AuthState(
     val isLoading: Boolean = false,
     val jwtToken: String = "",
     val userId: Int = 0,
-    val email: String? "", // Make sure this property exists and is correctly named
+    val email: String? = null,
     val password: String = "",
     val errorMessage: String? = null
 )
