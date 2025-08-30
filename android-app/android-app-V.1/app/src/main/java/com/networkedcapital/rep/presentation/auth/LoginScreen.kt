@@ -40,9 +40,9 @@ fun LoginScreen(
     val coroutineScope = rememberCoroutineScope()
     var showAlert by remember { mutableStateOf(false) }
 
-    // Specify type explicitly and handle possible null for authState.email
-    var email by remember { mutableStateOf<String>(authState.email ?: "") }
-    var password by remember { mutableStateOf<String>(authState.password) }
+    // Specify type explicitly and handle possible null for authState.email and authState.password
+    var email by remember { mutableStateOf(authState.email ?: "") }
+    var password by remember { mutableStateOf(authState.password ?: "") }
 
     // Navigate on successful login
     LaunchedEffect(authState.jwtToken) {
