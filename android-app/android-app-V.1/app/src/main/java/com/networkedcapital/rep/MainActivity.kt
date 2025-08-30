@@ -94,9 +94,9 @@ class MainActivity : ComponentActivity() {
                             val chatId = backStackEntry.arguments?.getString("chatId")?.toIntOrNull() ?: 0
                             val currentUserId = backStackEntry.arguments?.getString("currentUserId")?.toIntOrNull() ?: 0
                             val viewModel = GroupChatViewModel(chatId, currentUserId)
-                            // Pass only required parameters for your GroupChatScreen
+                            // Remove 'viewModel =' if GroupChatScreen does not take a 'viewModel' parameter,
+                            // or pass all required parameters as per its definition.
                             GroupChatScreen(
-                                viewModel = viewModel,
                                 groupName = "Group Name",
                                 groupMembers = emptyList(),
                                 messages = emptyList(),
@@ -111,9 +111,9 @@ class MainActivity : ComponentActivity() {
                             val otherUserId = backStackEntry.arguments?.getString("otherUserId")?.toIntOrNull() ?: 0
                             val currentUserId = backStackEntry.arguments?.getString("currentUserId")?.toIntOrNull() ?: 0
                             val viewModel = IndividualChatViewModel(otherUserId, currentUserId)
-                            // Pass only required parameters for your IndividualChatScreen
+                            // Remove 'viewModel =' if IndividualChatScreen does not take a 'viewModel' parameter,
+                            // or pass all required parameters as per its definition.
                             IndividualChatScreen(
-                                viewModel = viewModel,
                                 userName = "User Name",
                                 userPhotoUrl = "",
                                 messages = emptyList(),
