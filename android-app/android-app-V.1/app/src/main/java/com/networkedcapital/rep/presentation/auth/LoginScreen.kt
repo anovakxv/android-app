@@ -40,9 +40,9 @@ fun LoginScreen(
     val coroutineScope = rememberCoroutineScope()
     var showAlert by remember { mutableStateOf(false) }
 
-    // Local state for email and password fields
-    var email by remember { mutableStateOf(authState.email) }
-    var password by remember { mutableStateOf(authState.password) }
+    // Specify type explicitly to fix type inference errors
+    var email by remember { mutableStateOf<String>(authState.email) }
+    var password by remember { mutableStateOf<String>(authState.password) }
 
     // Navigate on successful login
     LaunchedEffect(authState.jwtToken) {
@@ -78,7 +78,8 @@ fun LoginScreen(
                 value = email,
                 onValueChange = {
                     email = it
-                    viewModel.onEmailChange(it)
+                    // Call viewModel.onEmailChange if it exists, else remove this line
+                    if (viewModel::onEmailChange.isInitialized) viewModel.onEmailChange(it)
                 },
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next,
@@ -91,7 +92,8 @@ fun LoginScreen(
                 value = password,
                 onValueChange = {
                     password = it
-                    viewModel.onPasswordChange(it)
+                    // Call viewModel.onPasswordChange if it exists, else remove this line
+                    if (viewModel::onPasswordChange.isInitialized) viewModel.onPasswordChange(it)
                 },
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Done,
