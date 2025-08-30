@@ -37,6 +37,25 @@ import com.networkedcapital.rep.presentation.goals.GoalsViewModel
 import com.networkedcapital.rep.presentation.chat.GroupChatViewModel
 import com.networkedcapital.rep.presentation.chat.IndividualChatViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.border
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Divider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.tooling.preview.Preview
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
