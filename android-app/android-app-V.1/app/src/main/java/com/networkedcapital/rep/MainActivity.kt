@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalBottomSheetState
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -54,9 +55,6 @@ import androidx.compose.material3.Divider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material3.ModalBottomSheetState
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -96,6 +94,13 @@ class MainActivity : ComponentActivity() {
                             val viewModel = GroupChatViewModel(chatId, currentUserId)
                             GroupChatScreen(
                                 viewModel = viewModel,
+                                groupName = "Group Name",
+                                groupMembers = emptyList(),
+                                messages = emptyList(),
+                                currentUserId = currentUserId,
+                                inputText = "",
+                                onInputTextChange = {},
+                                onSend = {},
                                 onBack = { navController.popBackStack() }
                             )
                         }
@@ -105,6 +110,13 @@ class MainActivity : ComponentActivity() {
                             val viewModel = IndividualChatViewModel(otherUserId, currentUserId)
                             IndividualChatScreen(
                                 viewModel = viewModel,
+                                userName = "User Name",
+                                userPhotoUrl = "",
+                                messages = emptyList(),
+                                currentUserId = currentUserId,
+                                inputText = "",
+                                onInputTextChange = {},
+                                onSend = {},
                                 onBack = { navController.popBackStack() }
                             )
                         }
