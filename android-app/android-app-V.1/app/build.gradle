@@ -86,6 +86,13 @@ dependencies {
 
     // Kotlin Parcelize (already enabled via plugin)
     implementation "org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.22"
+
+    // Compose Material Icons (for SwapHoriz and other icons)
+    implementation 'androidx.compose.material:material-icons-extended:1.5.4'
+
+    // Compose Tooling Preview (for @Preview and tooling)
+    implementation 'androidx.compose.ui:ui-tooling-preview:1.5.4'
+    debugImplementation 'androidx.compose.ui:ui-tooling:1.5.4'
 }
 
 tasks.withType(KotlinCompile).configureEach {
