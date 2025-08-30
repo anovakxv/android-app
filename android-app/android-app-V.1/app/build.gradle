@@ -92,3 +92,7 @@ tasks.withType(KotlinCompile).configureEach {
         jvmTarget = "17"
     }
 }
+
+kapt {
+    correctErrorTypes = true
+}
