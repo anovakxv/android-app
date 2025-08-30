@@ -1,5 +1,6 @@
 package com.networkedcapital.rep.presentation.auth
 
+import android.util.Patterns
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -193,11 +194,18 @@ fun StyledLoginTextField(
                 }
             }
         } else null,
-        onImeActionPerformed = { action, softKeyboardController ->
-            if (action == imeAction) {
-                onNext()
-                softKeyboardController?.hideSoftwareKeyboard()
-            }
-        }
+      
+        keyboardActions = KeyboardActions(
+            onAny = { onNext() }
+        )
     )
 }
+
+// If you want to validate or parse emails, add this import:
+// import android.util.Patterns
+
+// If you want to use email validation, you can use:
+// Patterns.EMAIL_ADDRESS.matcher(email).matches()
+
+// No extra dependency is needed for handling email as a String in Compose.
+// If you want to use a third-party library for email validation, you can add it, but for most Android apps, android.util.Patterns is sufficient.
