@@ -30,7 +30,7 @@ fun LoginScreen(
     onNavigateToForgotPassword: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
-    val authState by viewModel.authState.collectAsState()
+    val authState = viewModel.authState.collectAsState().value
     val focusManager = LocalFocusManager.current
     val coroutineScope = rememberCoroutineScope()
     var showAlert by remember { mutableStateOf(false) }
