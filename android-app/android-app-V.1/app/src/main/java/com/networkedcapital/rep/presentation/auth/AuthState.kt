@@ -40,13 +40,14 @@ class AuthStateect constructor(
         password: String,
         firstName: String,
         lastName: String,
-        userTypeId: Int = 1, // Default to Lead (1)
+        userTypeId: Int = 1,
         phone: String? = null,
         about: String? = null,
         city: String? = null
     ): Flow<Result<User>> = flow {
         try {
-            val emailBody = email.toRequestBody()
+            // Option 1: Using Elvis operator for a default empty string if email is null
+            val emailBody = (email ?: "").toRequestBody()
             val passwordBody = password.toRequestBody()
             val firstNameBody = firstName.toRequestBody()
             val lastNameBody = lastName.toRequestBody()
