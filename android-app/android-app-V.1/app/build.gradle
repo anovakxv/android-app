@@ -9,7 +9,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 android {
     namespace 'com.networkedcapital.rep'
-    compileSdk 34
+    compileSdkVersion 34
 
     defaultConfig {
         applicationId "com.networkedcapital.rep"
