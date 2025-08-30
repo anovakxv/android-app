@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.android.gms.tasks.Task
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
@@ -14,7 +15,7 @@ class RepApp : Application() {
         FirebaseApp.initializeApp(this)
 
         // Register for FCM token and send to backend if needed
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task: com.google.android.gms.tasks.Task<String> ->
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task: Task<String> ->
             if (!task.isSuccessful) {
                 Log.w("RepApp", "Fetching FCM registration token failed", task.exception)
                 return@addOnCompleteListener

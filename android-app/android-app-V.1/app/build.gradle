@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'dagger.hilt.android.plugin'
+apply plugin: 'com.google.gms.google-services'
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -93,6 +94,13 @@ dependencies {
     // Compose Tooling Preview (for @Preview and tooling)
     implementation 'androidx.compose.ui:ui-tooling-preview:1.5.4'
     debugImplementation 'androidx.compose.ui:ui-tooling:1.5.4'
+
+    // Firebase BOM (Bill of Materials)
+    implementation platform('com.google.firebase:firebase-bom:32.7.0')
+    // Firebase Core (for FirebaseApp)
+    implementation 'com.google.firebase:firebase-analytics'
+    // Firebase Cloud Messaging
+    implementation 'com.google.firebase:firebase-messaging'
 }
 
 tasks.withType(KotlinCompile).configureEach {
