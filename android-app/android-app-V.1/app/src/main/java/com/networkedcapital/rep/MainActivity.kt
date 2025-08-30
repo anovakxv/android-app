@@ -23,10 +23,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalBottomSheetState
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import kotlinx.coroutines.launch
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
@@ -55,6 +55,8 @@ import androidx.compose.material3.Divider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items // <-- Add this import for LazyRow items
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -92,6 +94,7 @@ class MainActivity : ComponentActivity() {
                             val chatId = backStackEntry.arguments?.getString("chatId")?.toIntOrNull() ?: 0
                             val currentUserId = backStackEntry.arguments?.getString("currentUserId")?.toIntOrNull() ?: 0
                             val viewModel = GroupChatViewModel(chatId, currentUserId)
+                            // Pass only required parameters for your GroupChatScreen
                             GroupChatScreen(
                                 viewModel = viewModel,
                                 groupName = "Group Name",
@@ -108,6 +111,7 @@ class MainActivity : ComponentActivity() {
                             val otherUserId = backStackEntry.arguments?.getString("otherUserId")?.toIntOrNull() ?: 0
                             val currentUserId = backStackEntry.arguments?.getString("currentUserId")?.toIntOrNull() ?: 0
                             val viewModel = IndividualChatViewModel(otherUserId, currentUserId)
+                            // Pass only required parameters for your IndividualChatScreen
                             IndividualChatScreen(
                                 viewModel = viewModel,
                                 userName = "User Name",
