@@ -10,7 +10,7 @@ import javax.inject.Singleton
 import okhttp3.RequestBody.Companion.toRequestBody
 
 @Singleton
-class AuthRepository @Inject constructor(
+class AuthStateect constructor(
     private val authApiService: AuthApiService,
     private val authInterceptor: AuthInterceptor
 ) {
