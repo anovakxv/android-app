@@ -36,6 +36,7 @@ import com.networkedcapital.rep.presentation.chat.IndividualChatScreen
 import com.networkedcapital.rep.presentation.goals.GoalsViewModel
 import com.networkedcapital.rep.presentation.chat.GroupChatViewModel
 import com.networkedcapital.rep.presentation.chat.IndividualChatViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
