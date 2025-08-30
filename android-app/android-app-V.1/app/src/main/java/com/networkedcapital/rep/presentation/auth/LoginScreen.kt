@@ -25,7 +25,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-    import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardActions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,9 +40,9 @@ fun LoginScreen(
     val coroutineScope = rememberCoroutineScope()
     var showAlert by remember { mutableStateOf(false) }
 
-    // Specify type explicitly and handle possible null for authState.email and authState.password
-    var email by remember { mutableStateOf(authState.email ?: "") }
-    var password by remember { mutableStateOf(authState.password ?: "") }
+    // Define email and password as local state variables
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
     // Navigate on successful login
     LaunchedEffect(authState.jwtToken) {
