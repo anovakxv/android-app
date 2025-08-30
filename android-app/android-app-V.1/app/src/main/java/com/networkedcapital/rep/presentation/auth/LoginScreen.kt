@@ -41,7 +41,7 @@ fun LoginScreen(
     var showAlert by remember { mutableStateOf(false) }
 
     // Specify type explicitly and handle possible null for authState.email
-    var email by remember { mutableStateOf<String>(authState.email ?: "") }
+ var email by remember { mutableStateOf<String>(authState.correctEmailPropertyName ?: "") }
     var password by remember { mutableStateOf<String>(authState.password) }
 
     // Navigate on successful login

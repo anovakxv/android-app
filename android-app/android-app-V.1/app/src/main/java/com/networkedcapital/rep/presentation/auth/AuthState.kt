@@ -36,7 +36,7 @@ class AuthStateect constructor(
     }
 
     suspend fun register(
-        email: String,
+        email: String?,
         password: String,
         firstName: String,
         lastName: String,
