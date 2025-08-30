@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.border
 import androidx.compose.material3.ButtonDefaults
@@ -58,6 +57,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material3.ModalBottomSheetState
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -155,7 +155,7 @@ fun MainScreen(authViewModel: AuthViewModel, onNavigateToGoals: () -> Unit, onNa
                 }
             ) {
                 // TODO: Use your logo here
-                Icon(Icons.Default.SwapHoriz, contentDescription = "Switch Page")
+                Icon(Icons.Filled.SwapHoriz, contentDescription = "Switch Page")
             }
         }
     ) { innerPadding ->
