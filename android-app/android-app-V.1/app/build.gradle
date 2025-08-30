@@ -103,6 +103,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
     // Firebase Cloud Messaging
     implementation 'com.google.firebase:firebase-messaging'
+
+    // Compose UI (for KeyboardActions)
+    implementation 'androidx.compose.ui:ui:1.5.4'
 }
 
 tasks.withType(KotlinCompile).configureEach {
