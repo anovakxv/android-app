@@ -174,12 +174,11 @@ class AuthStateect constructor(
         }
     }
 }
-
 data class AuthState(
-    val password: String = "", // Add this line if it's missing
-    val correctEmailPropertyName: String? = null, // Your existing property
+    val isLoading: Boolean = false,
     val jwtToken: String = "",
     val userId: Int = 0,
-    val isLoading: Boolean = false,
+    val email: String = "", // Make sure this property exists and is correctly named
+    val password: String = "",
     val errorMessage: String? = null
 )
