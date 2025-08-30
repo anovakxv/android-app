@@ -21,6 +21,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.text.input.KeyboardActions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,9 +40,9 @@ fun LoginScreen(
     val coroutineScope = rememberCoroutineScope()
     var showAlert by remember { mutableStateOf(false) }
 
-    // Add these lines to provide local state for email and password fields
-    var email by remember { mutableStateOf<String>(authState.email) }
-    var password by remember { mutableStateOf<String>(authState.password) }
+    // Local state for email and password fields
+    var email by remember { mutableStateOf(authState.email) }
+    var password by remember { mutableStateOf(authState.password) }
 
     // Navigate on successful login
     LaunchedEffect(authState.jwtToken) {
@@ -77,7 +82,7 @@ fun LoginScreen(
                 },
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next,
-                onNext = { viewModel.focusPasswordField() }
+                onNext = { /* If you have a focusPasswordField, call it here, else remove this */ }
             )
             Spacer(modifier = Modifier.height(24.dp))
             // Update the StyledLoginTextField for password
@@ -91,7 +96,7 @@ fun LoginScreen(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Done,
                 isPassword = true,
-                onNext = { focusManager.clearFocus(); viewModel.login() }
+                onNext = { focusManager.clearFocus(); viewModel.login(email, password) }
             )
             Spacer(modifier = Modifier.height(8.dp))
             Row(
@@ -109,8 +114,8 @@ fun LoginScreen(
             }
             Spacer(modifier = Modifier.height(24.dp))
             Button(
-                onClick = { viewModel.login() },
-                enabled = authState.email.isNotBlank() && authState.password.isNotBlank() && !authState.isLoading,
+                onClick = { viewModel.login(email, password) },
+                enabled = email.isNotBlank() && password.isNotBlank() && !authState.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(54.dp),
@@ -188,15 +193,15 @@ fun StyledLoginTextField(
         ),
         trailingIcon = if (isPassword) {
             {
-                val icon = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility
+                val icon = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(imageVector = icon, contentDescription = null)
                 }
             }
         } else null,
-      
         keyboardActions = KeyboardActions(
-            onAny = { onNext() }
+            onDone = { onNext() },
+            onNext = { onNext() }
         )
     )
 }
