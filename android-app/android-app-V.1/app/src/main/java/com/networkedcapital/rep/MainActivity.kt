@@ -56,6 +56,8 @@ import androidx.compose.material3.Divider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.foundation.lazy.LazyRow
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -457,6 +459,24 @@ fun ChatsList(chats: List<String>) {
                     .padding(16.dp)
             )
             Divider()
+        }
+    }
+}
+
+@Composable
+fun HorizontalListDemo(items: List<String>) {
+    LazyRow {
+        items(items) { item ->
+            Box(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .background(Color.LightGray, RoundedCornerShape(8.dp))
+                    .clickable { /* Handle item click */ }
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = item)
+            }
         }
     }
 }
