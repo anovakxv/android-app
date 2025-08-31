@@ -2,8 +2,8 @@ package com.networkedcapital.rep.presentation.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.networkedcapital.rep.domain.model.GroupMessage
-import com.networkedcapital.rep.domain.model.GroupMember
+import com.networkedcapital.rep.presentation.chat.GroupMessage
+import com.networkedcapital.rep.presentation.chat.GroupMember
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
