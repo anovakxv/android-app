@@ -51,18 +51,19 @@ fun RepNavigation(
         
         composable(Screen.Login.route) {
             LoginScreen(
-                onNavigateToRegister = {
-                    navController.navigate(Screen.Register.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
-                },
                 onLoginSuccess = {
                     navController.navigate(Screen.Main.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
-                onNavigateToApiTest = {
-                    navController.navigate(Screen.ApiTest.route)
+                onNavigateToSignUp = {
+                    navController.navigate(Screen.Register.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                },
+                onNavigateToForgotPassword = {
+                    // You can navigate to a forgot password screen if you have one, or just pop for now
+                    navController.popBackStack()
                 }
             )
         }
@@ -81,6 +82,15 @@ fun RepNavigation(
             MainScreen(
                 onNavigateToProfile = { userId ->
                     navController.navigate("${Screen.Profile.route}/$userId")
+                },
+                onNavigateToPortalDetail = { portalId ->
+                    // TODO: Implement navigation to portal detail screen
+                },
+                onNavigateToPersonDetail = { personId ->
+                    // TODO: Implement navigation to person detail screen
+                },
+                onNavigateToChat = { chatId ->
+                    // TODO: Implement navigation to chat screen
                 },
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
