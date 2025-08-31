@@ -124,15 +124,22 @@ fun MainScreen(
                         IconButton(onClick = {
                             uiState.currentUser?.id?.let { onNavigateToProfile(it) }
                         }) {
-                            // Corrected usage
-                            AsyncImage(
-                                model = uiState.currentUser?.profileImageUrlCompat,
-                                contentDescription = "Profile",
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .clip(CircleShape),
-                                contentScale = ContentScale.Crop
-                            )
+                            val profileImageUrl = uiState.currentUser?.profileImageUrlCompat
+                            if (!profileImageUrl.isNullOrEmpty()) {
+                                AsyncImage(
+                                    model = profileImageUrl,
+                                    contentDescription = "Profile",
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .clip(CircleShape),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = "Profile"
+                                )
+                            }
                         }
                     }
                 },
@@ -361,11 +368,12 @@ fun PortalStorySectionAndroid(leads: List<User>, storyBlocks: List<PortalText>) 
                 .horizontalScroll(rememberScrollState())
                 .padding(vertical = 8.dp)
         ) {
-            leads.forEach { user ->
+            leads.forEach { user: User ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(end = 12.dp)) {
-                    if (user.profileImageUrl != null) {
+                    val profileImageUrl = user.profileImageUrlCompat
+                    if (!profileImageUrl.isNullOrEmpty()) {
                         AsyncImage(
-                            model = user.profileImageUrl,
+                            model = profileImageUrl,
                             contentDescription = "${user.firstName} ${user.lastName}",
                             modifier = Modifier
                                 .size(36.dp)
@@ -546,7 +554,7 @@ fun PortalItem(
                         modifier = Modifier.padding(top = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        leads.take(3).forEach { user ->
+                        leads.take(3).forEach { user: User ->
                             val userProfileImageUrl = user.profileImageUrlCompat
                             if (!userProfileImageUrl.isNullOrEmpty()) {
                                 AsyncImage(
@@ -680,3 +688,16 @@ fun UserProfileImage(
         )
     }
 }
+
+// Add this extension property at the end of the file (only once, not duplicated)
+val User.profileImageUrlCompat: String?
+    get() = try {
+        this::class.members.firstOrNull { it.name == "profileImageUrl" }
+            ?.call(this) as? String
+            ?: this::class.members.firstOrNull { it.name == "imageUrl" }
+                ?.call(this) as? String
+            ?: this::class.members.firstOrNull { it.name == "avatarUrl" }
+                ?.call(this) as? String
+    } catch (e: Exception) {
+        null
+    }
