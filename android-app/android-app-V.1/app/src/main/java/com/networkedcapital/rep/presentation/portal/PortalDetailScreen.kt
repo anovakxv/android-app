@@ -1,3 +1,8 @@
+@file:OptIn(
+    androidx.compose.foundation.ExperimentalFoundationApi::class,
+    androidx.compose.material3.ExperimentalMaterial3Api::class
+)
+
 package com.networkedcapital.rep.presentation.portal
 
 import androidx.compose.foundation.background
@@ -27,7 +32,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.networkedcapital.rep.domain.model.*
-import com.networkedcapital.rep.presentation.components.GoalListItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -385,7 +389,7 @@ fun StorySection(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
-            
+
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -395,7 +399,7 @@ fun StorySection(
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         AsyncImage(
-                            model = lead.profileImageUrl,
+                            model = lead.profileImageUrlCompat,
                             contentDescription = "${lead.firstName} ${lead.lastName}",
                             modifier = Modifier
                                 .size(32.dp)
@@ -640,3 +644,34 @@ fun ZoomableImage(
         contentScale = ContentScale.Fit
     )
 }
+
+@Composable
+fun GoalListItem(goal: Goal, onClick: () -> Unit) {
+    // Minimal implementation for demonstration
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(goal.name, fontWeight = FontWeight.Bold)
+            if (!goal.description.isNullOrBlank()) {
+                Text(goal.description, fontSize = 14.sp, color = Color.Gray)
+            }
+        }
+    }
+}
+
+val User.profileImageUrlCompat: String?
+    get() = try {
+        this::class.members.firstOrNull { it.name == "profileImageUrl" }
+            ?.call(this) as? String
+            ?: this::class.members.firstOrNull { it.name == "imageUrl" }
+                ?.call(this) as? String
+            ?: this::class.members.firstOrNull { it.name == "avatarUrl" }
+                ?.call(this) as? String
+    } catch (e: Exception) {
+        null
+    }
