@@ -241,8 +241,10 @@ class MainViewModel @Inject constructor(
                         }
                     }
                     MainPage.PEOPLE -> {
-                        val users = if (_uiState.value.selectedSection == 2) {
-                            portalRepository.searchPeople(query)
+                        val users: List<User> = if (_uiState.value.selectedSection == 2) {
+                            // Ensure the result is cast to List<User>
+                            @Suppress("UNCHECKED_CAST")
+                            portalRepository.searchPeople(query) as? List<User> ?: emptyList()
                         } else {
                             _uiState.value.users.filter {
                                 it.displayName.contains(query, ignoreCase = true)
