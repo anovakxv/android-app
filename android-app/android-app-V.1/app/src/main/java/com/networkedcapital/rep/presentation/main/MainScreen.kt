@@ -1,5 +1,6 @@
 package com.networkedcapital.rep.presentation.main
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -228,15 +229,27 @@ fun MainScreen(
 
                     Spacer(modifier = Modifier.width(16.dp))
 
+                    // FIX: Use robust type checking for chat id
                     IconButton(
                         onClick = {
                             if (uiState.activeChats.isNotEmpty()) {
-                                // FIX: Always pass Int to onNavigateToChat, handle String id
-                                val id = uiState.activeChats.first().id
+                                val firstActiveChat = uiState.activeChats.first()
+                                val id = firstActiveChat.id
                                 when (id) {
-                                    is Int -> onNavigateToChat(id)
-                                    is String -> id.toIntOrNull()?.let { onNavigateToChat(it) }
-                                    else -> { /* ignore or handle error */ }
+                                    is Int -> {
+                                        onNavigateToChat(id)
+                                    }
+                                    is String -> {
+                                        val intId = id.toIntOrNull()
+                                        if (intId != null) {
+                                            onNavigateToChat(intId)
+                                        } else {
+                                            Log.e("MainScreen", "Failed to convert chat ID to Int: $id")
+                                        }
+                                    }
+                                    else -> {
+                                        Log.e("MainScreen", "Unexpected type for chat ID: ${id?.javaClass?.name}")
+                                    }
                                 }
                             }
                         }
