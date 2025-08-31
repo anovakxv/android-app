@@ -547,14 +547,14 @@ fun PortalItem(
                     )
                 }
                 // Leads row (if available)
-                val leads = portal.leads
+                val leads: List<User>? = portal.leads
                 if (!leads.isNullOrEmpty()) {
                     Row(
                         modifier = Modifier.padding(top = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         leads.take(3).forEach { user: User ->
-                            val userProfileImageUrl = user.profileImageUrl
+                            val userProfileImageUrl: String? = user.profileImageUrl
                             if (!userProfileImageUrl.isNullOrEmpty()) {
                                 AsyncImage(
                                     model = userProfileImageUrl,
@@ -610,7 +610,7 @@ fun PersonItem(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val profileImageUrl = person.profileImageUrl
+            val profileImageUrl: String? = person.profileImageUrl
             if (!profileImageUrl.isNullOrEmpty()) {
                 AsyncImage(
                     model = profileImageUrl,
