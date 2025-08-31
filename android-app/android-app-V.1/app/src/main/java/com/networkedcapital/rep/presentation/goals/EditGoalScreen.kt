@@ -9,6 +9,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.networkedcapital.rep.domain.model.Goal
 import kotlinx.coroutines.launch
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,7 +39,7 @@ fun EditGoalScreen(
                 title = { Text(if (existingGoal != null) "Edit Goal" else "Add Goal") },
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Cancel")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Cancel")
                     }
                 }
             )
@@ -152,16 +154,10 @@ fun EditGoalScreen(
                                     quota = quota.toDoubleOrNull() ?: 0.0,
                                     progress = 0.0,
                                     progressPercent = 0.0,
-                                    target = 0.0,
-                                    achieved = 0.0,
                                     typeName = goalType,
                                     metricName = metric,
                                     reportingName = reportingIncrement,
-                                    createdAt = "",
-                                    updatedAt = "",
-                                    chartData = emptyList(),
-                                    portalsId = 0,
-                                    portalName = null
+                                    chartData = emptyList()
                                 )
                             )
                         }
@@ -170,6 +166,10 @@ fun EditGoalScreen(
                 ) {
                     Text(if (existingGoal != null) "Save Changes" else "Add Goal")
                 }
+            }
+        }
+    }
+}
             }
         }
     }
