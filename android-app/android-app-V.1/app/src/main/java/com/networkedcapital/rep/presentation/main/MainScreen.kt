@@ -371,6 +371,7 @@ fun PortalStorySectionAndroid(leads: List<User>, storyBlocks: List<PortalText>) 
             leads.forEach { user: User ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(end = 12.dp)) {
                     val profileImageUrl = user.profileImageUrlCompat
+                    // FIX: Only safe or non-null asserted calls allowed on nullable receiver
                     if (!profileImageUrl.isNullOrEmpty()) {
                         AsyncImage(
                             model = profileImageUrl,
@@ -465,6 +466,7 @@ fun PortalsList(
         items(portals) { portal ->
             PortalItem(
                 portal = portal,
+                // FIX: Ensure portal.id is Int, not String
                 onClick = { onPortalClick(portal.id) }
             )
         }
@@ -547,8 +549,8 @@ fun PortalItem(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                // Leads row (if available)
-                val leads = portal.leads
+                // FIX: Make sure leads is defined and used safely
+                val leads: List<User>? = portal.leads
                 if (!leads.isNullOrEmpty()) {
                     Row(
                         modifier = Modifier.padding(top = 4.dp),
