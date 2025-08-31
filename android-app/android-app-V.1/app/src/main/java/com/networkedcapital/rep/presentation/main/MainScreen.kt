@@ -657,27 +657,26 @@ fun PersonItem(
     }
 }
 
-// Add an extension property for profileImageUrl if your User class does not have it
-val User.profileImageUrlCompat: String?
-    get() = try {
-        this::class.members.firstOrNull { it.name == "profileImageUrl" }
-            ?.call(this) as? String
-            ?: this::class.members.firstOrNull { it.name == "imageUrl" }
-                ?.call(this) as? String
-            ?: this::class.members.firstOrNull { it.name == "avatarUrl" }
-                ?.call(this) as? String
-    } catch (e: Exception) {
-        null
+@Composable
+fun UserProfileImage(
+    user: User,
+    modifier: Modifier = Modifier
+) {
+    val profileImageUrl = user.profileImageUrlCompat
+    if (!profileImageUrl.isNullOrEmpty()) {
+        AsyncImage(
+            model = profileImageUrl,
+            contentDescription = "${user.firstName} ${user.lastName}",
+            modifier = modifier
+                .size(60.dp)
+                .clip(CircleShape),
+            contentScale = ContentScale.Crop
+        )
+    } else {
+        Box(
+            modifier = modifier
+                .size(60.dp)
+                .background(Color.Gray, CircleShape)
+        )
     }
-    {   null
-    
-
-            ?.call(this) as? String
-            ?: this::class.members.firstOrNull { it.name == "imageUrl" }
-                ?.call(this) as? String
-            ?: this::class.members.firstOrNull { it.name == "avatarUrl" }
-                ?.call(this) as? String
-    } catch (e: Exception) {
-        null
-    }
-
+}
