@@ -3,10 +3,14 @@ package com.networkedcapital.rep.presentation.chat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.icons.Icons
+import androidx.compose.material3.icons.filled.ArrowBack
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -14,9 +18,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.networkedcapital.rep.domain.model.GroupMessage
-import com.networkedcapital.rep.domain.model.GroupMember
 
+// --- Add missing data classes ---
+data class GroupMember(
+    val id: Int,
+    val name: String,
+    val photoUrl: String?
+)
+
+data class GroupMessage(
+    val id: Int,
+    val senderId: Int,
+    val senderName: String,
+    val senderPhotoUrl: String?,
+    val text: String,
+    val timestamp: String
+)
+// --- End data classes ---
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupChatScreen(
     groupName: String,
@@ -34,7 +54,7 @@ fun GroupChatScreen(
             title = { Text(groupName, fontWeight = FontWeight.Bold) },
             navigationIcon = {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
                 }
             }
         )
@@ -56,7 +76,11 @@ fun GroupChatScreen(
                             .clip(CircleShape)
                             .background(Color.Gray.copy(alpha = 0.3f))
                     )
-                    Text(member.name, fontSize = MaterialTheme.typography.labelSmall.fontSize, maxLines = 1)
+                    Text(
+                        member.name,
+                        fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                        maxLines = 1
+                    )
                 }
             }
         }
@@ -84,7 +108,11 @@ fun GroupChatScreen(
                     }
                     Column(horizontalAlignment = if (msg.senderId == currentUserId) Alignment.End else Alignment.Start) {
                         if (msg.senderId != currentUserId) {
-                            Text(msg.senderName, fontSize = MaterialTheme.typography.labelSmall.fontSize, color = Color.Gray)
+                            Text(
+                                msg.senderName,
+                                fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                                color = Color.Gray
+                            )
                         }
                         Surface(
                             color = if (msg.senderId == currentUserId) Color(0xFF00C853) else Color(0xFFF2F2F2),
@@ -96,7 +124,11 @@ fun GroupChatScreen(
                                 color = if (msg.senderId == currentUserId) Color.White else Color.Black
                             )
                         }
-                        Text(msg.timestamp, fontSize = MaterialTheme.typography.labelSmall.fontSize, color = Color.Gray)
+                        Text(
+                            msg.timestamp,
+                            fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                            color = Color.Gray
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
