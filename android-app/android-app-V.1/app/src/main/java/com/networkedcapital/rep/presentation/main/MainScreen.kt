@@ -235,6 +235,7 @@ fun MainScreen(
                             if (uiState.activeChats.isNotEmpty()) {
                                 val firstActiveChat = uiState.activeChats.first()
                                 val id = firstActiveChat.id
+                                Log.d("MainScreen", "Chat ID: $id, Type: ${id?.javaClass?.name}")
                                 when (id) {
                                     is Int -> onNavigateToChat(id)
                                     is String -> id.toIntOrNull()?.let { onNavigateToChat(it) }

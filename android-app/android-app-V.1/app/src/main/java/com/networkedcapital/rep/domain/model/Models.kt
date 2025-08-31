@@ -36,7 +36,10 @@ data class User(
     val userType_string: String? = null,
     val city: String? = null,
     val lastMessage: String? = null,
-    val lastMessageDate: String? = null
+    val lastMessageDate: String? = null,
+    // Add for compatibility with MainScreen
+    val imageUrl: String? = null,
+    val avatarUrl: String? = null
 ) : Parcelable {
     val displayName: String
         get() = fullName ?: fname?.let { fn -> 
@@ -86,7 +89,7 @@ data class Portal(
     val location: String = "",
     val isSafe: Boolean = false,
     val imageUrl: String? = null,
-    val leads: List<User>? = emptyList()
+    val leads: List<User>? = emptyList() // Ensure this is present and matches MainScreen usage
 ) : Parcelable
 
 @Parcelize
@@ -226,7 +229,7 @@ data class Team(
 // Chat models for main screen
 @Parcelize
 data class ActiveChat(
-    val id: String, // "direct-<userId>" or "group-<chatId>"
+    val id: Any, // Accept Int or String for compatibility with MainScreen
     val type: String, // "direct" or "group"
     val user: User? = null,
     val chat: ChatModel? = null,
