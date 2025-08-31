@@ -264,12 +264,7 @@ fun MainScreen(
                     ) {
                         Icon(
                             imageVector = if (uiState.showOnlySafePortals) Icons.Default.Shield else Icons.Default.Public,
-                            contentDescription = "Safe Portals",
-                            tint = if (uiState.showOnlySafePortals) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurface
-                            }
+                            contentDescription = if (uiState.showOnlySafePortals) "Show All Portals" else "Show Safe Portals Only"
                         )
                     }
                 }
