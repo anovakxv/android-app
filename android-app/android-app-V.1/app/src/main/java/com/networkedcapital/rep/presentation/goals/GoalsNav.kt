@@ -1,22 +1,23 @@
 package com.networkedcapital.rep.presentation.goals
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun GoalsNavHost(
-    navController: NavController = rememberNavController(),
+    navController: NavHostController = rememberNavController(),
     goalsViewModel: GoalsViewModel = hiltViewModel()
 ) {
     NavHost(navController = navController, startDestination = "goalsList") {
         composable("goalsList") {
             GoalsListScreen(
                 viewModel = goalsViewModel,
-                onGoalClick = { goal ->
+                onGoalClick = { goal: com.networkedcapital.rep.domain.model.Goal ->
                     goalsViewModel.selectGoal(goal)
                     navController.navigate("goalDetail")
                 }
