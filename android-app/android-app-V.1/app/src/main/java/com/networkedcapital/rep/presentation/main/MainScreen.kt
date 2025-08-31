@@ -231,7 +231,14 @@ fun MainScreen(
                     IconButton(
                         onClick = {
                             if (uiState.activeChats.isNotEmpty()) {
-                                onNavigateToChat(uiState.activeChats.first().id)
+                                onNavigateToChat(
+                                    // FIX: Ensure id is Int, convert if needed
+                                    when (val id = uiState.activeChats.first().id) {
+                                        is Int -> id
+                                        is String -> id.toIntOrNull() ?: 0
+                                        else -> 0
+                                    }
+                                )
                             }
                         }
                     ) {
@@ -256,7 +263,6 @@ fun MainScreen(
                         )
                     }
 
-                    // Fix for: Type mismatch: inferred type is String but Int was expected
                     IconButton(
                         onClick = {
                             val userId = uiState.currentUser?.id ?: 0
