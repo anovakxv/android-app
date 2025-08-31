@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.networkedcapital.rep.domain.model.*
-import com.networkedcapital.rep.presentation.main.MainViewModel
+import com.networkedcapital.rep.presentation.main.MainViewModel.MainPage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,9 +45,7 @@ fun MainScreen(
     val uiState by viewModel.uiState.collectAsState()
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    // Use loadData instead of loadInitialData, and pass userId if needed
-    LaunchedEffect(Unit) {
-        // Replace with actual userId if needed, e.g. from auth/session
+    LaunchedEffect(uiState.currentUser?.id) {
         val userId = uiState.currentUser?.id ?: 0
         viewModel.loadData(userId)
     }
@@ -71,8 +69,6 @@ fun MainScreen(
                             keyboardActions = KeyboardActions(
                                 onSearch = {
                                     keyboardController?.hide()
-                                    // performSearch is private, so use onSearchQueryChange to trigger search
-                                    // viewModel.onSearchQueryChange(uiState.searchQuery)
                                 }
                             ),
                             leadingIcon = {
@@ -652,6 +648,10 @@ fun PersonItem(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
+            }
+        }
+    }
+}
             }
         }
     }
