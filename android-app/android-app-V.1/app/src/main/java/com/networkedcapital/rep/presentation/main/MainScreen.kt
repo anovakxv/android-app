@@ -466,13 +466,13 @@ fun PortalsList(
         items(portals) { portal ->
             PortalItem(
                 portal = portal,
-                // FIX: Ensure portal.id is Int, not String
-                onClick = { 
-                    // If portal.id is not Int, try to convert it
-                    when (val id = portal.id) {
+                // FIX: Only pass Int to onPortalClick, convert if needed
+                onClick = {
+                    val id = portal.id
+                    when (id) {
                         is Int -> onPortalClick(id)
                         is String -> id.toIntOrNull()?.let { onPortalClick(it) }
-                        else -> {} // Ignore or handle error
+                        else -> {} // ignore or handle error
                     }
                 }
             )
