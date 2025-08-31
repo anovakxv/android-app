@@ -124,7 +124,7 @@ fun MainScreen(
                         IconButton(onClick = {
                             uiState.currentUser?.id?.let { onNavigateToProfile(it) }
                         }) {
-                            if (uiState.currentUser?.profileImageUrl != null) {
+                            if (!uiState.currentUser?.profileImageUrl.isNullOrEmpty()) {
                                 AsyncImage(
                                     model = uiState.currentUser?.profileImageUrl,
                                     contentDescription = "Profile",
@@ -546,13 +546,13 @@ fun PortalItem(
                     )
                 }
                 // Leads row (if available)
-                if (portal.leads != null && portal.leads.isNotEmpty()) {
+                if (!portal.leads.isNullOrEmpty()) {
                     Row(
                         modifier = Modifier.padding(top = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        portal.leads.take(3).forEach { user ->
-                            if (user.profileImageUrl != null) {
+                        portal.leads.take(3).forEach { user: User ->
+                            if (!user.profileImageUrl.isNullOrEmpty()) {
                                 AsyncImage(
                                     model = user.profileImageUrl,
                                     contentDescription = "${user.firstName} ${user.lastName}",
@@ -608,14 +608,22 @@ fun PersonItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Profile Image using Coil
-            AsyncImage(
-                model = person.profileImageUrl,
-                contentDescription = "${person.firstName} ${person.lastName}",
-                modifier = Modifier
-                    .size(60.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
+            if (!person.profileImageUrl.isNullOrEmpty()) {
+                AsyncImage(
+                    model = person.profileImageUrl,
+                    contentDescription = "${person.firstName} ${person.lastName}",
+                    modifier = Modifier
+                        .size(60.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(60.dp)
+                        .background(Color.Gray, CircleShape)
+                )
+            }
 
             Spacer(modifier = Modifier.width(16.dp))
 
@@ -628,7 +636,7 @@ fun PersonItem(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                
+
                 if (person.about?.isNotBlank() == true) {
                     Text(
                         text = person.about,
@@ -652,4 +660,4 @@ fun PersonItem(
         }
     }
 }
-            
+
