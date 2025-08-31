@@ -208,10 +208,3 @@ fun LargeBarChartView(data: List<BarChartData>, quota: Double) {
     }
 }
 
-// Remove this FeedItem data class if it is already declared elsewhere in your project
-data class FeedItem(
-    val userName: String,
-    val date: String,
-    val value: String,
-    val note: String
-)
