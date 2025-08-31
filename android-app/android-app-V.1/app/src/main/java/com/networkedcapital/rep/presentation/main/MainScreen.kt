@@ -234,11 +234,15 @@ fun MainScreen(
                         onClick = {
                             if (uiState.activeChats.isNotEmpty()) {
                                 val firstActiveChat = uiState.activeChats.first()
-                                val id = firstActiveChat.id
+                                val id = firstActiveChat.id // id is potentially String?
                                 Log.d("MainScreen", "Chat ID: $id, Type: ${id?.javaClass?.name}")
                                 when (id) {
                                     is Int -> onNavigateToChat(id)
-                                    is String -> id.toIntOrNull()?.let { onNavigateToChat(it) }
+                                    is String -> {
+                                        id.toIntOrNull()?.let { intId ->
+                                            onNavigateToChat(intId)
+                                        } ?: Log.e("MainScreen", "Failed to convert String chat ID to Int: $id")
+                                    }
                                     else -> Log.e("MainScreen", "Unexpected type for chat ID: ${id?.javaClass?.name}")
                                 }
                             }
