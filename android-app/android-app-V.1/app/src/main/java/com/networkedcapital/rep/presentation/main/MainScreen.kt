@@ -234,28 +234,17 @@ fun MainScreen(
                         onClick = {
                             if (uiState.activeChats.isNotEmpty()) {
                                 val firstActiveChat = uiState.activeChats.first()
-                                val id = firstActiveChat.id // This 'id' could be of various types
+                                val id = firstActiveChat.id
                                 when (id) {
-                                    is Int -> {
-                                        onNavigateToChat(id) // Expects an Int
-                                    }
-                                    is String -> {
-                                        val intId = id.toIntOrNull()
-                                        if (intId != null) {
-                                            onNavigateToChat(intId) // Expects an Int
-                                        } else {
-                                            Log.e("MainScreen", "Failed to convert chat ID to Int: $id")
-                                        }
-                                    }
-                                    else -> {
-                                        Log.e("MainScreen", "Unexpected type for chat ID: ${id?.javaClass?.name}")
-                                    }
+                                    is Int -> onNavigateToChat(id)
+                                    is String -> id.toIntOrNull()?.let { onNavigateToChat(it) }
+                                    else -> Log.e("MainScreen", "Unexpected type for chat ID: ${id?.javaClass?.name}")
                                 }
                             }
                         }
                     ) {
                         Badge(
-                            modifier = Modifier.offset(x = 8.dp, y = (-8).dp) // Line 239
+                            modifier = Modifier.offset(x = 8.dp, y = (-8).dp)
                         ) {
                             if (uiState.activeChats.isNotEmpty()) {
                                 Text(
