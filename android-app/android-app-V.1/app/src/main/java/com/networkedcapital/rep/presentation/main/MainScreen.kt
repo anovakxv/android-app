@@ -562,12 +562,17 @@ fun PortalItem(
                         leads.take(3).forEach { user: User ->
                             val userProfileImageUrl = user.profileImageUrlCompat
                             // FIX: Only safe or non-null asserted calls allowed on nullable receiver
-                            val firstName = user.firstName ?: user.fname ?: ""
-                            val lastName = user.lastName ?: user.lname ?: ""
+                            val firstInitial = user.firstName?.firstOrNull()?.toString()
+                                ?: user.fname?.firstOrNull()?.toString()
+                                ?: ""
+                            val lastInitial = user.lastName?.firstOrNull()?.toString()
+                                ?: user.lname?.firstOrNull()?.toString()
+                                ?: ""
+                            val contentDescription = "$firstInitial$lastInitial"
                             if (!userProfileImageUrl.isNullOrEmpty()) {
                                 AsyncImage(
                                     model = userProfileImageUrl,
-                                    contentDescription = "${firstName}${if (firstName.isNotEmpty() && lastName.isNotEmpty()) " " else ""}$lastName",
+                                    contentDescription = contentDescription,
                                     modifier = Modifier
                                         .size(20.dp)
                                         .clip(CircleShape)
