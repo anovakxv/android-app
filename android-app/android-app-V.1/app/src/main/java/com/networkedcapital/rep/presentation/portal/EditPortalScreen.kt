@@ -86,8 +86,8 @@ fun EditPortalScreen(
                                     description = about,
                                     imageUrl = existingPortal?.imageUrl ?: "",
                                     location = existingPortal?.location ?: "",
-                                    isSafe = existingPortal?.isSafe ?: false,
-                                    leads = existingPortal?.leads ?: emptyList()
+                                    isSafe = existingPortal?.isSafe ?: false
+                                    // Remove 'leads' parameter, as it does not exist in your Portal constructor
                                 )
                             )
                         }
