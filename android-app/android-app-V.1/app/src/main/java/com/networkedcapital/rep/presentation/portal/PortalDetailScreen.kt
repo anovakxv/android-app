@@ -112,7 +112,7 @@ fun PortalDetailScreen(
                             onNavigateToChat(
                                 lead.id,
                                 "${lead.firstName} ${lead.lastName}",
-                                lead.profileImageUrl
+                                lead.profileImageUrlCompat // FIX: use profileImageUrlCompat instead of profileImageUrl
                             )
                         }
                     }
@@ -656,7 +656,11 @@ fun GoalListItem(goal: Goal, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            Text(goal.name, fontWeight = FontWeight.Bold)
+            // FIX: Use goal.title or goal.goalName if goal.name does not exist
+            Text(
+                text = goal.name ?: goal.title ?: goal.goalName ?: "Goal",
+                fontWeight = FontWeight.Bold
+            )
             if (!goal.description.isNullOrBlank()) {
                 Text(goal.description, fontSize = 14.sp, color = Color.Gray)
             }
