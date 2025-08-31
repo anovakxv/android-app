@@ -555,12 +555,8 @@ fun PortalItem(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                // FIX: Use portal.leads if available, otherwise emptyList()
-                val leads: List<User> = try {
-                    portal.leads ?: emptyList()
-                } catch (e: Exception) {
-                    emptyList()
-                }
+                // FIX: Always define leads locally from portal.leads or emptyList()
+                val leads: List<User> = portal.leads ?: emptyList()
                 if (leads.isNotEmpty()) {
                     Row(
                         modifier = Modifier.padding(top = 4.dp),
