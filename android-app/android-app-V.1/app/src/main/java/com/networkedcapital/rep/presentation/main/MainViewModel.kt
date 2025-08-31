@@ -1,5 +1,5 @@
 package com.networkedcapital.rep.presentation.main
-
+import com.networkedcapital.rep.domain.model.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.networkedcapital.rep.data.repository.AuthRepository
