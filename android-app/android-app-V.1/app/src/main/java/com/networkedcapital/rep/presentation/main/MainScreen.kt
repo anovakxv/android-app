@@ -415,6 +415,14 @@ fun PortalStorySectionAndroid(leads: List<User>, storyBlocks: List<PortalText>) 
     }
 }
 
+private fun String?.firstOrNull(): String {
+    return if (this.isNullOrEmpty()) {
+        ""
+    } else {
+        this.first().toString()
+    }
+}
+
 @Composable
 fun SegmentedControl(
     sections: List<String>,
