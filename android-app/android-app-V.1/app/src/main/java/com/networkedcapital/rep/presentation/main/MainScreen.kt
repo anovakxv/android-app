@@ -670,13 +670,14 @@ val User.profileImageUrlCompat: String?
         null
     }
         null
-    }
+    
+
             ?.call(this) as? String
             ?: this::class.members.firstOrNull { it.name == "imageUrl" }
                 ?.call(this) as? String
             ?: this::class.members.firstOrNull { it.name == "avatarUrl" }
                 ?.call(this) as? String
-    } catch (e: Exception) {
+     catch (e: Exception) {
         null
     }
 
