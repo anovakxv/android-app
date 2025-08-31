@@ -89,8 +89,8 @@ class MainViewModel @Inject constructor(
             it.copy(
                 currentPage = newPage,
                 searchQuery = "",
-                searchResults = emptyList(),
-                isSearching = false
+                searchPortals = emptyList(),
+                searchUsers = emptyList()
             ) 
         }
         
@@ -117,7 +117,8 @@ class MainViewModel @Inject constructor(
             it.copy(
                 showSearch = showSearch,
                 searchQuery = if (!showSearch) "" else it.searchQuery,
-                searchResults = if (!showSearch) emptyList() else it.searchResults
+                searchPortals = if (!showSearch) emptyList() else it.searchPortals,
+                searchUsers = if (!showSearch) emptyList() else it.searchUsers
             ) 
         }
         
@@ -206,8 +207,12 @@ class MainViewModel @Inject constructor(
     
     private suspend fun fetchCurrentUser() {
         try {
-            val user = authRepository.getCurrentUser()
-            _uiState.update { it.copy(currentUser = user) }
+            authRepository.getCurrentUser()
+                .collect { result ->
+                    result.getOrNull()?.let { user ->
+                        _uiState.update { it.copy(currentUser = user) }
+                    }
+                }
         } catch (e: Exception) {
             // Ignore error, user will remain null
         }
@@ -219,61 +224,65 @@ class MainViewModel @Inject constructor(
             _uiState.update { it.copy(isSearching = true) }
             
             try {
-                val results = when (_uiState.value.currentPage) {
-                    MainPage.PORTALS -> {
-                        if (_uiState.value.selectedSection == 2) {
-                            portalRepository.searchPortals(query)
-                        } else {
-                            // Filter local results
-                            _uiState.value.portals.filter { 
-                                it.name.contains(query, ignoreCase = true)
-                            }
-                        }
-                    }
-                    MainPage.PEOPLE -> {
-                        if (_uiState.value.selectedSection == 2) {
-                            portalRepository.searchPeople(query)
-                        } else {
-                            // Filter local results
-                            _uiState.value.users.filter { 
-                                it.displayName.contains(query, ignoreCase = true)
-                            }
-                        }
+                val portals = if (_uiState.value.selectedSection == 2) {
+                    portalRepository.searchPortals(query)ection == 2) {
+                } else {
+                    // Filter local results
+                    _uiState.value.portals.filter { filter {
+                        it.name.contains(query, ignoreCase = true)reCase = true)
                     }
                 }
-                
-                _uiState.update { 
-                    it.copy(
-                        isSearching = false,
-                        searchResults = results
+                uiState.update {
+                val users = if (_uiState.value.selectedSection == 2) {       it.copy(
+                    portalRepository.searchPeople(query)ing = false,
+                } else {
+                    // Filter local results
+                    _uiState.value.users.filter { 
+                        it.displayName.contains(query, ignoreCase = true)
+                    }
+                }
+                esults = if (_uiState.value.selectedSection == 2) {
+                _uiState.update {    portalRepository.searchPeople(query)
+                    it.copy(   } else {
+                        isSearching = false,           _uiState.value.users.filter {
+                        searchPortals = portals,                it.displayName.contains(query, ignoreCase = true)
+                        searchUsers = users
                     ) 
                 }
             } catch (e: Exception) {
-                _uiState.update { 
-                    it.copy(
-                        isSearching = false,
+                _uiState.update {           isSearching = false,
+                    it.copy(               searchUsers = results,
+                        isSearching = false,chPortals = emptyList()
                         errorMessage = e.message ?: "Search failed"
                     ) 
                 }
             }
-        }
-    }
-}
-
-data class MainUiState(
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null,
+        }: Exception) {
+    }uiState.update {
+}       it.copy(
+               isSearching = false,
+data class MainUiState(                   errorMessage = e.message ?: "Search failed"
+    val isLoading: Boolean = false,                   )
+    val errorMessage: String? = null,                }
     val currentPage: MainPage = MainPage.PORTALS,
     val selectedSection: Int = 2, // 0=OPEN, 1=NTWK, 2=ALL
     val showSearch: Boolean = false,
     val searchQuery: String = "",
     val isSearching: Boolean = false,
     val showOnlySafePortals: Boolean = false,
-    
+    e,
     // Data
-    val currentUser: User? = null,
-    val portals: List<Portal> = emptyList(),
-    val users: List<User> = emptyList(),
+    val currentUser: User? = null,ALS,
+    val portals: List<Portal> = emptyList(),val selectedSection: Int = 2, // 0=OPEN, 1=NTWK, 2=ALL
+    val users: List<User> = emptyList(),wSearch: Boolean = false,
+    val activeChats: List<ActiveChat> = emptyList(),
+    val searchPortals: List<Portal> = emptyList(),
+    val searchUsers: List<User> = emptyList()alse,
+)
+
+enum class MainPage {   val currentUser: User? = null,
+    PORTALS, PEOPLE    val portals: List<Portal> = emptyList(),
+}ser> = emptyList(),
     val activeChats: List<ActiveChat> = emptyList(),
     val searchResults: List<Any> = emptyList()
 )
