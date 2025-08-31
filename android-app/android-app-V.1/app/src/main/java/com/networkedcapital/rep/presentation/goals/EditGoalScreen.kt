@@ -170,7 +170,4 @@ fun EditGoalScreen(
         }
     }
 }
-            }
-        }
-    }
-}
+     
