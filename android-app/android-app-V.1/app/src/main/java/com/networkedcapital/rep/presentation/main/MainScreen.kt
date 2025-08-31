@@ -124,9 +124,10 @@ fun MainScreen(
                         IconButton(onClick = {
                             uiState.currentUser?.id?.let { onNavigateToProfile(it) }
                         }) {
-                            if (!uiState.currentUser?.profileImageUrl.isNullOrEmpty()) {
+                            val profileImageUrl = uiState.currentUser?.profileImageUrl
+                            if (!profileImageUrl.isNullOrEmpty()) {
                                 AsyncImage(
-                                    model = uiState.currentUser?.profileImageUrl,
+                                    model = profileImageUrl,
                                     contentDescription = "Profile",
                                     modifier = Modifier
                                         .size(32.dp)
@@ -551,10 +552,11 @@ fun PortalItem(
                         modifier = Modifier.padding(top = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        portal.leads.take(3).forEach { user: User ->
-                            if (!user.profileImageUrl.isNullOrEmpty()) {
+                        portal.leads.take(3).forEach { user ->
+                            val userProfileImageUrl = user.profileImageUrl
+                            if (!userProfileImageUrl.isNullOrEmpty()) {
                                 AsyncImage(
-                                    model = user.profileImageUrl,
+                                    model = userProfileImageUrl,
                                     contentDescription = "${user.firstName} ${user.lastName}",
                                     modifier = Modifier
                                         .size(20.dp)
@@ -607,10 +609,10 @@ fun PersonItem(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Profile Image using Coil
-            if (!person.profileImageUrl.isNullOrEmpty()) {
+            val profileImageUrl = person.profileImageUrl
+            if (!profileImageUrl.isNullOrEmpty()) {
                 AsyncImage(
-                    model = person.profileImageUrl,
+                    model = profileImageUrl,
                     contentDescription = "${person.firstName} ${person.lastName}",
                     modifier = Modifier
                         .size(60.dp)
