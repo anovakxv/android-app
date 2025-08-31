@@ -183,6 +183,7 @@ fun MainScreen(
                         )
                     }
                     // Add an else branch if your enum is not exhaustive
+                    else -> {} // Ensure exhaustive when
                 }
             }
 
