@@ -230,4 +230,41 @@ class MainViewModel @Inject constructor(
                         } else {
                             _uiState.value.portals.filter {
                                 it.name.contains(query, ignoreCase = true)
-                           
+                            }
+                        }
+                        _uiState.update {
+                            it.copy(
+                                isSearching = false,
+                                searchPortals = portals,
+                                searchUsers = emptyList()
+                            )
+                        }
+                    }
+                    MainPage.PEOPLE -> {
+                        val users = if (_uiState.value.selectedSection == 2) {
+                            portalRepository.searchPeople(query)
+                        } else {
+                            _uiState.value.users.filter {
+                                it.displayName.contains(query, ignoreCase = true)
+                            }
+                        }
+                        _uiState.update {
+                            it.copy(
+                                isSearching = false,
+                                searchUsers = users,
+                                searchPortals = emptyList()
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isSearching = false,
+                        errorMessage = e.message ?: "Search failed"
+                    )
+                }
+            }
+        }
+    }
+}
