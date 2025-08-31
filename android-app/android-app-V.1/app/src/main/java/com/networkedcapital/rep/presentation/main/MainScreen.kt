@@ -652,7 +652,4 @@ fun PersonItem(
         }
     }
 }
-            }
-        }
-    }
-}
+            
