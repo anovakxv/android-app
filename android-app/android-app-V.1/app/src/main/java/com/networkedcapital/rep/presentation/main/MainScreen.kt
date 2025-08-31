@@ -567,7 +567,7 @@ fun PortalItem(
                             if (!userProfileImageUrl.isNullOrEmpty()) {
                                 AsyncImage(
                                     model = userProfileImageUrl,
-                                    contentDescription = "$firstName $lastName",
+                                    contentDescription = "${firstName}${if (firstName.isNotEmpty() && lastName.isNotEmpty()) " " else ""}$lastName",
                                     modifier = Modifier
                                         .size(20.dp)
                                         .clip(CircleShape)
