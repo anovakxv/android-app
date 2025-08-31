@@ -124,23 +124,15 @@ fun MainScreen(
                         IconButton(onClick = {
                             uiState.currentUser?.id?.let { onNavigateToProfile(it) }
                         }) {
-                            // Use the extension property for compatibility
-                            val profileImageUrl = uiState.currentUser?.profileImageUrlCompat
-                            if (!profileImageUrl.isNullOrEmpty()) {
-                                AsyncImage(
-                                    model = profileImageUrl,
-                                    contentDescription = "Profile",
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .clip(CircleShape),
-                                    contentScale = ContentScale.Crop
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.Person,
-                                    contentDescription = "Profile"
-                                )
-                            }
+                            // Corrected usage
+                            AsyncImage(
+                                model = uiState.currentUser?.profileImageUrlCompat,
+                                contentDescription = "Profile",
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
                         }
                     }
                 },
@@ -671,6 +663,14 @@ val User.profileImageUrlCompat: String?
         // Try to use profileImageUrl if it exists, otherwise fallback to imageUrl or avatarUrl
         // Replace "imageUrl" or "avatarUrl" with the actual property names if needed
         this::class.members.firstOrNull { it.name == "profileImageUrl" }
+            ?.call(this) as? String
+            ?: this::class.members.firstOrNull { it.name == "imageUrl" }
+                ?.call(this) as? String
+            ?: this::class.members.firstOrNull { it.name == "avatarUrl" }
+                ?.call(this) as? String
+    } catch (e: Exception) {
+        null
+    }
             ?.call(this) as? String
             ?: this::class.members.firstOrNull { it.name == "imageUrl" }
                 ?.call(this) as? String
