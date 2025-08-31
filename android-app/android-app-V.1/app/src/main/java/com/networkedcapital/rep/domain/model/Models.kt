@@ -2,6 +2,7 @@ package com.networkedcapital.rep.domain.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 
 @Parcelize
 data class User(
@@ -229,7 +230,7 @@ data class Team(
 // Chat models for main screen
 @Parcelize
 data class ActiveChat(
-    val id: Any, // Accept Int or String for compatibility with MainScreen
+    val id: @RawValue Any, // Accept Int or String for compatibility with MainScreen
     val type: String, // "direct" or "group"
     val user: User? = null,
     val chat: ChatModel? = null,
