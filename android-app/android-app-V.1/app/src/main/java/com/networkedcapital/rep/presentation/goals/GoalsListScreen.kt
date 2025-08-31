@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.networkedcapital.rep.domain.model.Goal
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GoalsListScreen(
     viewModel: GoalsViewModel,
