@@ -3,6 +3,7 @@ package com.networkedcapital.rep.presentation.main
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -115,7 +116,7 @@ fun MainScreen(
                         }) {
                             if (uiState.currentUser?.profileImageUrl != null) {
                                 AsyncImage(
-                                    model = uiState.currentUser.profileImageUrl,
+                                    model = uiState.currentUser?.profileImageUrl,
                                     contentDescription = "Profile",
                                     modifier = Modifier
                                         .size(32.dp)
