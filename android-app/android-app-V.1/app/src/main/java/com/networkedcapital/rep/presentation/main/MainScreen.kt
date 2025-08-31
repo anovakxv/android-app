@@ -231,11 +231,12 @@ fun MainScreen(
                     IconButton(
                         onClick = {
                             if (uiState.activeChats.isNotEmpty()) {
-                                // FIX: Always pass Int to onNavigateToChat
+                                // FIX: Always pass Int to onNavigateToChat, handle String id
                                 val id = uiState.activeChats.first().id
                                 when (id) {
                                     is Int -> onNavigateToChat(id)
                                     is String -> id.toIntOrNull()?.let { onNavigateToChat(it) }
+                                    else -> { /* ignore or handle error */ }
                                 }
                             }
                         }
@@ -466,14 +467,8 @@ fun PortalsList(
         items(portals) { portal ->
             PortalItem(
                 portal = portal,
-                // FIX: Only pass Int to onPortalClick, convert if needed
-                onClick = {
-                    val id = portal.id
-                    when (id) {
-                        is Int -> onPortalClick(id)
-                        is String -> id.toIntOrNull()?.let { onPortalClick(it) }
-                    }
-                }
+                // FIX: Only pass Int to onPortalClick, portal.id is Int in your model
+                onClick = { onPortalClick(portal.id) }
             )
         }
     }
@@ -555,7 +550,6 @@ fun PortalItem(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                // FIX: Always define leads locally from portal.leads or emptyList()
                 val leads: List<User> = portal.leads ?: emptyList()
                 if (leads.isNotEmpty()) {
                     Row(
@@ -564,10 +558,11 @@ fun PortalItem(
                     ) {
                         leads.take(3).forEach { user: User ->
                             val userProfileImageUrl = user.profileImageUrlCompat
+                            // FIX: Only safe or non-null asserted calls allowed on nullable receiver
                             if (!userProfileImageUrl.isNullOrEmpty()) {
                                 AsyncImage(
                                     model = userProfileImageUrl,
-                                    contentDescription = "${user.firstName} ${user.lastName}",
+                                    contentDescription = "${user.firstName ?: user.fname ?: ""} ${user.lastName ?: user.lname ?: ""}",
                                     modifier = Modifier
                                         .size(20.dp)
                                         .clip(CircleShape)
