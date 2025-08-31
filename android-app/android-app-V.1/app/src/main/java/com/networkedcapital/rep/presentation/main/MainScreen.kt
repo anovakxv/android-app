@@ -231,12 +231,11 @@ fun MainScreen(
                     IconButton(
                         onClick = {
                             if (uiState.activeChats.isNotEmpty()) {
-                                // FIX: If onNavigateToChat expects Int, always pass Int
+                                // FIX: Always pass Int to onNavigateToChat
                                 val id = uiState.activeChats.first().id
-                                if (id is Int) {
-                                    onNavigateToChat(id)
-                                } else if (id is String) {
-                                    id.toIntOrNull()?.let { onNavigateToChat(it) }
+                                when (id) {
+                                    is Int -> onNavigateToChat(id)
+                                    is String -> id.toIntOrNull()?.let { onNavigateToChat(it) }
                                 }
                             }
                         }
@@ -470,10 +469,9 @@ fun PortalsList(
                 // FIX: Only pass Int to onPortalClick, convert if needed
                 onClick = {
                     val id = portal.id
-                    if (id is Int) {
-                        onPortalClick(id)
-                    } else if (id is String) {
-                        id.toIntOrNull()?.let { onPortalClick(it) }
+                    when (id) {
+                        is Int -> onPortalClick(id)
+                        is String -> id.toIntOrNull()?.let { onPortalClick(it) }
                     }
                 }
             )
