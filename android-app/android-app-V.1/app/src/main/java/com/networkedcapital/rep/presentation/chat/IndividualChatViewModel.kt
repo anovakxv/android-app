@@ -2,7 +2,7 @@ package com.networkedcapital.rep.presentation.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.networkedcapital.rep.domain.model.SimpleMessage
+import com.networkedcapital.rep.presentation.chat.SimpleMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
