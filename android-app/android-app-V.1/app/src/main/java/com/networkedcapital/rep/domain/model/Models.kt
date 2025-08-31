@@ -85,7 +85,8 @@ data class Portal(
     val description: String = "",
     val location: String = "",
     val isSafe: Boolean = false,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val leads: List<User>? = emptyList()
 ) : Parcelable
 
 @Parcelize
