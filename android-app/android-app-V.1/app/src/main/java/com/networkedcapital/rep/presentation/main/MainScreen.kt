@@ -467,7 +467,14 @@ fun PortalsList(
             PortalItem(
                 portal = portal,
                 // FIX: Ensure portal.id is Int, not String
-                onClick = { onPortalClick(portal.id) }
+                onClick = { 
+                    // If portal.id is not Int, try to convert it
+                    when (val id = portal.id) {
+                        is Int -> onPortalClick(id)
+                        is String -> id.toIntOrNull()?.let { onPortalClick(it) }
+                        else -> {} // Ignore or handle error
+                    }
+                }
             )
         }
     }
