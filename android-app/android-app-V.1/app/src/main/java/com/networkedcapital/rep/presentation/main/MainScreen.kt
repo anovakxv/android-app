@@ -556,13 +556,17 @@ fun PortalItem(
                     )
                 }
                 // FIX: Use portal.leads if available, otherwise emptyList()
-                val portalLeads: List<User> = portal.leads ?: emptyList()
-                if (portalLeads.isNotEmpty()) {
+                val leads: List<User> = try {
+                    portal.leads ?: emptyList()
+                } catch (e: Exception) {
+                    emptyList()
+                }
+                if (leads.isNotEmpty()) {
                     Row(
                         modifier = Modifier.padding(top = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        portalLeads.take(3).forEach { user: User ->
+                        leads.take(3).forEach { user: User ->
                             val userProfileImageUrl = user.profileImageUrlCompat
                             if (!userProfileImageUrl.isNullOrEmpty()) {
                                 AsyncImage(
@@ -583,8 +587,8 @@ fun PortalItem(
                                 )
                             }
                         }
-                        if (portalLeads.size > 3) {
-                            Text("+${portalLeads.size - 3}", fontSize = 12.sp)
+                        if (leads.size > 3) {
+                            Text("+${leads.size - 3}", fontSize = 12.sp)
                         }
                     }
                 }
