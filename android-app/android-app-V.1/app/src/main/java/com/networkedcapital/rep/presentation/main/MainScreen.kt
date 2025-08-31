@@ -424,7 +424,7 @@ fun SegmentedControl(
             )
             .padding(4.dp)
     ) {
-        sections.forEach { section ->
+        sections.forEachIndexed { idx, section ->
             val isSelected = section == selectedSection
             Box(
                 modifier = Modifier
