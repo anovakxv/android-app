@@ -660,8 +660,6 @@ fun PersonItem(
 // Add an extension property for profileImageUrl if your User class does not have it
 val User.profileImageUrlCompat: String?
     get() = try {
-        // Try to use profileImageUrl if it exists, otherwise fallback to imageUrl or avatarUrl
-        // Replace "imageUrl" or "avatarUrl" with the actual property names if needed
         this::class.members.firstOrNull { it.name == "profileImageUrl" }
             ?.call(this) as? String
             ?: this::class.members.firstOrNull { it.name == "imageUrl" }
@@ -669,6 +667,8 @@ val User.profileImageUrlCompat: String?
             ?: this::class.members.firstOrNull { it.name == "avatarUrl" }
                 ?.call(this) as? String
     } catch (e: Exception) {
+        null
+    }
         null
     }
             ?.call(this) as? String
