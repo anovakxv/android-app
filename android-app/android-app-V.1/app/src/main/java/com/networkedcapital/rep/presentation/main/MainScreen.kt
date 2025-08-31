@@ -124,7 +124,7 @@ fun MainScreen(
                         IconButton(onClick = {
                             uiState.currentUser?.id?.let { onNavigateToProfile(it) }
                         }) {
-                            val profileImageUrl: String? = uiState.currentUser?.profileImageUrl
+                            val profileImageUrl = uiState.currentUser?.profileImageUrl
                             if (!profileImageUrl.isNullOrEmpty()) {
                                 AsyncImage(
                                     model = profileImageUrl,
@@ -547,14 +547,14 @@ fun PortalItem(
                     )
                 }
                 // Leads row (if available)
-                val leads: List<User>? = portal.leads
+                val leads = portal.leads
                 if (!leads.isNullOrEmpty()) {
                     Row(
                         modifier = Modifier.padding(top = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        leads.take(3).forEach { user: User ->
-                            val userProfileImageUrl: String? = user.profileImageUrl
+                        leads.take(3).forEach { user ->
+                            val userProfileImageUrl = user.profileImageUrl
                             if (!userProfileImageUrl.isNullOrEmpty()) {
                                 AsyncImage(
                                     model = userProfileImageUrl,
@@ -610,7 +610,7 @@ fun PersonItem(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val profileImageUrl: String? = person.profileImageUrl
+            val profileImageUrl = person.profileImageUrl
             if (!profileImageUrl.isNullOrEmpty()) {
                 AsyncImage(
                     model = profileImageUrl,
