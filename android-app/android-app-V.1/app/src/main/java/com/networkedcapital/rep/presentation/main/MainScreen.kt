@@ -58,16 +58,16 @@ fun MainScreen(
                         OutlinedTextField(
                             value = uiState.searchText,
                             onValueChange = viewModel::updateSearchText,
-                            placeholder = { 
+                            placeholder = {
                                 Text(
                                     "Search ${if (uiState.currentPage == MainViewModel.Page.PORTALS) "portals" else "people"}...",
                                     fontSize = 16.sp
-                                ) 
+                                )
                             },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                             keyboardActions = KeyboardActions(
-                                onSearch = { 
+                                onSearch = {
                                     keyboardController?.hide()
                                     viewModel.performSearch()
                                 }
@@ -81,7 +81,7 @@ fun MainScreen(
                             },
                             trailingIcon = {
                                 IconButton(
-                                    onClick = { 
+                                    onClick = {
                                         viewModel.toggleSearch()
                                         keyboardController?.hide()
                                     }
@@ -104,15 +104,15 @@ fun MainScreen(
                             SegmentedControl(
                                 sections = listOf("OPEN", "NTWK", "ALL"),
                                 selectedSection = uiState.selectedSection,
-                                onSectionSelected = viewModel::selectSection
+                                onSectionSelected = { section: String -> viewModel.selectSection(section) }
                             )
                         }
                     }
                 },
                 navigationIcon = {
                     if (!uiState.isSearchMode) {
-                        IconButton(onClick = { 
-                            uiState.currentUser?.id?.let { onNavigateToProfile(it) } 
+                        IconButton(onClick = {
+                            uiState.currentUser?.id?.let { onNavigateToProfile(it) }
                         }) {
                             if (uiState.currentUser?.profileImageUrl != null) {
                                 AsyncImage(
@@ -182,6 +182,7 @@ fun MainScreen(
                             modifier = Modifier.weight(1f)
                         )
                     }
+                    // Add an else branch if your enum is not exhaustive
                 }
             }
 
@@ -219,8 +220,7 @@ fun MainScreen(
 
                     // Active Chats Button
                     IconButton(
-                        onClick = { 
-                            // Navigate to chat list or first active chat
+                        onClick = {
                             if (uiState.activeChats.isNotEmpty()) {
                                 onNavigateToChat(uiState.activeChats.first().id)
                             }
