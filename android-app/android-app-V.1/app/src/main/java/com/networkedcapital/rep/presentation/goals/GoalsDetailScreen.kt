@@ -4,12 +4,18 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.clip
 import com.networkedcapital.rep.domain.model.Goal
 import com.networkedcapital.rep.domain.model.BarChartData
 import com.networkedcapital.rep.domain.model.User
@@ -35,7 +41,7 @@ fun GoalsDetailScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFF8CC55D))
+                Icon(Icons.Filled.ArrowBack, contentDescription = "Back", tint = Color(0xFF8CC55D))
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(goal.title, style = MaterialTheme.typography.titleMedium)
@@ -167,7 +173,7 @@ fun TeamMemberItem(user: User, onMessage: (User) -> Unit) {
         Text(user.fullName ?: "", fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
         Spacer(modifier = Modifier.weight(1f))
         IconButton(onClick = { onMessage(user) }) {
-            Icon(Icons.Default.Message, contentDescription = "Message")
+            Icon(Icons.Filled.Message, contentDescription = "Message")
         }
     }
 }
@@ -202,7 +208,7 @@ fun LargeBarChartView(data: List<BarChartData>, quota: Double) {
     }
 }
 
-// Data class for feed items
+// Remove this FeedItem data class if it is already declared elsewhere in your project
 data class FeedItem(
     val userName: String,
     val date: String,
