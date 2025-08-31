@@ -40,7 +40,7 @@ fun GoalListItem(
                 data = goal.chartData.takeLast(4),
                 quota = goal.quota,
                 modifier = Modifier
-                    .width(4 * 24.dp + 3 * 6.dp)
+                    .width((4 * 24 + 3 * 6).dp)
                     .height(81.dp)
                     .padding(vertical = 4.dp)
             )
@@ -76,11 +76,11 @@ fun MiniBarChart(
         data.forEachIndexed { idx, bar ->
             val quotaValue = if (quota > 0) quota else 1.0
             val percent = (bar.value / quotaValue).coerceIn(0.0, 1.0)
-            val barHeight = percent * 77f
+            val barHeight = (percent * 77f).dp
             Box(
                 modifier = Modifier
                     .width(24.dp)
-                    .height(barHeight.dp)
+                    .height(barHeight)
                     .background(Color(0xFF8CC55D), RoundedCornerShape(3.dp))
             )
             if (idx < data.lastIndex) Spacer(modifier = Modifier.width(6.dp))
