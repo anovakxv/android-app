@@ -45,22 +45,24 @@ fun MainScreen(
     val uiState by viewModel.uiState.collectAsState()
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    // Use loadData instead of loadInitialData, and pass userId if needed
     LaunchedEffect(Unit) {
-        viewModel.loadInitialData()
+        // Replace with actual userId if needed, e.g. from auth/session
+        val userId = uiState.currentUser?.id ?: 0
+        viewModel.loadData(userId)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Top App Bar with Search
             TopAppBar(
                 title = {
-                    if (uiState.isSearchMode) {
+                    if (uiState.showSearch) {
                         OutlinedTextField(
-                            value = uiState.searchText,
-                            onValueChange = viewModel::updateSearchText,
+                            value = uiState.searchQuery,
+                            onValueChange = viewModel::onSearchQueryChange,
                             placeholder = {
                                 Text(
-                                    "Search ${if (uiState.currentPage == MainViewModel.Page.PORTALS) "portals" else "people"}...",
+                                    "Search ${if (uiState.currentPage == MainPage.PORTALS) "portals" else "people"}...",
                                     fontSize = 16.sp
                                 )
                             },
@@ -69,7 +71,8 @@ fun MainScreen(
                             keyboardActions = KeyboardActions(
                                 onSearch = {
                                     keyboardController?.hide()
-                                    viewModel.performSearch()
+                                    // performSearch is private, so use onSearchQueryChange to trigger search
+                                    // viewModel.onSearchQueryChange(uiState.searchQuery)
                                 }
                             ),
                             leadingIcon = {
@@ -96,21 +99,32 @@ fun MainScreen(
                             modifier = Modifier.fillMaxWidth()
                         )
                     } else {
-                        // Segmented Control for OPEN/NTWK/ALL
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center
                         ) {
                             SegmentedControl(
                                 sections = listOf("OPEN", "NTWK", "ALL"),
-                                selectedSection = uiState.selectedSection,
-                                onSectionSelected = { section: String -> viewModel.selectSection(section) }
+                                selectedSection = when (uiState.selectedSection) {
+                                    0 -> "OPEN"
+                                    1 -> "NTWK"
+                                    else -> "ALL"
+                                },
+                                onSectionSelected = { section ->
+                                    val sectionIdx = when (section) {
+                                        "OPEN" -> 0
+                                        "NTWK" -> 1
+                                        else -> 2
+                                    }
+                                    val userId = uiState.currentUser?.id ?: 0
+                                    viewModel.onSectionChanged(sectionIdx, userId)
+                                }
                             )
                         }
                     }
                 },
                 navigationIcon = {
-                    if (!uiState.isSearchMode) {
+                    if (!uiState.showSearch) {
                         IconButton(onClick = {
                             uiState.currentUser?.id?.let { onNavigateToProfile(it) }
                         }) {
@@ -133,7 +147,7 @@ fun MainScreen(
                     }
                 },
                 actions = {
-                    if (!uiState.isSearchMode) {
+                    if (!uiState.showSearch) {
                         IconButton(onClick = viewModel::toggleSearch) {
                             Icon(
                                 imageVector = Icons.Default.Search,
@@ -150,7 +164,6 @@ fun MainScreen(
                 }
             )
 
-            // Main Content
             if (uiState.isLoading) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -160,34 +173,31 @@ fun MainScreen(
                 }
             } else {
                 when (uiState.currentPage) {
-                    MainViewModel.Page.PORTALS -> {
+                    MainPage.PORTALS -> {
                         PortalsList(
-                            portals = if (uiState.isSearchMode && uiState.searchText.isNotBlank()) {
-                                uiState.searchResults.portals
+                            portals = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) {
+                                uiState.searchPortals
                             } else {
-                                uiState.filteredPortals
+                                uiState.portals
                             },
                             onPortalClick = onNavigateToPortalDetail,
                             modifier = Modifier.weight(1f)
                         )
                     }
-                    MainViewModel.Page.PEOPLE -> {
+                    MainPage.PEOPLE -> {
                         PeopleList(
-                            people = if (uiState.isSearchMode && uiState.searchText.isNotBlank()) {
-                                uiState.searchResults.people
+                            people = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) {
+                                uiState.searchUsers
                             } else {
-                                uiState.filteredPeople
+                                uiState.users
                             },
                             onPersonClick = onNavigateToPersonDetail,
                             modifier = Modifier.weight(1f)
                         )
                     }
-                    // Add an else branch if your enum is not exhaustive
-                    else -> {} // Ensure exhaustive when
                 }
             }
 
-            // Bottom Navigation
             BottomAppBar(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -195,11 +205,13 @@ fun MainScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    // Toggle between Portals and People
                     Button(
-                        onClick = { viewModel.togglePage() },
+                        onClick = {
+                            val userId = uiState.currentUser?.id ?: 0
+                            viewModel.togglePage(userId)
+                        },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (uiState.currentPage == MainViewModel.Page.PORTALS) {
+                            containerColor = if (uiState.currentPage == MainPage.PORTALS) {
                                 MaterialTheme.colorScheme.primary
                             } else {
                                 MaterialTheme.colorScheme.surface
@@ -208,8 +220,8 @@ fun MainScreen(
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(
-                            text = if (uiState.currentPage == MainViewModel.Page.PORTALS) "PORTALS" else "PEOPLE",
-                            color = if (uiState.currentPage == MainViewModel.Page.PORTALS) {
+                            text = if (uiState.currentPage == MainPage.PORTALS) "PORTALS" else "PEOPLE",
+                            color = if (uiState.currentPage == MainPage.PORTALS) {
                                 MaterialTheme.colorScheme.onPrimary
                             } else {
                                 MaterialTheme.colorScheme.onSurface
@@ -219,7 +231,6 @@ fun MainScreen(
 
                     Spacer(modifier = Modifier.width(16.dp))
 
-                    // Active Chats Button
                     IconButton(
                         onClick = {
                             if (uiState.activeChats.isNotEmpty()) {
@@ -248,14 +259,16 @@ fun MainScreen(
                         )
                     }
 
-                    // Safe Portals Toggle
                     IconButton(
-                        onClick = viewModel::toggleSafePortals
+                        onClick = {
+                            val userId = uiState.currentUser?.id ?: 0
+                            viewModel.toggleSafePortals(userId)
+                        }
                     ) {
                         Icon(
-                            imageVector = if (uiState.safePortalsOnly) Icons.Default.Shield else Icons.Default.Public,
+                            imageVector = if (uiState.showOnlySafePortals) Icons.Default.Shield else Icons.Default.Public,
                             contentDescription = "Safe Portals",
-                            tint = if (uiState.safePortalsOnly) {
+                            tint = if (uiState.showOnlySafePortals) {
                                 MaterialTheme.colorScheme.primary
                             } else {
                                 MaterialTheme.colorScheme.onSurface
