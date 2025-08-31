@@ -222,71 +222,12 @@ class MainViewModel @Inject constructor(
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             _uiState.update { it.copy(isSearching = true) }
-            
             try {
-                val portals = if (_uiState.value.selectedSection == 2) {
-                    portalRepository.searchPortals(query)ection == 2) {
-                } else {
-                    // Filter local results
-                    _uiState.value.portals.filter { filter {
-                        it.name.contains(query, ignoreCase = true)reCase = true)
-                    }
-                }
-                uiState.update {
-                val users = if (_uiState.value.selectedSection == 2) {       it.copy(
-                    portalRepository.searchPeople(query)ing = false,
-                } else {
-                    // Filter local results
-                    _uiState.value.users.filter { 
-                        it.displayName.contains(query, ignoreCase = true)
-                    }
-                }
-                esults = if (_uiState.value.selectedSection == 2) {
-                _uiState.update {    portalRepository.searchPeople(query)
-                    it.copy(   } else {
-                        isSearching = false,           _uiState.value.users.filter {
-                        searchPortals = portals,                it.displayName.contains(query, ignoreCase = true)
-                        searchUsers = users
-                    ) 
-                }
-            } catch (e: Exception) {
-                _uiState.update {           isSearching = false,
-                    it.copy(               searchUsers = results,
-                        isSearching = false,chPortals = emptyList()
-                        errorMessage = e.message ?: "Search failed"
-                    ) 
-                }
-            }
-        }: Exception) {
-    }uiState.update {
-}       it.copy(
-               isSearching = false,
-data class MainUiState(                   errorMessage = e.message ?: "Search failed"
-    val isLoading: Boolean = false,                   )
-    val errorMessage: String? = null,                }
-    val currentPage: MainPage = MainPage.PORTALS,
-    val selectedSection: Int = 2, // 0=OPEN, 1=NTWK, 2=ALL
-    val showSearch: Boolean = false,
-    val searchQuery: String = "",
-    val isSearching: Boolean = false,
-    val showOnlySafePortals: Boolean = false,
-    e,
-    // Data
-    val currentUser: User? = null,ALS,
-    val portals: List<Portal> = emptyList(),val selectedSection: Int = 2, // 0=OPEN, 1=NTWK, 2=ALL
-    val users: List<User> = emptyList(),wSearch: Boolean = false,
-    val activeChats: List<ActiveChat> = emptyList(),
-    val searchPortals: List<Portal> = emptyList(),
-    val searchUsers: List<User> = emptyList()alse,
-)
-
-enum class MainPage {   val currentUser: User? = null,
-    PORTALS, PEOPLE    val portals: List<Portal> = emptyList(),
-}ser> = emptyList(),
-    val activeChats: List<ActiveChat> = emptyList(),
-    val searchResults: List<Any> = emptyList()
-)
-
-enum class MainPage {
-    PORTALS, PEOPLE
-}
+                when (_uiState.value.currentPage) {
+                    MainPage.PORTALS -> {
+                        val portals = if (_uiState.value.selectedSection == 2) {
+                            portalRepository.searchPortals(query)
+                        } else {
+                            _uiState.value.portals.filter {
+                                it.name.contains(query, ignoreCase = true)
+                           
