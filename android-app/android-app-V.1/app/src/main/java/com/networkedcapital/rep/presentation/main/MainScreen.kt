@@ -555,14 +555,14 @@ fun PortalItem(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                // FIX: Make sure leads is defined and used safely
-                val leads: List<User>? = portal.leads
-                if (!leads.isNullOrEmpty()) {
+                // FIX: Use portal.leads if available, otherwise emptyList()
+                val portalLeads: List<User> = portal.leads ?: emptyList()
+                if (portalLeads.isNotEmpty()) {
                     Row(
                         modifier = Modifier.padding(top = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        leads.take(3).forEach { user: User ->
+                        portalLeads.take(3).forEach { user: User ->
                             val userProfileImageUrl = user.profileImageUrlCompat
                             if (!userProfileImageUrl.isNullOrEmpty()) {
                                 AsyncImage(
@@ -583,8 +583,8 @@ fun PortalItem(
                                 )
                             }
                         }
-                        if (leads.size > 3) {
-                            Text("+${leads.size - 3}", fontSize = 12.sp)
+                        if (portalLeads.size > 3) {
+                            Text("+${portalLeads.size - 3}", fontSize = 12.sp)
                         }
                     }
                 }
