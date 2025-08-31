@@ -656,12 +656,20 @@ fun GoalListItem(goal: Goal, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            // FIX: Use goal.title or goal.goalName if goal.name does not exist
+            // FIX: Use goal.title or fallback to "Goal" if neither name nor goalName exist
             Text(
-                text = goal.name ?: goal.title ?: goal.goalName ?: "Goal",
+                text = when {
+                    // If your Goal model has a 'title' property, use it
+                    goal.title != null && goal.title.isNotBlank() -> goal.title
+                    // If your Goal model has a 'description' property, use it as a fallback
+                    !goal.description.isNullOrBlank() -> goal.description
+                    // Otherwise, fallback to a generic label
+                    else -> "Goal"
+                },
                 fontWeight = FontWeight.Bold
             )
-            if (!goal.description.isNullOrBlank()) {
+            // Show description only if it's not already used as the title
+            if (!goal.description.isNullOrBlank() && (goal.title == null || goal.title != goal.description)) {
                 Text(goal.description, fontSize = 14.sp, color = Color.Gray)
             }
         }
