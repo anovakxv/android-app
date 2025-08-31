@@ -239,9 +239,9 @@ fun MainScreen(
                                 when (id) {
                                     is Int -> onNavigateToChat(id)
                                     is String -> {
-                                        id.toIntOrNull()?.let { intId ->
+                                        id?.toIntOrNull()?.let { intId ->
                                             onNavigateToChat(intId)
-                                        } ?: Log.e("MainScreen", "Failed to convert String chat ID to Int: $id")
+                                        } ?: Log.e("MainScreen", "Failed to convert String chat ID to Int or ID was null: $id")
                                     }
                                     else -> Log.e("MainScreen", "Unexpected type for chat ID: ${id?.javaClass?.name ?: "Type N/A (id was null)"}")
                                 }
