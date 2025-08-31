@@ -256,6 +256,7 @@ fun MainScreen(
                         )
                     }
 
+                    // Fix for: Type mismatch: inferred type is String but Int was expected
                     IconButton(
                         onClick = {
                             val userId = uiState.currentUser?.id ?: 0
