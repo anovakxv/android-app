@@ -11,8 +11,12 @@ import dagger.hilt.android.HiltAndroidApp
 class RepApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        // Initialize Firebase
-        FirebaseApp.initializeApp(this)
+        // Initialize Firebase and check result before using FirebaseMessaging
+        val firebaseApp = FirebaseApp.initializeApp(this)
+        if (firebaseApp == null) {
+            Log.e("RepApp", "FirebaseApp initialization failed!")
+            return
+        }
 
         // Register for FCM token and send to backend if needed
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task: Task<String> ->
