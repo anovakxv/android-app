@@ -11,6 +11,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.networkedcapital.rep.presentation.theme.RepTheme
 import com.networkedcapital.rep.presentation.auth.AuthViewModel
 import com.networkedcapital.rep.presentation.auth.LoginScreen
+import com.networkedcapital.rep.presentation.auth.RegisterScreen
+import com.networkedcapital.rep.presentation.main.MainScreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,6 +29,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import kotlinx.coroutines.launch
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -67,58 +70,72 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val authViewModel: AuthViewModel = hiltViewModel()
                 var isLoggedIn by remember { mutableStateOf(false) }
-                if (!isLoggedIn) {
-                    LoginScreen(
-                        onLoginSuccess = { isLoggedIn = true },
-                        onNavigateToSignUp = { /* TODO: Navigate to sign up screen */ },
-                        onNavigateToForgotPassword = { /* TODO: Navigate to forgot password screen */ }
-                    )
-                } else {
-                    NavHost(navController = navController, startDestination = "main") {
-                        composable("main") {
-                            MainScreen(authViewModel = authViewModel,
-                                onNavigateToGoals = { navController.navigate("goals") },
-                                onNavigateToGroupChat = { chatId, currentUserId ->
-                                    navController.navigate("groupChat/$chatId/$currentUserId")
-                                },
-                                onNavigateToIndividualChat = { otherUserId, currentUserId ->
-                                    navController.navigate("individualChat/$otherUserId/$currentUserId")
+                // Navigation graph
+                NavHost(navController = navController, startDestination = "login") {
+                    composable("login") {
+                        LoginScreen(
+                            onLoginSuccess = {
+                                isLoggedIn = true
+                                navController.navigate("main") {
+                                    popUpTo("login") { inclusive = true }
                                 }
-                            )
-                        }
-                        composable("goals") {
-                            GoalsNavHost(navController = navController)
-                        }
-                        composable("groupChat/{chatId}/{currentUserId}") { backStackEntry ->
-                            val chatId = backStackEntry.arguments?.getString("chatId")?.toIntOrNull() ?: 0
-                            val currentUserId = backStackEntry.arguments?.getString("currentUserId")?.toIntOrNull() ?: 0
-                            val viewModel = GroupChatViewModel(chatId, currentUserId)
-                            GroupChatScreen(
-                                groupName = "Group Name",
-                                groupMembers = emptyList(),
-                                messages = emptyList(),
-                                currentUserId = currentUserId,
-                                inputText = "",
-                                onInputTextChange = {},
-                                onSend = {},
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
-                        composable("individualChat/{otherUserId}/{currentUserId}") { backStackEntry ->
-                            val otherUserId = backStackEntry.arguments?.getString("otherUserId")?.toIntOrNull() ?: 0
-                            val currentUserId = backStackEntry.arguments?.getString("currentUserId")?.toIntOrNull() ?: 0
-                            val viewModel = IndividualChatViewModel(otherUserId, currentUserId)
-                            IndividualChatScreen(
-                                userName = "User Name",
-                                userPhotoUrl = "",
-                                messages = emptyList(),
-                                currentUserId = currentUserId,
-                                inputText = "",
-                                onInputTextChange = {},
-                                onSend = {},
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
+                            },
+                            onNavigateToSignUp = { navController.navigate("register") },
+                            onNavigateToForgotPassword = { /* TODO: Navigate to forgot password screen */ }
+                        )
+                    }
+                    composable("register") {
+                        RegisterScreen(
+                            onRegisterSuccess = {
+                                navController.popBackStack("login", inclusive = false)
+                            },
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable("main") {
+                        MainScreen(
+                            authViewModel = authViewModel,
+                            onNavigateToGoals = { navController.navigate("goals") },
+                            onNavigateToGroupChat = { chatId, currentUserId ->
+                                navController.navigate("groupChat/$chatId/$currentUserId")
+                            },
+                            onNavigateToIndividualChat = { otherUserId, currentUserId ->
+                                navController.navigate("individualChat/$otherUserId/$currentUserId")
+                            }
+                        )
+                    }
+                    composable("goals") {
+                        GoalsNavHost(navController = navController)
+                    }
+                    composable("groupChat/{chatId}/{currentUserId}") { backStackEntry ->
+                        val chatId = backStackEntry.arguments?.getString("chatId")?.toIntOrNull() ?: 0
+                        val currentUserId = backStackEntry.arguments?.getString("currentUserId")?.toIntOrNull() ?: 0
+                        val viewModel = GroupChatViewModel(chatId, currentUserId)
+                        GroupChatScreen(
+                            groupName = "Group Name",
+                            groupMembers = emptyList(),
+                            messages = emptyList(),
+                            currentUserId = currentUserId,
+                            inputText = "",
+                            onInputTextChange = {},
+                            onSend = {},
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable("individualChat/{otherUserId}/{currentUserId}") { backStackEntry ->
+                        val otherUserId = backStackEntry.arguments?.getString("otherUserId")?.toIntOrNull() ?: 0
+                        val currentUserId = backStackEntry.arguments?.getString("currentUserId")?.toIntOrNull() ?: 0
+                        val viewModel = IndividualChatViewModel(otherUserId, currentUserId)
+                        IndividualChatScreen(
+                            userName = "User Name",
+                            userPhotoUrl = "",
+                            messages = emptyList(),
+                            currentUserId = currentUserId,
+                            inputText = "",
+                            onInputTextChange = {},
+                            onSend = {},
+                            onBack = { navController.popBackStack() }
+                        )
                     }
                 }
             }
