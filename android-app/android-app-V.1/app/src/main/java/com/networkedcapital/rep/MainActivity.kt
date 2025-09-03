@@ -86,10 +86,8 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("register") {
                         RegisterScreen(
-                            onRegisterSuccess = {
-                                navController.popBackStack("login", inclusive = false)
-                            },
-                            onNavigateBack = { navController.popBackStack() }
+                            onNavigateToLogin = { navController.popBackStack("login", inclusive = false) },
+                            onRegistrationSuccess = { navController.popBackStack("login", inclusive = false) }
                         )
                     }
                     composable("main") {
@@ -506,4 +504,5 @@ fun HorizontalListDemo(items: List<String>) {
         }
     }
 }
+  
 
