@@ -11,8 +11,8 @@ import dagger.hilt.android.HiltAndroidApp
 class RepApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        // Initialize Firebase and check result before using FirebaseMessaging
-        val firebaseApp = FirebaseApp.initializeApp(this)
+        // Ensure FirebaseApp is initialized only if not already initialized
+        val firebaseApp = FirebaseApp.getApps(this).firstOrNull() ?: FirebaseApp.initializeApp(this)
         if (firebaseApp == null) {
             Log.e("RepApp", "FirebaseApp initialization failed!")
             return

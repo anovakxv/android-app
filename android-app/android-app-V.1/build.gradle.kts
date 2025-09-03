@@ -16,7 +16,6 @@ dependencyResolutionManagement {
 rootProject.name = "Rep"
 include(":app")
 
-// Add this block at the TOP of your project-level build.gradle.kts (not the app/build.gradle!):
 buildscript {
     repositories {
         google()
