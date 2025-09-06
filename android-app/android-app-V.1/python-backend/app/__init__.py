@@ -49,4 +49,8 @@ def create_app():
     from app.routes.User_Routes.RegisterUser import register_bp
     app.register_blueprint(register_bp)
 
+    # Login endpoint
+    from app.routes.User_Routes.LoginActions import user_bp
+    app.register_blueprint(user_bp)
+
     return app
