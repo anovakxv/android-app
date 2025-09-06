@@ -13,10 +13,10 @@ socketio = SocketIO(cors_allowed_origins="*")
 
 # --- Force SQLAlchemy to register ---
 from app.models.Purpose_Models.Category import Category
-from app.models.People_Models import User
+from app.models.People_Models.user import User
 from app.models.Purpose_Models.City import City
 from app.models.Purpose_Models.PortalGraphicSection import PortalGraphicSection
-from app.models.s3Content_Models import S3Content
+from app.models.s3Content_Models.s3Content import S3Content
 from app.models.ValueMetric_Models import Goal, GoalMetric, GoalPreInvite, GoalProgressLog, GoalTeam, GoalType, ReportingIncrement
 
 def create_app():
@@ -27,7 +27,8 @@ def create_app():
     from app.models.Purpose_Models.Category import Category
    
     # People_Models
-    from app.models.People_Models import user, UserType, UserSkill, UserNetwork, UserFollower, PasswordUpdater, Skill
+    from app.models.People_Models.user import User
+    from app.models.People_Models import UserType, UserSkill, UserNetwork, UserFollower, PasswordUpdater, Skill
 
     # Write_Models
     from app.models.People_Models.Write_Models import Writings_Model
@@ -39,8 +40,13 @@ def create_app():
     from app.models.Purpose_Models import Portal, PortalUser, PortalEvent, PortalGraphicSection, PortalInvite, PortalTexts
 
     # s3Content_Models
-    from app.models.s3Content_Models import s3Content
+    from app.models.s3Content_Models.s3Content import S3Content
 
     db.init_app(app)
     socketio.init_app(app)
+
+    # RegisterUser endpoint
+    from app.routes.User_Routes.RegisterUser import register_bp
+    app.register_blueprint(register_bp)
+
     return app
