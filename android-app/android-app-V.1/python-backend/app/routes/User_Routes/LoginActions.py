@@ -34,7 +34,15 @@ def api_login_user():
     if user and user.password == password:
         # You should use hashed passwords in production!
         token = jwt.encode({'user_id': user.id}, 'your-secret-key', algorithm='HS256')
-        return jsonify({'result': {'message': 'Login successful', 'id': user.id, 'token': token}}), 200
+        user_data = {
+            "id": user.id,
+            "email": user.email,
+            "username": user.username,
+            "fname": user.fname,
+            "lname": user.lname
+            # Add other fields as needed
+        }
+        return jsonify({"result": user_data, "token": token}), 200
     else:
         return jsonify({'error': 'Invalid credentials'}), 401
 
