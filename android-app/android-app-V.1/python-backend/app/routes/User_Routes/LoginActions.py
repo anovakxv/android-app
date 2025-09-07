@@ -18,12 +18,20 @@ user_bp = Blueprint('login_user', __name__)
 @user_bp.route('/login', methods=['POST'])
 @user_bp.route('/api/user/login', methods=['POST'])
 def api_login_user():
-    data = request.get_json()
-    if not data or 'username' not in data or 'password' not in data:
-        return jsonify({'error': 'Missing username or password'}), 400
+    # Try to get JSON data first
+    data = request.get_json(silent=True)
+    if data and 'username' in data and 'password' in data:
+        username = data['username']
+        password = data['password']
+    else:
+        # Fallback to form data
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if not username or not password:
+            return jsonify({'error': 'Missing username or password'}), 400
 
-    user = User.query.filter_by(username=data['username']).first()
-    if user and user.password == data['password']:
+    user = User.query.filter_by(username=username).first()
+    if user and user.password == password:
         # You should use hashed passwords in production!
         return jsonify({'message': 'Login successful', 'user_id': user.id}), 200
     else:
