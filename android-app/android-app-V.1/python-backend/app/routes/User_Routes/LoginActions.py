@@ -16,6 +16,7 @@ import time
 user_bp = Blueprint('login_user', __name__)
 
 @user_bp.route('/login', methods=['POST'])
+@user_bp.route('/api/user/login', methods=['POST'])
 def api_login_user():
     data = request.get_json()
     if not data or 'username' not in data or 'password' not in data:
