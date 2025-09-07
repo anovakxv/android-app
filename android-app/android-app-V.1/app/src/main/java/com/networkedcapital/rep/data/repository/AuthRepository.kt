@@ -66,7 +66,7 @@ class AuthRepository @Inject constructor(
                 city = cityBody
             )
             
-            if (response.code() == 201) {
+            if (response.isSuccessful) {
                 val registerResponse = response.body()
                 if (registerResponse != null) {
                     // Save token
