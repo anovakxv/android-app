@@ -33,7 +33,7 @@ def api_register_user():
     )
     db.session.add(new_user)
     db.session.commit()
-    return jsonify({'result': {'message': 'Registration successful', 'user_id': new_user.id}}), 201
+    return jsonify({'result': {'message': 'Registration successful', 'id': new_user.id}}), 201
 
 # Multipart registration (for Android frontend)
 @register_bp.route('/api/user/register', methods=['POST'])
@@ -72,4 +72,4 @@ def api_register_user_multipart():
     )
     db.session.add(new_user)
     db.session.commit()
-    return jsonify({'result': {'message': 'Registration successful', 'user_id': new_user.id}}), 201
+    return jsonify({'result': {'message': 'Registration successful', 'id': new_user.id}}), 201
