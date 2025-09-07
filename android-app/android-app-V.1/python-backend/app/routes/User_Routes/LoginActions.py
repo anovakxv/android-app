@@ -1,0 +1,37 @@
+# Rep
+# Android backend copy
+# ...existing code from original...
+from flask import Blueprint, request, jsonify, session, make_response
+from app import db
+from app.models.People_Models.user import User
+from app.models.People_Models.PasswordUpdater import PasswordUpdater
+from app.utils.user_utils import manage_user_row, mark_all_activities_as_read
+from app.utils.mail_utils import send_mail
+import hashlib
+import os
+import jwt
+import datetime
+import time
+
+user_bp = Blueprint('login_user', __name__)
+
+@user_bp.route('/login', methods=['POST'])
+def api_login_user():
+    data = request.get_json()
+    if not data or 'username' not in data or 'password' not in data:
+        return jsonify({'error': 'Missing username or password'}), 400
+
+    user = User.query.filter_by(username=data['username']).first()
+    if user and user.password == data['password']:
+        # You should use hashed passwords in production!
+        return jsonify({'message': 'Login successful', 'user_id': user.id}), 200
+    else:
+        return jsonify({'error': 'Invalid credentials'}), 401
+
+@user_bp.route('/logout', methods=['POST'])
+def api_logout_user():
+    return jsonify({'message': 'Logout successful'}), 200
+
+@user_bp.route('/forgot_password', methods=['POST'])
+def api_forgot_password():
+    return jsonify({'message': 'Forgot password endpoint not implemented'}), 501
