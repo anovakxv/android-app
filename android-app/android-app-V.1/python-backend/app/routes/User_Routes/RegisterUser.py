@@ -35,7 +35,16 @@ def api_register_user():
     db.session.add(new_user)
     db.session.commit()
     token = jwt.encode({'user_id': new_user.id}, 'your-secret-key', algorithm='HS256')
-    return jsonify({'result': {'message': 'Registration successful', 'id': new_user.id, 'token': token}}), 201
+    user_data = {
+        "id": new_user.id,
+        "message": "Registration successful",
+        "email": new_user.email,
+        "username": new_user.username,
+        "fname": new_user.fname,
+        "lname": new_user.lname
+        # Add other fields as needed
+    }
+    return jsonify({"result": user_data, "token": token}), 201
 
 # Multipart registration (for Android frontend)
 @register_bp.route('/api/user/register', methods=['POST'])
@@ -75,4 +84,13 @@ def api_register_user_multipart():
     db.session.add(new_user)
     db.session.commit()
     token = jwt.encode({'user_id': new_user.id}, 'your-secret-key', algorithm='HS256')
-    return jsonify({'result': {'message': 'Registration successful', 'id': new_user.id, 'token': token}}), 201
+    user_data = {
+        "id": new_user.id,
+        "message": "Registration successful",
+        "email": new_user.email,
+        "username": new_user.username,
+        "fname": new_user.fname,
+        "lname": new_user.lname
+        # Add other fields as needed
+    }
+    return jsonify({"result": user_data, "token": token}), 201
