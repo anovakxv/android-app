@@ -4,6 +4,7 @@ from flask import Blueprint, request, jsonify
 from app import db
 from app.models.People_Models.user import User
 from werkzeug.security import generate_password_hash
+import jwt
 
 
 register_bp = Blueprint('register_user', __name__)
@@ -33,7 +34,8 @@ def api_register_user():
     )
     db.session.add(new_user)
     db.session.commit()
-    return jsonify({'result': {'message': 'Registration successful', 'id': new_user.id}}), 201
+    token = jwt.encode({'user_id': new_user.id}, 'your-secret-key', algorithm='HS256')
+    return jsonify({'result': {'message': 'Registration successful', 'id': new_user.id, 'token': token}}), 201
 
 # Multipart registration (for Android frontend)
 @register_bp.route('/api/user/register', methods=['POST'])
@@ -72,4 +74,5 @@ def api_register_user_multipart():
     )
     db.session.add(new_user)
     db.session.commit()
-    return jsonify({'result': {'message': 'Registration successful', 'id': new_user.id}}), 201
+    token = jwt.encode({'user_id': new_user.id}, 'your-secret-key', algorithm='HS256')
+    return jsonify({'result': {'message': 'Registration successful', 'id': new_user.id, 'token': token}}), 201
