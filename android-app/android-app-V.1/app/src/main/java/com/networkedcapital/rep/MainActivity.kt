@@ -85,71 +85,86 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable("register") {
-                        RegisterScreen(
-                            onNavigateToLogin = { navController.popBackStack("login", inclusive = false) },
-                            onRegistrationSuccess = { navController.popBackStack("login", inclusive = false) }
-                        )
-                    }
-                    composable("main") {
-                        MainScreen(
-                            authViewModel = authViewModel,
-                            onNavigateToGoals = { navController.navigate("goals") },
-                            onNavigateToGroupChat = { chatId, currentUserId ->
-                                navController.navigate("groupChat/$chatId/$currentUserId")
-                            },
-                            onNavigateToIndividualChat = { otherUserId, currentUserId ->
-                                navController.navigate("individualChat/$otherUserId/$currentUserId")
+                        NavHost(navController = navController, startDestination = "login") {
+                            composable("login") {
+                                LoginScreen(
+                                    onLoginSuccess = {
+                                        isLoggedIn = true
+                                        navController.navigate("main") {
+                                            popUpTo("login") { inclusive = true }
+                                        }
+                                    },
+                                    onNavigateToSignUp = { navController.navigate("register") },
+                                    onNavigateToForgotPassword = { /* TODO: Navigate to forgot password screen */ }
+                                )
                             }
-                        )
-                    }
-                    composable("goals") {
-                        GoalsNavHost(navController = navController)
-                    }
-                    composable("groupChat/{chatId}/{currentUserId}") { backStackEntry ->
-                        val chatId = backStackEntry.arguments?.getString("chatId")?.toIntOrNull() ?: 0
-                        val currentUserId = backStackEntry.arguments?.getString("currentUserId")?.toIntOrNull() ?: 0
-                        val viewModel = GroupChatViewModel(chatId, currentUserId)
-                        GroupChatScreen(
-                            groupName = "Group Name",
-                            groupMembers = emptyList(),
-                            messages = emptyList(),
-                            currentUserId = currentUserId,
-                            inputText = "",
-                            onInputTextChange = {},
-                            onSend = {},
-                            onBack = { navController.popBackStack() }
-                        )
-                    }
-                    composable("individualChat/{otherUserId}/{currentUserId}") { backStackEntry ->
-                        val otherUserId = backStackEntry.arguments?.getString("otherUserId")?.toIntOrNull() ?: 0
-                        val currentUserId = backStackEntry.arguments?.getString("currentUserId")?.toIntOrNull() ?: 0
-                        val viewModel = IndividualChatViewModel(otherUserId, currentUserId)
-                        IndividualChatScreen(
-                            userName = "User Name",
-                            userPhotoUrl = "",
-                            messages = emptyList(),
-                            currentUserId = currentUserId,
-                            inputText = "",
-                            onInputTextChange = {},
-                            onSend = {},
-                            onBack = { navController.popBackStack() }
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    RepTheme {
-        // Preview content will be added later
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
+                            composable("register") {
+                                RegisterScreen(
+                                    onNavigateToLogin = { navController.popBackStack("login", inclusive = false) },
+                                    onRegistrationSuccess = { navController.navigate("editProfile") }
+                                )
+                            }
+                            composable("editProfile") {
+                                com.networkedcapital.rep.presentation.onboarding.EditProfileScreen(
+                                    onProfileSaved = { navController.navigate("termsOfUse") }
+                                )
+                            }
+                            composable("termsOfUse") {
+                                com.networkedcapital.rep.presentation.onboarding.TermsOfUseScreen(
+                                    onAccept = { navController.navigate("aboutRep") }
+                                )
+                            }
+                            composable("aboutRep") {
+                                com.networkedcapital.rep.presentation.onboarding.AboutRepScreen(
+                                    onContinue = { navController.navigate("main") }
+                                )
+                            }
+                            composable("main") {
+                                MainScreen(
+                                    authViewModel = authViewModel,
+                                    onNavigateToGoals = { navController.navigate("goals") },
+                                    onNavigateToGroupChat = { chatId, currentUserId ->
+                                        navController.navigate("groupChat/$chatId/$currentUserId")
+                                    },
+                                    onNavigateToIndividualChat = { otherUserId, currentUserId ->
+                                        navController.navigate("individualChat/$otherUserId/$currentUserId")
+                                    }
+                                )
+                            }
+                            composable("goals") {
+                                GoalsNavHost(navController = navController)
+                            }
+                            composable("groupChat/{chatId}/{currentUserId}") { backStackEntry ->
+                                val chatId = backStackEntry.arguments?.getString("chatId")?.toIntOrNull() ?: 0
+                                val currentUserId = backStackEntry.arguments?.getString("currentUserId")?.toIntOrNull() ?: 0
+                                val viewModel = GroupChatViewModel(chatId, currentUserId)
+                                GroupChatScreen(
+                                    groupName = "Group Name",
+                                    groupMembers = emptyList(),
+                                    messages = emptyList(),
+                                    currentUserId = currentUserId,
+                                    inputText = "",
+                                    onInputTextChange = {},
+                                    onSend = {},
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+                            composable("individualChat/{otherUserId}/{currentUserId}") { backStackEntry ->
+                                val otherUserId = backStackEntry.arguments?.getString("otherUserId")?.toIntOrNull() ?: 0
+                                val currentUserId = backStackEntry.arguments?.getString("currentUserId")?.toIntOrNull() ?: 0
+                                val viewModel = IndividualChatViewModel(otherUserId, currentUserId)
+                                IndividualChatScreen(
+                                    userName = "User Name",
+                                    userPhotoUrl = "",
+                                    messages = emptyList(),
+                                    currentUserId = currentUserId,
+                                    inputText = "",
+                                    onInputTextChange = {},
+                                    onSend = {},
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+                        }
 @Composable
 fun MainScreen(authViewModel: AuthViewModel, onNavigateToGoals: () -> Unit, onNavigateToGroupChat: (Int, Int) -> Unit, onNavigateToIndividualChat: (Int, Int) -> Unit) {
     // State for page (portals/people), section, search, etc.
