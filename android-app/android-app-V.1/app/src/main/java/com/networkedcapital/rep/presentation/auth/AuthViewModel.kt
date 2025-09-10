@@ -21,6 +21,9 @@ data class AuthState(
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
+    private val authRepository: AuthRepository
+) : ViewModel() {
+
     fun acceptTermsOfUse() {
         // This could call a backend endpoint if needed, or just update state
         _authState.value = _authState.value.copy(onboardingComplete = false)
@@ -65,8 +68,6 @@ class AuthViewModel @Inject constructor(
                 }
         }
     }
-    private val authRepository: AuthRepository
-) : ViewModel() {
     
     private val _authState = MutableStateFlow(AuthState())
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
