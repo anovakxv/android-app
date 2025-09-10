@@ -26,17 +26,42 @@ import dagger.hilt.android.AndroidEntryPoint
 
 import com.networkedcapital.rep.presentation.auth.LoginScreen
 
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val navController = rememberNavController()
             Surface(color = Color.White) {
-                LoginScreen(
-                    onLoginSuccess = {},
-                    onNavigateToSignUp = {},
-                    onNavigateToForgotPassword = {}
-                )
+                NavHost(navController = navController, startDestination = "login") {
+                    composable("login") {
+                        LoginScreen(
+                            onLoginSuccess = { navController.navigate("main") { popUpTo("login") { inclusive = true } } },
+                            onNavigateToSignUp = { navController.navigate("register") },
+                            onNavigateToForgotPassword = { navController.navigate("forgot") }
+                        )
+                    }
+                    composable("register") {
+                        // Replace with your actual RegisterScreen composable
+                        Text("Register Screen Placeholder")
+                    }
+                    composable("forgot") {
+                        // Replace with your actual ForgotPasswordScreen composable
+                        Text("Forgot Password Screen Placeholder")
+                    }
+                    composable("onboarding") {
+                        // Replace with your actual OnboardingScreen composable
+                        Text("Onboarding Screen Placeholder")
+                    }
+                    composable("main") {
+                        // Replace with your actual MainScreen composable
+                        Text("Main Screen Placeholder")
+                    }
+                }
             }
         }
     }
