@@ -14,30 +14,8 @@ import com.networkedcapital.rep.presentation.auth.LoginScreen
 import com.networkedcapital.rep.presentation.auth.RegisterScreen
 import com.networkedcapital.rep.presentation.main.MainScreen
 import androidx.compose.foundation.background
+
 import androidx.compose.foundation.layout.*
-        Spacer(Modifier.height(16.dp))
-                        Text("Edit Profile Screen Placeholder") // Placeholder
-                Icon(Icons.Filled.SwapHoriz, contentDescription = "Switch Page")
-                onDismissRequest = { showActionSheet = false },
-                    Button(
-                            // showActionSheet = false
-                                sheetState.hide()
-            }
-    ) {
-                segments = listOf("OPEN", "NTWK", "ALL"),
-                onSelected = onSectionChange
-            )
-            IconButton(onClick = onPlusClick) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add",
-                    tint = Color(0xFF8CCF5D), // Consider MaterialTheme.colorScheme.primary
-                    modifier = Modifier.size(24.dp) // Standard icon size
-                )
-            }
-        }
-    }
-}
 
 @Composable
 fun MainSegmentedPicker(
