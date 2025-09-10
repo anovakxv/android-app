@@ -460,8 +460,7 @@ fun HorizontalListDemo(items: List<String>) {
         }
     }
 }
-
-
+}
 
 }
 
