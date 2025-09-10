@@ -3,9 +3,11 @@ package com.networkedcapital.rep
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -15,13 +17,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.ui.draw.clip
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 
 import com.networkedcapital.rep.presentation.auth.LoginScreen
@@ -30,14 +32,7 @@ import com.networkedcapital.rep.presentation.onboarding.EditProfileScreen
 import com.networkedcapital.rep.presentation.onboarding.TermsOfUseScreen
 import com.networkedcapital.rep.presentation.onboarding.AboutRepScreen
 import com.networkedcapital.rep.presentation.main.MainScreen
-
 import com.networkedcapital.rep.presentation.auth.OnboardingScreen
-
-
-
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -47,37 +42,51 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             Surface(color = Color.White) {
                 NavHost(navController = navController, startDestination = "login") {
+
                     composable("login") {
                         LoginScreen(
-                            onLoginSuccess = { navController.navigate("main") { popUpTo("login") { inclusive = true } } },
+                            onLoginSuccess = {
+                                navController.navigate("main") {
+                                    popUpTo("login") { inclusive = true }
+                                }
+                            },
                             onNavigateToSignUp = { navController.navigate("register") },
                             onNavigateToForgotPassword = { navController.navigate("forgot") }
                         )
                     }
+
                     composable("register") {
                         RegisterScreen(
-                            onNavigateToLogin = { navController.popBackStack("login", inclusive = false) },
+                            onNavigateToLogin = {
+                                navController.popBackStack("login", inclusive = false)
+                            },
                             onRegistrationSuccess = { navController.navigate("editProfile") }
                         )
                     }
+
                     composable("editProfile") {
                         EditProfileScreen(onProfileSaved = { navController.navigate("terms") })
                     }
+
                     composable("terms") {
                         TermsOfUseScreen(onAccept = { navController.navigate("about") })
                     }
+
                     composable("about") {
                         AboutRepScreen(onContinue = { navController.navigate("main") })
                     }
+
                     composable("forgot") {
-                        // TODO: Replace with your actual ForgotPasswordScreen composable
+                        // TODO: Replace with real ForgotPasswordScreen
                         Text("Forgot Password Screen Placeholder")
                     }
+
                     composable("onboarding") {
                         OnboardingScreen(
                             onOnboardingComplete = { navController.navigate("main") }
                         )
                     }
+
                     composable("main") {
                         MainScreen(
                             onNavigateToProfile = {},
@@ -93,7 +102,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// ---------------------- SEGMENTED PICKER ----------------------
+/* ---------------------- COMPONENTS ---------------------- */
+
+// Segmented Picker
 @Composable
 fun MainSegmentedPicker(
     segments: List<String>,
@@ -135,7 +146,7 @@ fun MainSegmentedPicker(
     }
 }
 
-// ---------------------- SEARCH BAR ----------------------
+// Search Bar
 @Composable
 fun MainSearchBar(
     searchText: String,
@@ -169,9 +180,7 @@ fun MainSearchBar(
     }
 }
 
-// ---------------------- TOP BAR ----------------------
-enum class MainPage { Portals, People }
-
+// Top Bar
 @Composable
 fun MainTopBar(
     section: Int,
@@ -214,7 +223,7 @@ fun MainTopBar(
     }
 }
 
-// ---------------------- ACTION SHEET ----------------------
+// Action Sheet
 @Composable
 fun MainActionSheet(
     showOnlySafePortals: Boolean,
@@ -258,7 +267,7 @@ fun MainActionSheet(
     )
 }
 
-// ---------------------- LISTS ----------------------
+// Lists
 @Composable
 fun PortalsList(portals: List<String>) {
     LazyColumn {
