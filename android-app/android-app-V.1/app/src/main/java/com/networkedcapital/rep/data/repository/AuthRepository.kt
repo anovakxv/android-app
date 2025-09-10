@@ -11,28 +11,14 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 @Singleton
 class AuthRepository @Inject constructor(
-    suspend fun updateProfile(name: String, email: String): Flow<Result<User>> = flow {
-        try {
-            // For demonstration, update only name and email. Expand as needed.
-            val user = User(id = 0, fname = name, email = email)
-            val response = authApiService.updateProfile(user)
-            if (response.isSuccessful) {
-                val updatedUser = response.body()
-                if (updatedUser != null) {
-                    emit(Result.success(updatedUser))
-                } else {
-                    emit(Result.failure(Exception("Invalid response")))
-                }
-            } else {
-                emit(Result.failure(Exception("Profile update failed: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
-        }
-    }
     private val authApiService: AuthApiService,
     private val authInterceptor: AuthInterceptor
 ) {
+
+    suspend fun updateProfile(name: String, email: String): Flow<Result<User>> = flow {
+        val user = User(id = 0, fname = name, email = email)
+        updateProfile(user).collect { emit(it) }
+    }
 
     suspend fun login(email: String, password: String): Flow<Result<User>> = flow {
         try {
