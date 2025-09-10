@@ -87,52 +87,7 @@ class AuthViewModel @Inject constructor(
             onboardingComplete = isLoggedIn
         )
         if (isLoggedIn) {
-            fun register(
-                firstName: String,
-                lastName: String,
-                email: String,
-                password: String,
-                phone: String = "",
-                repType: String = "Lead",
-                userTypeId: Int = 1 // Lead = 1, Specialist = 2, Partner = 3, Founder = 4
-            ) {
-                viewModelScope.launch {
-                    _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
-
-                    authRepository.register(email, password, firstName, lastName, userTypeId, phone, null, null)
-                        .catch { throwable ->
-                            _authState.value = _authState.value.copy(
-                                isLoading = false,
-                                errorMessage = throwable.message ?: "Registration failed"
-                            )
-                        }
-                        .collect { result ->
-                            result.fold(
-                                onSuccess = { user ->
-                                    _currentUser.value = user
-                                    _authState.value = _authState.value.copy(
-                                        isLoading = false,
-                                        isLoggedIn = true,
-                                        isRegistered = true,
-                                        onboardingComplete = false, // Still needs onboarding
-                                        userId = user.id,
-                                        errorMessage = null
-                                    )
-                                    android.util.Log.d("AuthViewModel", "Registration success: isRegistered=${_authState.value.isRegistered}, onboardingComplete=${_authState.value.onboardingComplete}, userId=${_authState.value.userId}")
-                                },
-                                onFailure = { throwable ->
-                                    _authState.value = _authState.value.copy(
-                                        isLoading = false,
-                                        errorMessage = throwable.message ?: "Registration failed"
-                                    )
-                                    android.util.Log.d("AuthViewModel", "Registration failed: ${throwable.message}")
-                                }
-                            )
-                                errorMessage = throwable.message ?: "Login failed"
-                            )
-                        }
-                    )
-                }
+            getCurrentUser()
         }
     }
     
