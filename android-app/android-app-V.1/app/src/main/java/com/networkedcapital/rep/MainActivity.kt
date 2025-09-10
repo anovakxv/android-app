@@ -379,37 +379,6 @@ fun PeopleList(people: List<String>) {
         }
     }
 }
-import kotlinx.coroutines.launch
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import com.networkedcapital.rep.presentation.goals.GoalsNavHost
-import com.networkedcapital.rep.presentation.chat.GroupChatScreen
-import com.networkedcapital.rep.presentation.chat.IndividualChatScreen
-import com.networkedcapital.rep.presentation.goals.GoalsViewModel
-import com.networkedcapital.rep.presentation.chat.GroupChatViewModel
-import com.networkedcapital.rep.presentation.chat.IndividualChatViewModel
-import dagger.hilt.android.AndroidEntryPoint
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.border
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Button
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Divider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
