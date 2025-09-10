@@ -85,48 +85,44 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable("register") {
-                        RegisterScreen(
-                            onNavigateToLogin = { navController.popBackStack("login", inclusive = false) },
-                            onRegistrationSuccess = { navController.navigate("editProfile") }
-                        )
-                    }
-                    composable("editProfile") {
-                        com.networkedcapital.rep.presentation.onboarding.EditProfileScreen(
-                            onProfileSaved = { navController.navigate("termsOfUse") }
-                        )
-                    }
-                    composable("termsOfUse") {
-                        com.networkedcapital.rep.presentation.onboarding.TermsOfUseScreen(
-                            onAccept = { navController.navigate("aboutRep") }
-                        )
-                    }
-                    composable("aboutRep") {
-                        com.networkedcapital.rep.presentation.onboarding.AboutRepScreen(
-                            onContinue = { navController.navigate("main") }
-                        )
-                    }
-@Composable
-fun MainScreen(authViewModel: AuthViewModel, onNavigateToGoals: () -> Unit, onNavigateToGroupChat: (Int, Int) -> Unit, onNavigateToIndividualChat: (Int, Int) -> Unit) {
-    // State for page (portals/people), section, search, etc.
-    var page by remember { mutableStateOf(MainPage.Portals) }
-    var section by remember { mutableStateOf(2) }
-    var showSearch by remember { mutableStateOf(false) }
-    var searchText by remember { mutableStateOf("") }
-    var showActionSheet by remember { mutableStateOf(false) }
-    var showOnlySafePortals by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
-    val coroutineScope = rememberCoroutineScope()
-    // TODO: Add ViewModels for portals and people, and fetch data as in SwiftUI
+                        @Composable
+                        fun MainTopBar(
+                            section: Int,
+                            onSectionChange: (Int) -> Unit,
+                            onProfileClick: () -> Unit,
+                            onPlusClick: () -> Unit
+                        ) {
+                            Surface(
+                                shadowElevation = 4.dp,
+                                color = Color(0xFFF9F9F9)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween // Added to space out the icons
+                                ) {
+                                    IconButton(onClick = onProfileClick) {
+                                        // Add an Icon or other content for the profile button here
+                                        // For example:
+                                        // Icon(Icons.Filled.Person, contentDescription = "Profile")
+                                    }
 
-    Scaffold(
-        topBar = {
-            MainTopBar(
-                section = section,
-                onSectionChange = { section = it },
-                onProfileClick = { /* TODO: Navigate to profile */ },
-                onPlusClick = { showActionSheet = true }
-            )
-        },
+                                    // TODO: Add your MainSegmentedPicker or other elements here
+                                    // MainSegmentedPicker(...)
+
+                                    IconButton(onClick = onPlusClick) {
+                                        Icon(
+                                            imageVector = Icons.Default.Add,
+                                            contentDescription = "Add",
+                                            tint = Color(0xFF8CCF5D),
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
