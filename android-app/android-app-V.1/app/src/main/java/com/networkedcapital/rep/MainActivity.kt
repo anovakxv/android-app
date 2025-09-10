@@ -87,9 +87,45 @@ class MainActivity : ComponentActivity() {
                     composable("register") {
                         RegisterScreen(
                             onNavigateToLogin = { navController.popBackStack("login", inclusive = false) },
-                            onRegistrationSuccess = { navController.popBackStack("login", inclusive = false) }
+                            onRegistrationSuccess = { navController.navigate("editProfile") }
                         )
                     }
+                    composable("editProfile") {
+                        EditProfileScreen(onNext = { navController.navigate("terms") })
+                    }
+                    composable("terms") {
+                        TermsScreen(onNext = { navController.navigate("about") })
+                    }
+                    composable("about") {
+                        AboutScreen(onFinish = { navController.navigate("main") })
+                    }
+// Placeholder composables for onboarding flow
+@Composable
+fun EditProfileScreen(onNext: () -> Unit) {
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Text("Edit Profile Screen")
+        Spacer(Modifier.height(16.dp))
+        Button(onClick = onNext) { Text("Next") }
+    }
+}
+
+@Composable
+fun TermsScreen(onNext: () -> Unit) {
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Text("Terms and Conditions Screen")
+        Spacer(Modifier.height(16.dp))
+        Button(onClick = onNext) { Text("Next") }
+    }
+}
+
+@Composable
+fun AboutScreen(onFinish: () -> Unit) {
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Text("About Screen")
+        Spacer(Modifier.height(16.dp))
+        Button(onClick = onFinish) { Text("Finish") }
+    }
+}
                     composable("main") {
                         MainScreen(
                             authViewModel = authViewModel,
