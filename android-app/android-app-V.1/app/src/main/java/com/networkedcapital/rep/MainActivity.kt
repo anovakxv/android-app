@@ -31,6 +31,8 @@ import com.networkedcapital.rep.presentation.onboarding.TermsOfUseScreen
 import com.networkedcapital.rep.presentation.onboarding.AboutRepScreen
 import com.networkedcapital.rep.presentation.main.MainScreen
 
+import com.networkedcapital.rep.presentation.auth.OnboardingScreen
+
 
 
 import androidx.navigation.compose.NavHost
