@@ -21,6 +21,50 @@ data class AuthState(
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
+    fun acceptTermsOfUse() {
+        // This could call a backend endpoint if needed, or just update state
+        _authState.value = _authState.value.copy(onboardingComplete = false)
+    }
+
+    fun continueAboutRep() {
+        // This could call a backend endpoint if needed, or just update state
+        _authState.value = _authState.value.copy(onboardingComplete = false)
+    }
+
+    fun saveProfile(
+        name: String,
+        email: String
+    ) {
+        viewModelScope.launch {
+            _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
+            authRepository.updateProfile(name, email)
+                .catch { throwable ->
+                    _authState.value = _authState.value.copy(
+                        isLoading = false,
+                        errorMessage = throwable.message ?: "Profile update failed"
+                    )
+                }
+                .collect { result ->
+                    result.fold(
+                        onSuccess = { user ->
+                            _currentUser.value = user
+                            _authState.value = _authState.value.copy(
+                                isLoading = false,
+                                onboardingComplete = true,
+                                userId = user.id,
+                                errorMessage = null
+                            )
+                        },
+                        onFailure = { throwable ->
+                            _authState.value = _authState.value.copy(
+                                isLoading = false,
+                                errorMessage = throwable.message ?: "Profile update failed"
+                            )
+                        }
+                    )
+                }
+        }
+    }
     private val authRepository: AuthRepository
 ) : ViewModel() {
     

@@ -69,13 +69,33 @@ fun RepNavigation(
         }
         
         composable(Screen.Onboarding.route) {
-            OnboardingScreen(
-                onOnboardingComplete = {
-                    navController.navigate(Screen.Main.route) {
-                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                TermsOfUseScreen(
+                    onAccept = {
+                        navController.navigate(Screen.AboutRep.route) {
+                            popUpTo(Screen.Onboarding.route) { inclusive = true }
+                        }
                     }
-                }
-            )
+                )
+            }
+
+            composable(Screen.AboutRep.route) {
+                AboutRepScreen(
+                    onContinue = {
+                        navController.navigate(Screen.EditProfile.route) {
+                            popUpTo(Screen.AboutRep.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable(Screen.EditProfile.route) {
+                EditProfileScreen(
+                    onProfileSaved = {
+                        navController.navigate(Screen.Main.route) {
+                            popUpTo(Screen.EditProfile.route) { inclusive = true }
+                        }
+                    }
+                )
         }
         
         composable(Screen.Main.route) {
@@ -122,6 +142,8 @@ sealed class Screen(val route: String) {
     object Register : Screen("register")
     object Login : Screen("login")
     object Onboarding : Screen("onboarding")
+    object AboutRep : Screen("about_rep")
+    object EditProfile : Screen("edit_profile")
     object Main : Screen("main")
     object Profile : Screen("profile")
     object ApiTest : Screen("api_test")
