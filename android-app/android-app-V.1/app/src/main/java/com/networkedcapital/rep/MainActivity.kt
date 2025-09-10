@@ -22,10 +22,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.draw.clip
+import dagger.hilt.android.AndroidEntryPoint
 
 import com.networkedcapital.rep.presentation.auth.LoginScreen
 
-// MainActivity class restored for proper app launch
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
