@@ -286,6 +286,7 @@ fun MainScreen(authViewModel: AuthViewModel, onNavigateToGoals: () -> Unit, onNa
             }
         }
     }
+
 }
 
 // --- You will need to implement MainTopBar, MainSearchBar, MainActionSheet, and the lists ---
