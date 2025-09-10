@@ -742,6 +742,7 @@ fun HorizontalListDemo(items: List<String>) {
         }
     }
 }
+<<<<<<< HEAD
 
 }}
 
@@ -780,5 +781,8 @@ fun HorizontalListDemo(items: List<String>) {
 
 
 
+=======
+                }}}}
+>>>>>>> parent of 4a6e7f1 (Update MainActivity.kt)
 
 
