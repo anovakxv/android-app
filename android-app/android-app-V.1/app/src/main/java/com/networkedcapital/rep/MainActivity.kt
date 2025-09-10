@@ -252,21 +252,9 @@ fun MainTopBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onProfileClick) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Profile",
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clip(CircleShape)
-                )
+                }
             }
-            Spacer(modifier = Modifier.width(8.dp))
-            MainSegmentedPicker(
-                segments = listOf("OPEN", "NTWK", "ALL"),
-                selectedIndex = section,
-                onSelected = onSectionChange
-            )
-            Spacer(modifier = Modifier.weight(1f))
+        }
             IconButton(onClick = onPlusClick) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -462,6 +450,24 @@ fun HorizontalListDemo(items: List<String>) {
 }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
