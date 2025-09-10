@@ -84,108 +84,332 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable("register") {
-                        NavHost(navController = navController, startDestination = "login") {
-                            composable("login") {
-                                LoginScreen(
-                                    onLoginSuccess = {
-                                        isLoggedIn = true
-                                        navController.navigate("main") {
-                                            popUpTo("login") { inclusive = true }
-                                        }
-                                    },
-                                    onNavigateToSignUp = { navController.navigate("register") },
-                                    onNavigateToForgotPassword = { /* TODO: Navigate to forgot password screen */ }
-                                )
-                            }
-                            composable("register") {
-                                RegisterScreen(
-                                    onNavigateToLogin = { navController.popBackStack("login", inclusive = false) },
-                                    onRegistrationSuccess = { navController.navigate("editProfile") }
-                                )
-                            }
-                            composable("editProfile") {
-                                com.networkedcapital.rep.presentation.onboarding.EditProfileScreen(
-                                    onProfileSaved = { navController.navigate("termsOfUse") }
-                                )
-                            }
-                            composable("termsOfUse") {
-                                com.networkedcapital.rep.presentation.onboarding.TermsOfUseScreen(
-                                    onAccept = { navController.navigate("aboutRep") }
-                                )
-                            }
-                            composable("aboutRep") {
-                                com.networkedcapital.rep.presentation.onboarding.AboutRepScreen(
-                                    onContinue = { navController.navigate("main") }
-                                )
-                            }
-                            composable("main") {
-                                MainScreen(
-                                    authViewModel = authViewModel,
-                                    onNavigateToGoals = { navController.navigate("goals") },
-                                    onNavigateToGroupChat = { chatId, currentUserId ->
-                                        navController.navigate("groupChat/$chatId/$currentUserId")
-                                    },
-                                    onNavigateToIndividualChat = { otherUserId, currentUserId ->
-                                        navController.navigate("individualChat/$otherUserId/$currentUserId")
-                                    }
-                                )
-                            }
-                            composable("goals") {
-                                GoalsNavHost(navController = navController)
-                            }
-                            composable("groupChat/{chatId}/{currentUserId}") { backStackEntry ->
-                                val chatId = backStackEntry.arguments?.getString("chatId")?.toIntOrNull() ?: 0
-                                val currentUserId = backStackEntry.arguments?.getString("currentUserId")?.toIntOrNull() ?: 0
-                                val viewModel = GroupChatViewModel(chatId, currentUserId)
-                                GroupChatScreen(
-                                    groupName = "Group Name",
-                                    groupMembers = emptyList(),
-                                    messages = emptyList(),
-                                    currentUserId = currentUserId,
-                                    inputText = "",
-                                    onInputTextChange = {},
-                                    onSend = {},
-                                    onBack = { navController.popBackStack() }
-                                )
-                            }
-                            composable("individualChat/{otherUserId}/{currentUserId}") { backStackEntry ->
-                                val otherUserId = backStackEntry.arguments?.getString("otherUserId")?.toIntOrNull() ?: 0
-                                val currentUserId = backStackEntry.arguments?.getString("currentUserId")?.toIntOrNull() ?: 0
-                                val viewModel = IndividualChatViewModel(otherUserId, currentUserId)
-                                IndividualChatScreen(
-                                    userName = "User Name",
-                                    userPhotoUrl = "",
-                                    messages = emptyList(),
-                                    currentUserId = currentUserId,
-                                    inputText = "",
-                                    onInputTextChange = {},
-                                    onSend = {},
-                                    onBack = { navController.popBackStack() }
-                                )
-                            }
-                        }
+                        RegisterScreen(
+                            onNavigateToLogin = { navController.popBackStack("login", inclusive = false) },
+                            onRegistrationSuccess = { navController.navigate("editProfile") }
+                        )
+                    }
+                    composable("main") {
+                        // This is where your main screen content with Scaffold should go
+                        MainScreenContent(navController = navController)
+                    }
+                    composable("editProfile") {
+                        // Your EditProfileScreen Composable
+                        // EditProfileScreen(onProfileSaved = { navController.navigate("main") })
+                        Text("Edit Profile Screen Placeholder") // Placeholder
+                    }
+                }
+            }
+        }
+    }
+}
+
+enum class MainPage { Portals, People }
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(authViewModel: AuthViewModel, onNavigateToGoals: () -> Unit, onNavigateToGroupChat: (Int, Int) -> Unit, onNavigateToIndividualChat: (Int, Int) -> Unit) {
-    // State for page (portals/people), section, search, etc.
+fun MainScreenContent(navController: NavHostController) {
     var page by remember { mutableStateOf(MainPage.Portals) }
-    var section by remember { mutableStateOf(2) }
     var showSearch by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
     var showActionSheet by remember { mutableStateOf(false) }
-    var showOnlySafePortals by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val coroutineScope = rememberCoroutineScope()
-    // TODO: Add ViewModels for portals and people, and fetch data as in SwiftUI
+    var showOnlySafePortals by remember { mutableStateOf(false) }
+    var currentSection by remember { mutableStateOf(0) } // For MainTopBar
 
     Scaffold(
         topBar = {
-            MainTopBar(
-                section = section,
-                onSectionChange = { section = it },
-                onProfileClick = { /* TODO: Navigate to profile */ },
-                onPlusClick = { showActionSheet = true }
-            )
+            if (!showSearch) { // Only show top bar if not searching
+                MainTopBar(
+                    section = currentSection,
+                    onSectionChange = { currentSection = it /* TODO: Handle section change logic */ },
+                    onProfileClick = { /* TODO: Navigate to profile */ },
+                    onPlusClick = { showActionSheet = true }
+                )
+            }
         },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    page = if (page == MainPage.Portals) MainPage.People else MainPage.Portals
+                    // TODO: Fetch data for new page
+                }
+            ) {
+                Icon(Icons.Filled.SwapHoriz, contentDescription = "Switch Page")
+            }
+        }
+    ) { innerPadding ->
+        Column(modifier = Modifier.padding(innerPadding)) { // Apply innerPadding
+            // Search bar overlay (conditional rendering)
+            if (showSearch) {
+                MainSearchBar(
+                    searchText = searchText,
+                    onSearchTextChange = { searchText = it },
+                    onCancel = {
+                        showSearch = false
+                        searchText = ""
+                        // TODO: Clear search results
+                    }
+                )
+            }
+
+            // Main content based on the 'page' state
+            when (page) {
+                MainPage.Portals -> {
+                    // Example usage of LazyColumn for portals
+                    PortalsList(portals = listOf("Portal 1", "Portal 2", "Portal 3")) // Replace with actual data
+                }
+                MainPage.People -> {
+                    PeopleList(people = listOf("Alice", "Bob", "Charlie")) // Replace with actual data
+                }
+            }
+        }
+
+        // ModalBottomSheet for the action sheet
+        if (showActionSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showActionSheet = false },
+                sheetState = sheetState
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Show: ")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = {
+                                showOnlySafePortals = false
+                                // showActionSheet = false // Hide sheet after selection
+                                // TODO: Fetch all portals
+                                coroutineScope.launch {
+                                    sheetState.hide()
+                                    showActionSheet = false // Ensure it's hidden after animation
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (!showOnlySafePortals) Color(0xFF8CCF5D) else Color.LightGray
+                            )
+                        ) { Text("All") }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = {
+                                showOnlySafePortals = true
+                                // showActionSheet = false
+                                // TODO: Fetch safe portals
+                                coroutineScope.launch {
+                                    sheetState.hide()
+                                    showActionSheet = false
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (showOnlySafePortals) Color(0xFF8CCF5D) else Color.LightGray
+                            )
+                        ) { Text("Safe") }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            // showActionSheet = false
+                            // TODO: Navigate to add purpose screen
+                            coroutineScope.launch {
+                                sheetState.hide()
+                                showActionSheet = false
+                                // navController.navigate("addPurpose") // Example navigation
+                            }
+                        }
+                    ) { Text("Add Purpose") }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = {
+                            // showActionSheet = false
+                            showSearch = true // Show search bar
+                            coroutineScope.launch {
+                                sheetState.hide()
+                                showActionSheet = false
+                            }
+                        }
+                    ) { Text("Search") }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button( // Cancel button for the modal sheet
+                        onClick = {
+                            coroutineScope.launch {
+                                sheetState.hide()
+                                showActionSheet = false
+                            }
+                        }
+                    ) { Text("Cancel") }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MainTopBar(
+    section: Int,
+    onSectionChange: (Int) -> Unit,
+    onProfileClick: () -> Unit,
+    onPlusClick: () -> Unit
+) {
+    Surface( // TopAppBar is often better here, or just a Row with elevation
+        shadowElevation = 4.dp,
+        color = Color(0xFFF9F9F9) // Or MaterialTheme.colorScheme.surface
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp) // Consider height(56.dp) for standard app bar height
+                .height(56.dp), // Typical TopAppBar height
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            IconButton(onClick = onProfileClick) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Profile",
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+            // Place MainSegmentedPicker in the center
+            MainSegmentedPicker(
+                segments = listOf("OPEN", "NTWK", "ALL"),
+                selectedIndex = section,
+                onSelected = onSectionChange
+            )
+            IconButton(onClick = onPlusClick) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add",
+                    tint = Color(0xFF8CCF5D), // Consider MaterialTheme.colorScheme.primary
+                    modifier = Modifier.size(24.dp) // Standard icon size
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun MainSegmentedPicker(
+    segments: List<String>,
+    selectedIndex: Int,
+    onSelected: (Int) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .width(240.dp) // Consider making this more flexible or use weights
+            .height(32.dp)
+            .clip(RoundedCornerShape(4.dp))
+            .background(Color(0xFFF9F9F9)) // Or MaterialTheme.colorScheme.surfaceVariant
+            .border(1.dp, Color.Black, RoundedCornerShape(4.dp)) // Or MaterialTheme.colorScheme.outline
+    ) {
+        segments.forEachIndexed { idx, label ->
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .background(if (selectedIndex == idx) Color.Black else Color.White) // Or MaterialTheme.colorScheme.primary / surface
+                    .clickable { onSelected(idx) },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = label,
+                    color = if (selectedIndex == idx) Color.White else Color.Black, // Or MaterialTheme.colorScheme.onPrimary / onSurface
+                    fontSize = 14.sp
+                )
+            }
+            if (idx < segments.lastIndex) {
+                Divider(
+                    color = Color(0xFFE4E4E4), // Or MaterialTheme.colorScheme.outlineVariant
+                    modifier = Modifier
+                        .width(1.dp)
+                        .fillMaxHeight()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun MainSearchBar(
+    searchText: String,
+    onSearchTextChange: (String) -> Unit,
+    onCancel: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White) // Or MaterialTheme.colorScheme.surface
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.Search, // Ensure this icon is available
+            contentDescription = "Search"
+        )
+        // Add a TextField for search input here
+        // TextField(value = searchText, onValueChange = onSearchTextChange, ...)
+        Spacer(modifier = Modifier.width(8.dp))
+        Text("Search Bar Placeholder...", modifier = Modifier.weight(1f)) // Placeholder for TextField
+        Button(onClick = onCancel) { // Simple cancel button
+            Text("Cancel")
+        }
+    }
+}
+
+// Placeholder composables for PortalsList and PeopleList
+@Composable
+fun PortalsList(portals: List<String>) {
+    LazyColumn {
+        items(portals) { portal ->
+            Text(portal, modifier = Modifier.padding(16.dp))
+        }
+    }
+}
+
+@Composable
+fun PeopleList(people: List<String>) {
+    LazyColumn {
+        items(people) { person ->
+            Text(person, modifier = Modifier.padding(16.dp))
+        }
+    }
+}
+
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            RepTheme {
+                val navController = rememberNavController()
+                val authViewModel: AuthViewModel = hiltViewModel()
+                var isLoggedIn by remember { mutableStateOf(false) }
+                // Navigation graph
+                NavHost(navController = navController, startDestination = "login") {
+                    composable("login") {
+                        LoginScreen(
+                            onLoginSuccess = {
+                                isLoggedIn = true
+                                navController.navigate("main") {
+                                    popUpTo("login") { inclusive = true }
+                                }
+                            },
+                            onNavigateToSignUp = { navController.navigate("register") },
+                            onNavigateToForgotPassword = { /* TODO: Navigate to forgot password screen */ }
+                        )
+                    }
+                    composable("register") {
+                        RegisterScreen(
+                            onNavigateToLogin = { navController.popBackStack("login", inclusive = false) },
+                            onRegistrationSuccess = { navController.navigate("editProfile") }
+                        )
+                    }
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
