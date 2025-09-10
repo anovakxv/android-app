@@ -98,31 +98,101 @@ class MainActivity : ComponentActivity() {
                     composable("about") {
                         AboutScreen(onFinish = { navController.navigate("main") })
                     }
-// Placeholder composables for onboarding flow
+
+// --- Edit Profile Screen ---
 @Composable
 fun EditProfileScreen(onNext: () -> Unit) {
-    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Text("Edit Profile Screen")
+    // Mimics iOS EditProfileView: profile image, name fields, type, city, skills, save button
+    Column(
+        modifier = Modifier.fillMaxSize().padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Profile Image
+        Box(contentAlignment = Alignment.BottomEnd) {
+            Box(
+                modifier = Modifier.size(108.dp).clip(CircleShape).background(Color.Gray.copy(alpha = 0.3f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Default.Person, contentDescription = "Profile", modifier = Modifier.size(80.dp), tint = Color.Gray)
+            }
+            Button(onClick = { /* TODO: Add photo picker */ }, modifier = Modifier.offset(x = (-10).dp, y = 10.dp)) {
+                Text("+Edit\nPhoto")
+            }
+        }
         Spacer(Modifier.height(16.dp))
-        Button(onClick = onNext) { Text("Next") }
+        // Name fields
+        Row {
+            OutlinedTextField(value = "", onValueChange = {}, label = { Text("First Name") }, modifier = Modifier.weight(1f))
+            Spacer(Modifier.width(8.dp))
+            OutlinedTextField(value = "", onValueChange = {}, label = { Text("Last Name") }, modifier = Modifier.weight(1f))
+        }
+        Spacer(Modifier.height(8.dp))
+        OutlinedTextField(value = "", onValueChange = {}, label = { Text("Broadcast (optional)") }, modifier = Modifier.fillMaxWidth())
+        Spacer(Modifier.height(8.dp))
+        // Rep Type Picker
+        OutlinedTextField(value = "Lead", onValueChange = {}, label = { Text("Rep Type") }, modifier = Modifier.fillMaxWidth())
+        Spacer(Modifier.height(8.dp))
+        // City
+        OutlinedTextField(value = "", onValueChange = {}, label = { Text("City (optional)") }, modifier = Modifier.fillMaxWidth())
+        Spacer(Modifier.height(8.dp))
+        // Skills (multi-select)
+        Text("Select up to 3 Skills", fontWeight = FontWeight.Bold)
+        Row {
+            // Placeholder skill chips
+            Button(onClick = {}, modifier = Modifier.padding(end = 4.dp)) { Text("Skill 1") }
+            Button(onClick = {}, modifier = Modifier.padding(end = 4.dp)) { Text("Skill 2") }
+            Button(onClick = {}) { Text("Skill 3") }
+        }
+        Spacer(Modifier.height(8.dp))
+        OutlinedTextField(value = "", onValueChange = {}, label = { Text("Other Skill (optional)") }, modifier = Modifier.fillMaxWidth())
+        Spacer(Modifier.height(24.dp))
+        Button(onClick = onNext, modifier = Modifier.fillMaxWidth()) { Text("Save & Continue") }
     }
 }
 
+// --- Terms Screen ---
 @Composable
 fun TermsScreen(onNext: () -> Unit) {
-    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Text("Terms and Conditions Screen")
+    Column(
+        modifier = Modifier.fillMaxSize().padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Terms of Use", fontWeight = FontWeight.Bold, fontSize = 20.sp)
         Spacer(Modifier.height(16.dp))
-        Button(onClick = onNext) { Text("Next") }
+        Box(modifier = Modifier.weight(1f).fillMaxWidth().background(Color(0xFFF5F5F5)).padding(8.dp)) {
+            // Scrollable terms text
+            val termsText = "Terms of Use: Version 1.1\nEffective Date: 7/30/2025\nApp Name: Rep 1\nDeveloper: Networked Capital Inc.\n...\nBefore proceeding, you must confirm acceptance of these terms."
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                Text(termsText)
+            }
+        }
+        Spacer(Modifier.height(16.dp))
+        Button(onClick = onNext, modifier = Modifier.fillMaxWidth()) { Text("Accept Terms of Use") }
     }
 }
 
+// --- About Screen (Welcome) ---
 @Composable
 fun AboutScreen(onFinish: () -> Unit) {
-    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Text("About Screen")
+    Column(
+        modifier = Modifier.fillMaxSize().padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Spacer(Modifier.height(16.dp))
-        Button(onClick = onFinish) { Text("Finish") }
+        // Profile Image
+        Box(
+            modifier = Modifier.size(108.dp).clip(CircleShape).background(Color.Gray.copy(alpha = 0.3f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Default.Person, contentDescription = "Profile", modifier = Modifier.size(80.dp), tint = Color.Gray)
+        }
+        Spacer(Modifier.height(16.dp))
+        Text("Hi, User!\n\nWe’re here to help you become your best self.\n\nWe do this by leveraging the people in your life who care about you, +AI.\n\nStart by viewing the list of ‘Purposes’ and joining a Team.\n\nOr, search for someone you know and see what Goal Teams they’re on!", fontSize = 18.sp, lineHeight = 24.sp)
+        Spacer(Modifier.weight(1f))
+        Button(onClick = onFinish, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+            Text("Find Goal Team to Join", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        }
+        Spacer(Modifier.height(32.dp))
     }
 }
                     composable("main") {
