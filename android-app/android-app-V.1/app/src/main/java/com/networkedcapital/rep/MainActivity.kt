@@ -245,29 +245,40 @@ fun MainTopBar(
         shadowElevation = 4.dp,
         color = Color(0xFFF9F9F9)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Surface(
+            shadowElevation = 4.dp,
+            color = Color(0xFFF9F9F9)
         ) {
-            IconButton(onClick = onProfileClick) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                IconButton(onClick = onProfileClick) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Profile",
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+                // Place MainSegmentedPicker in the center
+                MainSegmentedPicker(
+                    segments = listOf("OPEN", "NTWK", "ALL"),
+                    selectedIndex = section,
+                    onSelected = onSectionChange
+                )
+                IconButton(onClick = onPlusClick) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add",
+                        tint = Color(0xFF8CCF5D),
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             }
         }
-            IconButton(onClick = onPlusClick) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add",
-                    tint = Color(0xFF8CCF5D),
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
 fun MainSegmentedPicker(
     segments: List<String>,
     selectedIndex: Int,
