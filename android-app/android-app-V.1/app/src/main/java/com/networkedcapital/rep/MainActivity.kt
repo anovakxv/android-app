@@ -379,45 +379,6 @@ fun PeopleList(people: List<String>) {
         }
     }
 }
-
-// Ensure you have this Preview if you want to preview MainScreenContent
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    RepTheme {
-        MainScreenContent(navController = rememberNavController())
-    }
-}
-package com.networkedcapital.rep
-
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.networkedcapital.rep.presentation.theme.RepTheme
-import com.networkedcapital.rep.presentation.auth.AuthViewModel
-import com.networkedcapital.rep.presentation.auth.LoginScreen
-import com.networkedcapital.rep.presentation.auth.RegisterScreen
-import com.networkedcapital.rep.presentation.main.MainScreen
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import kotlinx.coroutines.launch
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
