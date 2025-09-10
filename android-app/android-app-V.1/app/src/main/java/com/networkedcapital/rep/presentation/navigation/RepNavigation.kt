@@ -10,7 +10,9 @@ import androidx.navigation.compose.composable
 import com.networkedcapital.rep.presentation.auth.AuthViewModel
 import com.networkedcapital.rep.presentation.auth.LoginScreen
 import com.networkedcapital.rep.presentation.auth.RegisterScreen
-import com.networkedcapital.rep.presentation.auth.OnboardingScreen
+import com.networkedcapital.rep.presentation.onboarding.TermsOfUseScreen
+import com.networkedcapital.rep.presentation.onboarding.AboutRepScreen
+import com.networkedcapital.rep.presentation.onboarding.EditProfileScreen
 import com.networkedcapital.rep.presentation.main.MainScreen
 import com.networkedcapital.rep.presentation.profile.ProfileScreen
 
