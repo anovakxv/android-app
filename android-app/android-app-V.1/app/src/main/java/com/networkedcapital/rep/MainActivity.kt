@@ -25,6 +25,9 @@ import androidx.compose.ui.draw.clip
 import dagger.hilt.android.AndroidEntryPoint
 
 import com.networkedcapital.rep.presentation.auth.LoginScreen
+import com.networkedcapital.rep.presentation.auth.RegisterScreen
+import com.networkedcapital.rep.presentation.auth.OnboardingScreen
+import com.networkedcapital.rep.presentation.main.MainScreen
 
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -46,20 +49,28 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable("register") {
-                        // Replace with your actual RegisterScreen composable
-                        Text("Register Screen Placeholder")
+                        RegisterScreen(
+                            onNavigateToLogin = { navController.popBackStack("login", inclusive = false) },
+                            onRegistrationSuccess = { navController.navigate("onboarding") }
+                        )
                     }
                     composable("forgot") {
-                        // Replace with your actual ForgotPasswordScreen composable
+                        // TODO: Replace with your actual ForgotPasswordScreen composable
                         Text("Forgot Password Screen Placeholder")
                     }
                     composable("onboarding") {
-                        // Replace with your actual OnboardingScreen composable
-                        Text("Onboarding Screen Placeholder")
+                        OnboardingScreen(
+                            onOnboardingComplete = { navController.navigate("main") }
+                        )
                     }
                     composable("main") {
-                        // Replace with your actual MainScreen composable
-                        Text("Main Screen Placeholder")
+                        MainScreen(
+                            onNavigateToProfile = {},
+                            onNavigateToPortalDetail = {},
+                            onNavigateToPersonDetail = {},
+                            onNavigateToChat = {},
+                            onLogout = {}
+                        )
                     }
                 }
             }
