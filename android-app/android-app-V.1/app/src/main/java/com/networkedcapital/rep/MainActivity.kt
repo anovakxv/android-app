@@ -28,18 +28,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // You can replace this with your actual app content
             Surface(color = Color.White) {
-                // Example: show a top bar and a portals list
-                Column {
-                    MainTopBar(
-                        section = 0,
-                        onSectionChange = {},
-                        onProfileClick = {},
-                        onPlusClick = {}
-                    )
-                    PortalsList(portals = listOf("Portal 1", "Portal 2", "Portal 3"))
-                }
+                LoginScreen(
+                    onLoginSuccess = {},
+                    onNavigateToSignUp = {},
+                    onNavigateToForgotPassword = {}
+                )
             }
         }
     }
