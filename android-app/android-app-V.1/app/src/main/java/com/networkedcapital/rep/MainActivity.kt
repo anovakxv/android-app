@@ -85,44 +85,11 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable("register") {
-                        @Composable
-                        fun MainTopBar(
-                            section: Int,
-                            onSectionChange: (Int) -> Unit,
-                            onProfileClick: () -> Unit,
-                            onPlusClick: () -> Unit
-                        ) {
-                            Surface(
-                                shadowElevation = 4.dp,
-                                color = Color(0xFFF9F9F9)
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween // Added to space out the icons
-                                ) {
-                                    IconButton(onClick = onProfileClick) {
-                                        // Add an Icon or other content for the profile button here
-                                        // For example:
-                                        // Icon(Icons.Filled.Person, contentDescription = "Profile")
-                                    }
-
-                                    // TODO: Add your MainSegmentedPicker or other elements here
-                                    // MainSegmentedPicker(...)
-
-                                    IconButton(onClick = onPlusClick) {
-                                        Icon(
-                                            imageVector = Icons.Default.Add,
-                                            contentDescription = "Add",
-                                            tint = Color(0xFF8CCF5D),
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        RegisterScreen(
+                            onNavigateToLogin = { navController.popBackStack("login", inclusive = false) },
+                            onRegistrationSuccess = { navController.navigate("editProfile") }
+                        )
+                    }
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
