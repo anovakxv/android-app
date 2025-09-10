@@ -26,7 +26,9 @@ import dagger.hilt.android.AndroidEntryPoint
 
 import com.networkedcapital.rep.presentation.auth.LoginScreen
 import com.networkedcapital.rep.presentation.auth.RegisterScreen
-import com.networkedcapital.rep.presentation.auth.OnboardingScreen
+import com.networkedcapital.rep.presentation.onboarding.EditProfileScreen
+import com.networkedcapital.rep.presentation.onboarding.TermsOfUseScreen
+import com.networkedcapital.rep.presentation.onboarding.AboutRepScreen
 import com.networkedcapital.rep.presentation.main.MainScreen
 
 import androidx.navigation.compose.NavHost
@@ -51,8 +53,17 @@ class MainActivity : ComponentActivity() {
                     composable("register") {
                         RegisterScreen(
                             onNavigateToLogin = { navController.popBackStack("login", inclusive = false) },
-                            onRegistrationSuccess = { navController.navigate("onboarding") }
+                            onRegistrationSuccess = { navController.navigate("editProfile") }
                         )
+                    }
+                    composable("editProfile") {
+                        EditProfileScreen(onProfileSaved = { navController.navigate("terms") })
+                    }
+                    composable("terms") {
+                        TermsOfUseScreen(onAccept = { navController.navigate("about") })
+                    }
+                    composable("about") {
+                        AboutRepScreen(onContinue = { navController.navigate("main") })
                     }
                     composable("forgot") {
                         // TODO: Replace with your actual ForgotPasswordScreen composable
