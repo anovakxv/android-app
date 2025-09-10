@@ -75,6 +75,39 @@ class AuthViewModel @Inject constructor(
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser = _currentUser.asStateFlow()
 
+        fun login(email: String, password: String) {
+            viewModelScope.launch {
+                _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
+                authRepository.login(email, password)
+                    .catch { throwable ->
+                        _authState.value = _authState.value.copy(
+                            isLoading = false,
+                            errorMessage = throwable.message ?: "Login failed"
+                        )
+                    }
+                    .collect { result ->
+                        result.fold(
+                            onSuccess = { user ->
+                                _currentUser.value = user
+                                _authState.value = _authState.value.copy(
+                                    isLoading = false,
+                                    isLoggedIn = true,
+                                    isRegistered = true,
+                                    onboardingComplete = true,
+                                    userId = user.id,
+                                    errorMessage = null
+                                )
+                            },
+                            onFailure = { throwable ->
+                                _authState.value = _authState.value.copy(
+                                    isLoading = false,
+                                    errorMessage = throwable.message ?: "Login failed"
+                                )
+                            }
+                        )
+                    }
+            }
+        }
     init {
         checkAuthStatus()
     }
