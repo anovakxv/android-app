@@ -11,7 +11,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
-@Composable
 fun TermsOfUseScreen(
     onAccept: () -> Unit,
     viewModel: com.networkedcapital.rep.presentation.auth.AuthViewModel = hiltViewModel()
@@ -124,8 +123,9 @@ fun EditProfileScreen(
 ) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    val isLoading by viewModel.authState.collectAsState().let { it.value.isLoading }
-    val errorMessage by viewModel.authState.collectAsState().let { it.value.errorMessage }
+    val authState = viewModel.authState.collectAsState().value
+    val isLoading = authState.isLoading
+    val errorMessage = authState.errorMessage
     Surface(
         color = com.networkedcapital.rep.presentation.theme.RepBackground,
         modifier = Modifier.fillMaxSize()
