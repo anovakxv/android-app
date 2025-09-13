@@ -88,7 +88,7 @@ class AuthRepository @Inject constructor(
             val phoneBody = phone?.toRequestBody()
             val aboutBody = about?.toRequestBody()
             val cityBody = city?.toRequestBody()
-            
+
             val response = authApiService.register(
                 email = emailBody,
                 password = passwordBody,
@@ -99,10 +99,15 @@ class AuthRepository @Inject constructor(
                 about = aboutBody,
                 city = cityBody
             )
-            
+
+            // Debug logging: print raw response
+            println("[AuthRepository] register raw response: ${response.raw()}\nBody: ${response.body()}")
+
             if (response.isSuccessful) {
                 val registerResponse = response.body()
                 if (registerResponse != null) {
+                    // Debug: print nested skills mapping
+                    println("[AuthRepository] registerResponse.result.skills: ${registerResponse.result.skills}")
                     // Save token
                     authInterceptor.saveToken(registerResponse.token)
                     emit(Result.success(registerResponse.result))
