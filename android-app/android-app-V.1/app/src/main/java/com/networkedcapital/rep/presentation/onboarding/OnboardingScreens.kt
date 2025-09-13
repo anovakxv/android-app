@@ -15,7 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import coil.compose.rememberAsyncImagePainter
 import androidx.compose.material3.ExperimentalMaterial3Api
 
-@OptIn(ExperimentalMaterial3Api::class)
+@androidx.compose.material3.ExperimentalMaterial3Api
 @Composable
 fun TermsOfUseScreen(
     onAccept: () -> Unit,
