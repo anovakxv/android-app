@@ -34,8 +34,7 @@ fun TermsOfUseScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Terms of Use",
@@ -99,7 +98,7 @@ Before proceeding, you must confirm acceptance of these terms.
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Surface(
                 color = com.networkedcapital.rep.presentation.theme.RepBackground,
