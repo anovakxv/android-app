@@ -143,7 +143,7 @@ Before proceeding, you must confirm acceptance of these terms.
                     }
                 }
             }
-    {
+    ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
