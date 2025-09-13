@@ -103,18 +103,81 @@ Before proceeding, you must confirm acceptance of these terms.
             Button(
                 onClick = {
                     viewModel.acceptTermsOfUse()
-                    onAccept()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen)
-            ) {
-                Text("Accept Terms of Use", color = MaterialTheme.colorScheme.onPrimary)
-            }
-    }
-}
+                    Card(
+                        shape = MaterialTheme.shapes.medium,
+                        colors = CardDefaults.cardColors(containerColor = com.networkedcapital.rep.presentation.theme.RepLightGray),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
+                            Text(
+                                text = """
+        Terms of Use:  
+        Version: 1.1
+        Effective Date: 7/30/2025
+        App Name: Rep 1
+        Developer: Networked Capital Inc.
 
+        Welcome to Rep. By continuing, you agree to the following community guidelines and terms:
+
+        1. Community Standards
+        Users must not post objectionable, offensive, or abusive content.
+        Hate speech, harassment, and explicit material are strictly prohibited.
+        Violators may have their content removed and accounts suspended or banned.
+
+        2. User Responsibilities
+        You are solely responsible for the content you share, create, or promote.
+        Impersonation, deception, or targeted harassment is not tolerated.
+
+        3. Moderation & Enforcement
+        Rep reserves the right to monitor, moderate, and remove content at its discretion.
+        Inappropriate content can be flagged by users and reviewed by our team.
+        Users can block others to prevent unwanted or abusive interactions.
+
+        4. Removal of Objectionable Content    
+        We will review flagged content and remove content that violates this policy within 24 hours of the content being flagged. Users who repeatedly violate our content policy will be ejected from the platform. 
+
+        5. Intellectual Property
+        Rep and its underlying software, design, content, trademarks, logos, and features are the exclusive property of Networked Capital Inc., unless otherwise noted.
+        Users are not permitted to modify, reverse-engineer, reproduce, distribute, or exploit any part of the app or its codebase without prior written consent.
+        All feedback, suggestions, or feature ideas submitted by users may be used by Networked Capital Inc. to improve Rep, with no obligation of compensation unless explicitly agreed upon.
+        Unauthorized use of Rep’s intellectual property may result in termination of service and legal action.
+
+        6. Future Licensing
+        Certain components of Rep may, in the future, be released under an open-source license. However, until such licensing is explicitly announced and documented by Networked Capital Inc., all elements of the Rep software remain proprietary and fully protected under applicable intellectual property laws. Future licensing decisions will not retroactively affect ownership rights, nor shall they be construed as a waiver of any current protections.
+
+        7. Agreement
+        By using Rep, you acknowledge and agree to uphold these standards.
+        For questions, contact us via our website at:  https://networkedcapital.co/contact/
+
+        Before proceeding, you must confirm acceptance of these terms.
+        """,
+                                style = MaterialTheme.typography.bodyLarge,
+                                textAlign = TextAlign.Start,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Button(
+                                onClick = {
+                                    viewModel.acceptTermsOfUse()
+                                    onAccept()
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen)
+                            ) {
+                                Text("Accept Terms of Use", color = MaterialTheme.colorScheme.onPrimary)
+                            }
+                        }
+                    }
+            Text(
+                text = "About Rep",
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                color = com.networkedcapital.rep.presentation.theme.RepGreen
+            )
+            Spacer(modifier = Modifier.height(24.dp))
             Card(
                 shape = MaterialTheme.shapes.medium,
                 colors = CardDefaults.cardColors(containerColor = com.networkedcapital.rep.presentation.theme.RepLightGray),
@@ -143,6 +206,38 @@ Before proceeding, you must confirm acceptance of these terms.
                     }
                 }
             }
+        })
+    }
+}
+
+@Composable
+fun EditProfileScreen(
+    onProfileSaved: () -> Unit,
+    viewModel: com.networkedcapital.rep.presentation.auth.AuthViewModel = hiltViewModel()
+) {
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var broadcast by remember { mutableStateOf("") }
+    var city by remember { mutableStateOf("") }
+    var about by remember { mutableStateOf("") }
+    var otherSkill by remember { mutableStateOf("") }
+    var repType by remember { mutableStateOf("Lead") }
+    val repTypes = listOf("Lead", "Specialist", "Partner", "Founder")
+    // Skills picker
+    val allSkills = listOf("Leadership", "Sales", "Marketing", "Fundraising", "Networking", "Other") // Replace with backend fetch if needed
+    var selectedSkills by remember { mutableStateOf(setOf<String>()) }
+    // Profile image upload
+    var profileImageUri by remember { mutableStateOf<Uri?>(null) }
+    val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        profileImageUri = uri
+    }
+    val authState = viewModel.authState.collectAsState().value
+    val isLoading = authState.isLoading
+    val errorMessage = authState.errorMessage
+    Surface(
+        color = com.networkedcapital.rep.presentation.theme.RepBackground,
+        modifier = Modifier.fillMaxSize()
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
