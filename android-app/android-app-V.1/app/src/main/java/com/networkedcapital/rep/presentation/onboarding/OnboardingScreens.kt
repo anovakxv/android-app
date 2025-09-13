@@ -17,6 +17,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 
 @androidx.compose.material3.ExperimentalMaterial3Api
 @Composable
@@ -154,166 +156,172 @@ fun EditProfileScreen(
         color = com.networkedcapital.rep.presentation.theme.RepBackground,
         modifier = Modifier.fillMaxSize()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "Edit Profile",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                color = com.networkedcapital.rep.presentation.theme.RepGreen
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            Card(
-                shape = MaterialTheme.shapes.medium,
-                colors = CardDefaults.cardColors(containerColor = com.networkedcapital.rep.presentation.theme.RepLightGray),
-                modifier = Modifier.fillMaxWidth()
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        OutlinedTextField(
-                            value = firstName,
-                            onValueChange = { firstName = it },
-                            label = { Text("First Name") },
-                            modifier = Modifier.weight(1f)
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        OutlinedTextField(
-                            value = lastName,
-                            onValueChange = { lastName = it },
-                            label = { Text("Last Name") },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = email,
-                        onValueChange = { email = it },
-                        label = { Text("Email") },
-                        modifier = Modifier.fillMaxWidth()
+                    Text(
+                        text = "Edit Profile",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = com.networkedcapital.rep.presentation.theme.RepGreen,
+                        modifier = Modifier.weight(1f)
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = broadcast,
-                        onValueChange = { broadcast = it },
-                        label = { Text("Broadcast (optional)") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    // Rep Type Picker (Stable DropdownMenu)
-                    var repTypeDropdownExpanded by remember { mutableStateOf(false) }
-                    Box {
-                        OutlinedTextField(
-                            value = repType,
-                            onValueChange = {},
-                            label = { Text("Rep Type") },
-                            readOnly = true,
-                            trailingIcon = {
-                                IconButton(onClick = { repTypeDropdownExpanded = !repTypeDropdownExpanded }) {
-                                    Icon(
-                                        imageVector = if (repTypeDropdownExpanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
-                                        contentDescription = null
-                                    )
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        DropdownMenu(
-                            expanded = repTypeDropdownExpanded,
-                            onDismissRequest = { repTypeDropdownExpanded = false },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            repTypes.forEach { type ->
-                                DropdownMenuItem(
-                                    text = { Text(type) },
-                                    onClick = {
-                                        repType = type
-                                        repTypeDropdownExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = city,
-                        onValueChange = { city = it },
-                        label = { Text("City") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = about,
-                        onValueChange = { about = it },
-                        label = { Text("About") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = otherSkill,
-                        onValueChange = { otherSkill = it },
-                        label = { Text("Other Skill") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Skills", style = MaterialTheme.typography.titleMedium)
-                    Column {
-                        allSkills.forEach { skill ->
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Checkbox(
-                                    checked = selectedSkills.contains(skill),
-                                    onCheckedChange = { checked ->
-                                        selectedSkills = if (checked) selectedSkills + skill else selectedSkills - skill
-                                    }
-                                )
-                                Text(skill)
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Profile Image", style = MaterialTheme.typography.titleMedium)
-                    Button(onClick = { imagePickerLauncher.launch("image/*") }, modifier = Modifier.fillMaxWidth()) {
-                        Text(if (profileImageUri != null) "Change Image" else "Upload Image")
-                    }
-                    if (profileImageUri != null) {
-                        // Show image preview using Coil
-                        androidx.compose.foundation.Image(
-                            painter = coil.compose.rememberAsyncImagePainter(profileImageUri),
-                            contentDescription = "Profile Image",
-                            modifier = Modifier.size(96.dp)
-                        )
+                    Button(
+                        onClick = {
+                            viewModel.saveProfile(
+                                firstName, lastName, email, broadcast, repType, city, about, otherSkill,
+                                selectedSkills,
+                                profileImageUri?.toString()
+                            )
+                            onProfileSaved()
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen),
+                        modifier = Modifier
+                            .height(36.dp)
+                    ) {
+                        Text("Save", color = MaterialTheme.colorScheme.onPrimary)
                     }
                 }
-            }
-            Spacer(modifier = Modifier.height(32.dp))
-            if (isLoading) {
-                CircularProgressIndicator()
-            }
-            if (errorMessage != null) {
-                Text(text = errorMessage ?: "", color = MaterialTheme.colorScheme.error)
-            }
-            Button(
-                onClick = {
-                    viewModel.saveProfile(
-                        firstName, lastName, email, broadcast, repType, city, about, otherSkill,
-                        selectedSkills,
-                        profileImageUri?.toString()
-                    )
-                    onProfileSaved()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen)
-            ) {
-                Text("Save Profile", color = MaterialTheme.colorScheme.onPrimary)
+                Spacer(modifier = Modifier.height(24.dp))
+                Card(
+                    shape = MaterialTheme.shapes.medium,
+                    colors = CardDefaults.cardColors(containerColor = com.networkedcapital.rep.presentation.theme.RepLightGray),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            OutlinedTextField(
+                                value = firstName,
+                                onValueChange = { firstName = it },
+                                label = { Text("First Name") },
+                                modifier = Modifier.weight(1f)
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            OutlinedTextField(
+                                value = lastName,
+                                onValueChange = { lastName = it },
+                                label = { Text("Last Name") },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = email,
+                            onValueChange = { email = it },
+                            label = { Text("Email") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = broadcast,
+                            onValueChange = { broadcast = it },
+                            label = { Text("Broadcast (optional)") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        // Rep Type Picker (Stable DropdownMenu)
+                        var repTypeDropdownExpanded by remember { mutableStateOf(false) }
+                        Box {
+                            OutlinedTextField(
+                                value = repType,
+                                onValueChange = {},
+                                label = { Text("Rep Type") },
+                                readOnly = true,
+                                trailingIcon = {
+                                    IconButton(onClick = { repTypeDropdownExpanded = !repTypeDropdownExpanded }) {
+                                        Icon(
+                                            imageVector = if (repTypeDropdownExpanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
+                                            contentDescription = null
+                                        )
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            DropdownMenu(
+                                expanded = repTypeDropdownExpanded,
+                                onDismissRequest = { repTypeDropdownExpanded = false },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                repTypes.forEach { type ->
+                                    DropdownMenuItem(
+                                        text = { Text(type) },
+                                        onClick = {
+                                            repType = type
+                                            repTypeDropdownExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = city,
+                            onValueChange = { city = it },
+                            label = { Text("City") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = about,
+                            onValueChange = { about = it },
+                            label = { Text("About") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = otherSkill,
+                            onValueChange = { otherSkill = it },
+                            label = { Text("Other Skill") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Skills", style = MaterialTheme.typography.titleMedium)
+                        Column {
+                            allSkills.forEach { skill ->
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Checkbox(
+                                        checked = selectedSkills.contains(skill),
+                                        onCheckedChange = { checked ->
+                                            selectedSkills = if (checked) selectedSkills + skill else selectedSkills - skill
+                                        }
+                                    )
+                                    Text(skill)
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Profile Image", style = MaterialTheme.typography.titleMedium)
+                        Button(onClick = { imagePickerLauncher.launch("image/*") }, modifier = Modifier.fillMaxWidth()) {
+                            Text(if (profileImageUri != null) "Change Image" else "Upload Image")
+                        }
+                        if (profileImageUri != null) {
+                            // Show image preview using Coil
+                            androidx.compose.foundation.Image(
+                                painter = coil.compose.rememberAsyncImagePainter(profileImageUri),
+                                contentDescription = "Profile Image",
+                                modifier = Modifier.size(96.dp)
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(32.dp))
+                if (isLoading) {
+                    CircularProgressIndicator()
+                }
+                if (errorMessage != null) {
+                    Text(text = errorMessage ?: "", color = MaterialTheme.colorScheme.error)
+                }
             }
         }
     }
