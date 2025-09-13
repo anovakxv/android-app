@@ -115,30 +115,6 @@ Before proceeding, you must confirm acceptance of these terms.
     }
 }
 
-@Composable
-fun AboutRepScreen(
-    onContinue: () -> Unit,
-    viewModel: com.networkedcapital.rep.presentation.auth.AuthViewModel = hiltViewModel()
-) {
-    Surface(
-        color = com.networkedcapital.rep.presentation.theme.RepBackground,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "About Rep",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                color = com.networkedcapital.rep.presentation.theme.RepGreen
-            )
-            Spacer(modifier = Modifier.height(24.dp))
             Card(
                 shape = MaterialTheme.shapes.medium,
                 colors = CardDefaults.cardColors(containerColor = com.networkedcapital.rep.presentation.theme.RepLightGray),
@@ -167,9 +143,22 @@ fun AboutRepScreen(
                     }
                 }
             }
-        }
-    }
-}
+    {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Edit Profile",
+                        style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
                         color = com.networkedcapital.rep.presentation.theme.RepGreen,
                         modifier = Modifier.weight(1f)
