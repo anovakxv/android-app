@@ -24,6 +24,16 @@ class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
+    private val _authState = MutableStateFlow(AuthState())
+    val authState: StateFlow<AuthState> = _authState.asStateFlow()
+    
+    private val _currentUser = MutableStateFlow<User?>(null)
+    val currentUser = _currentUser.asStateFlow()
+
+    init {
+        checkAuthStatus()
+    }
+
     fun acceptTermsOfUse() {
         // This could call a backend endpoint if needed, or just update state
         _authState.value = _authState.value.copy(onboardingComplete = false)
@@ -92,48 +102,39 @@ class AuthViewModel @Inject constructor(
                 }
         }
     }
-    
-    private val _authState = MutableStateFlow(AuthState())
-    val authState: StateFlow<AuthState> = _authState.asStateFlow()
-    
-    private val _currentUser = MutableStateFlow<User?>(null)
-    val currentUser = _currentUser.asStateFlow()
 
-        fun login(email: String, password: String) {
-            viewModelScope.launch {
-                _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
-                authRepository.login(email, password)
-                    .catch { throwable ->
-                        _authState.value = _authState.value.copy(
-                            isLoading = false,
-                            errorMessage = throwable.message ?: "Login failed"
-                        )
-                    }
-                    .collect { result ->
-                        result.fold(
-                            onSuccess = { user ->
-                                _currentUser.value = user
-                                _authState.value = _authState.value.copy(
-                                    isLoading = false,
-                                    isLoggedIn = true,
-                                    isRegistered = true,
-                                    onboardingComplete = true,
-                                    userId = user.id,
-                                    errorMessage = null
-                                )
-                            },
-                            onFailure = { throwable ->
-                                _authState.value = _authState.value.copy(
-                                    isLoading = false,
-                                    errorMessage = throwable.message ?: "Login failed"
-                                )
-                            }
-                        )
-                    }
-            }
+    fun login(email: String, password: String) {
+        viewModelScope.launch {
+            _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
+            authRepository.login(email, password)
+                .catch { throwable ->
+                    _authState.value = _authState.value.copy(
+                        isLoading = false,
+                        errorMessage = throwable.message ?: "Login failed"
+                    )
+                }
+                .collect { result ->
+                    result.fold(
+                        onSuccess = { user ->
+                            _currentUser.value = user
+                            _authState.value = _authState.value.copy(
+                                isLoading = false,
+                                isLoggedIn = true,
+                                isRegistered = true,
+                                onboardingComplete = true,
+                                userId = user.id,
+                                errorMessage = null
+                            )
+                        },
+                        onFailure = { throwable ->
+                            _authState.value = _authState.value.copy(
+                                isLoading = false,
+                                errorMessage = throwable.message ?: "Login failed"
+                            )
+                        }
+                    )
+                }
         }
-    init {
-        checkAuthStatus()
     }
 
     private fun checkAuthStatus() {
@@ -159,43 +160,42 @@ class AuthViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
-            
+            println("[AuthViewModel] Starting registration: firstName=$firstName, lastName=$lastName, email=$email, phone=$phone, repType=$repType, userTypeId=$userTypeId")
             authRepository.register(email, password, firstName, lastName, userTypeId, phone, null, null)
                 .catch { throwable ->
-                _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
-                println("[AuthViewModel] Starting registration: firstName=$firstName, lastName=$lastName, email=$email, phone=$phone, repType=$repType, userTypeId=$userTypeId")
-                authRepository.register(email, password, firstName, lastName, userTypeId, phone, null, null)
-                    .catch { throwable ->
-                        println("[AuthViewModel] Registration failed: ${throwable.message}")
-                        _authState.value = _authState.value.copy(
-                            isLoading = false,
-                            errorMessage = throwable.message ?: "Registration failed"
-                        )
-                    }
-                    .collect { result ->
-                        result.fold(
-                            onSuccess = { user ->
-                                println("[AuthViewModel] Registration success. User ID: ${user.id}")
-                                _currentUser.value = user
-                                _authState.value = _authState.value.copy(
-                                    isLoading = false,
-                                    isLoggedIn = true,
-                                    isRegistered = true,
-                                    onboardingComplete = false, // Still needs onboarding
-                                    userId = user.id,
-                                    errorMessage = null
-                                )
-                                println("[AuthViewModel] authState after registration: isRegistered=${_authState.value.isRegistered}, onboardingComplete=${_authState.value.onboardingComplete}, userId=${_authState.value.userId}")
-                            },
-                            onFailure = { throwable ->
-                                println("[AuthViewModel] Registration result failure: ${throwable.message}")
-                                _authState.value = _authState.value.copy(
-                                    isLoading = false,
-                                    errorMessage = throwable.message ?: "Registration failed"
-                                )
-                            }
-                        )
-                    }
+                    println("[AuthViewModel] Registration failed: ${throwable.message}")
+                    _authState.value = _authState.value.copy(
+                        isLoading = false,
+                        errorMessage = throwable.message ?: "Registration failed"
+                    )
+                }
+                .collect { result ->
+                    result.fold(
+                        onSuccess = { user ->
+                            println("[AuthViewModel] Registration success. User ID: ${user.id}")
+                            _currentUser.value = user
+                            _authState.value = _authState.value.copy(
+                                isLoading = false,
+                                isLoggedIn = true,
+                                isRegistered = true,
+                                onboardingComplete = false, // Still needs onboarding
+                                userId = user.id,
+                                errorMessage = null
+                            )
+                            println("[AuthViewModel] authState after registration: isRegistered=${_authState.value.isRegistered}, onboardingComplete=${_authState.value.onboardingComplete}, userId=${_authState.value.userId}")
+                        },
+                        onFailure = { throwable ->
+                            println("[AuthViewModel] Registration result failure: ${throwable.message}")
+                            _authState.value = _authState.value.copy(
+                                isLoading = false,
+                                errorMessage = throwable.message ?: "Registration failed"
+                            )
+                        }
+                    )
+                }
+        }
+    }
+    
     fun completeOnboarding() {
         _authState.value = _authState.value.copy(
             onboardingComplete = true
@@ -237,7 +237,6 @@ class AuthViewModel @Inject constructor(
                         }
                     )
                 }
-        }
         }
     }
     
