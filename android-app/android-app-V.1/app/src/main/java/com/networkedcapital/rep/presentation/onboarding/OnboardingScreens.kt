@@ -204,26 +204,36 @@ fun EditProfileScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    // Rep Type Picker
-                    ExposedDropdownMenuBox(
-                        expanded = false,
-                        onExpandedChange = {}
-                    ) {
+                    // Rep Type Picker (Stable DropdownMenu)
+                    var repTypeDropdownExpanded by remember { mutableStateOf(false) }
+                    Box {
                         OutlinedTextField(
                             value = repType,
                             onValueChange = {},
                             label = { Text("Rep Type") },
                             readOnly = true,
+                            trailingIcon = {
+                                IconButton(onClick = { repTypeDropdownExpanded = !repTypeDropdownExpanded }) {
+                                    Icon(
+                                        imageVector = if (repTypeDropdownExpanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
+                                        contentDescription = null
+                                    )
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
-                        ExposedDropdownMenu(
-                            expanded = false,
-                            onDismissRequest = {}
+                        DropdownMenu(
+                            expanded = repTypeDropdownExpanded,
+                            onDismissRequest = { repTypeDropdownExpanded = false },
+                            modifier = Modifier.fillMaxWidth()
                         ) {
                             repTypes.forEach { type ->
                                 DropdownMenuItem(
                                     text = { Text(type) },
-                                    onClick = { repType = type }
+                                    onClick = {
+                                        repType = type
+                                        repTypeDropdownExpanded = false
+                                    }
                                 )
                             }
                         }
