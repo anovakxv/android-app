@@ -9,6 +9,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import coil.compose.rememberAsyncImagePainter
 
 @Composable
 fun TermsOfUseScreen(
@@ -134,9 +138,6 @@ fun EditProfileScreen(
     val allSkills = listOf("Leadership", "Sales", "Marketing", "Fundraising", "Networking", "Other") // Replace with backend fetch if needed
     var selectedSkills by remember { mutableStateOf(setOf<String>()) }
     // Profile image upload
-    import android.net.Uri
-    import androidx.activity.compose.rememberLauncherForActivityResult
-    import androidx.activity.result.contract.ActivityResultContracts
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
     val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         profileImageUri = uri
