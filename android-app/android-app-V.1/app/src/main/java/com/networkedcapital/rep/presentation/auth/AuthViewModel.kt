@@ -238,6 +238,7 @@ class AuthViewModel @Inject constructor(
                     )
                 }
         }
+        }
     }
     
     fun clearError() {
