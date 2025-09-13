@@ -38,11 +38,13 @@ fun RegisterScreen(
     val authState by viewModel.authState.collectAsState()
 
     // Navigate on successful registration
-    LaunchedEffect(authState.isRegistered) {
-        if (authState.isRegistered && !authState.onboardingComplete) {
-            onRegistrationSuccess()
+        LaunchedEffect(authState.isRegistered, authState.onboardingComplete) {
+            println("[RegisterScreen] LaunchedEffect triggered: isRegistered=${authState.isRegistered}, onboardingComplete=${authState.onboardingComplete}")
+            if (authState.isRegistered && !authState.onboardingComplete) {
+                println("[RegisterScreen] Triggering onRegistrationSuccess() navigation to onboarding.")
+                onRegistrationSuccess()
+            }
         }
-    }
 
     Column(
         modifier = Modifier
