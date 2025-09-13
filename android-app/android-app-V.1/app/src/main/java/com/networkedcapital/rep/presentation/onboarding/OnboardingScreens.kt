@@ -99,7 +99,8 @@ Before proceeding, you must confirm acceptance of these terms.
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(48.dp))}
+            
             Button(
                 onClick = {
                     viewModel.acceptTermsOfUse()
