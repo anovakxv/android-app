@@ -35,12 +35,36 @@ class AuthViewModel @Inject constructor(
     }
 
     fun saveProfile(
-        name: String,
-        email: String
+        firstName: String,
+        lastName: String,
+        email: String,
+        broadcast: String,
+        repType: String,
+        city: String,
+        about: String,
+        otherSkill: String,
+        skills: Set<String>,
+        profileImageUri: String?
     ) {
         viewModelScope.launch {
             _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
-            authRepository.updateProfile(name, email)
+            // Upload image if present
+            var imageUrl: String? = null
+            if (profileImageUri != null) {
+                authRepository.uploadProfileImage(profileImageUri)
+                    .catch { throwable ->
+                        _authState.value = _authState.value.copy(errorMessage = throwable.message ?: "Image upload failed")
+                    }
+                    .collect { result ->
+                        result.fold(
+                            onSuccess = { url -> imageUrl = url },
+                            onFailure = { throwable -> _authState.value = _authState.value.copy(errorMessage = throwable.message ?: "Image upload failed") }
+                        )
+                    }
+            }
+            authRepository.updateProfile(
+                firstName, lastName, email, broadcast, repType, city, about, otherSkill, skills.toList(), imageUrl
+            )
                 .catch { throwable ->
                     _authState.value = _authState.value.copy(
                         isLoading = false,

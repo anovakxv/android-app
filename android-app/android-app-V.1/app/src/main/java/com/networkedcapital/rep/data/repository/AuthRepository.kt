@@ -15,9 +15,38 @@ class AuthRepository @Inject constructor(
     private val authInterceptor: AuthInterceptor
 ) {
 
-    suspend fun updateProfile(name: String, email: String): Flow<Result<User>> = flow {
-        val user = User(id = 0, fname = name, email = email)
+    suspend fun updateProfile(
+        firstName: String,
+        lastName: String,
+        email: String,
+        broadcast: String,
+        repType: String,
+        city: String,
+        about: String,
+        otherSkill: String,
+        skills: List<String>,
+        imageUrl: String?
+    ): Flow<Result<User>> = flow {
+        val user = User(
+            id = 0,
+            fname = firstName,
+            lname = lastName,
+            email = email,
+            broadcast = broadcast,
+            userType_string = repType,
+            manual_city = city,
+            about = about,
+            other_skill = otherSkill,
+            skills = skills.mapIndexed { idx, title -> com.networkedcapital.rep.domain.model.Skill(idx, title) },
+            profile_picture_url = imageUrl
+        )
         updateProfile(user).collect { emit(it) }
+    }
+
+    suspend fun uploadProfileImage(profileImageUri: String): Flow<Result<String>> = flow {
+        // TODO: Use content resolver to get file from URI and upload as MultipartBody.Part
+        // For now, just emit a dummy URL
+        emit(Result.success("https://dummyimage.com/200x200"))
     }
 
     suspend fun login(email: String, password: String): Flow<Result<User>> = flow {

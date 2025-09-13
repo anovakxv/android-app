@@ -130,7 +130,17 @@ fun EditProfileScreen(
     var otherSkill by remember { mutableStateOf("") }
     var repType by remember { mutableStateOf("Lead") }
     val repTypes = listOf("Lead", "Specialist", "Partner", "Founder")
-    // TODO: Add skills and profile image upload logic
+    // Skills picker
+    val allSkills = listOf("Leadership", "Sales", "Marketing", "Fundraising", "Networking", "Other") // Replace with backend fetch if needed
+    var selectedSkills by remember { mutableStateOf(setOf<String>()) }
+    // Profile image upload
+    import android.net.Uri
+    import androidx.activity.compose.rememberLauncherForActivityResult
+    import androidx.activity.result.contract.ActivityResultContracts
+    var profileImageUri by remember { mutableStateOf<Uri?>(null) }
+    val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        profileImageUri = uri
+    }
     val authState = viewModel.authState.collectAsState().value
     val isLoading = authState.isLoading
     val errorMessage = authState.errorMessage
@@ -236,7 +246,34 @@ fun EditProfileScreen(
                         label = { Text("Other Skill") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    // TODO: Add skills picker and profile image upload
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Skills", style = MaterialTheme.typography.titleMedium)
+                    Column {
+                        allSkills.forEach { skill ->
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Checkbox(
+                                    checked = selectedSkills.contains(skill),
+                                    onCheckedChange = { checked ->
+                                        selectedSkills = if (checked) selectedSkills + skill else selectedSkills - skill
+                                    }
+                                )
+                                Text(skill)
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Profile Image", style = MaterialTheme.typography.titleMedium)
+                    Button(onClick = { imagePickerLauncher.launch("image/*") }, modifier = Modifier.fillMaxWidth()) {
+                        Text(if (profileImageUri != null) "Change Image" else "Upload Image")
+                    }
+                    if (profileImageUri != null) {
+                        // Show image preview using Coil
+                        androidx.compose.foundation.Image(
+                            painter = coil.compose.rememberAsyncImagePainter(profileImageUri),
+                            contentDescription = "Profile Image",
+                            modifier = Modifier.size(96.dp)
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(32.dp))
@@ -248,8 +285,11 @@ fun EditProfileScreen(
             }
             Button(
                 onClick = {
-                    // TODO: Pass all fields to backend
-                    viewModel.saveProfile(firstName, lastName, email, broadcast, repType, city, about, otherSkill)
+                    viewModel.saveProfile(
+                        firstName, lastName, email, broadcast, repType, city, about, otherSkill,
+                        selectedSkills,
+                        profileImageUri?.toString()
+                    )
                     onProfileSaved()
                 },
                 modifier = Modifier
