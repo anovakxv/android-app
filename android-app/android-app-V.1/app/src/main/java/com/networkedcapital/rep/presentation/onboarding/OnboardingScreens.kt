@@ -29,29 +29,6 @@ fun TermsOfUseScreen(
     Surface(
         color = com.networkedcapital.rep.presentation.theme.RepBackground,
         modifier = Modifier.fillMaxSize()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "Terms of Use",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                color = com.networkedcapital.rep.presentation.theme.RepGreen
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            Card(
-                shape = MaterialTheme.shapes.medium,
-                colors = CardDefaults.cardColors(containerColor = com.networkedcapital.rep.presentation.theme.RepLightGray),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
-                    Text(
                         text = """
 Terms of Use:  
 Version: 1.1
@@ -92,26 +69,25 @@ By using Rep, you acknowledge and agree to uphold these standards.
 For questions, contact us via our website at:  https://networkedcapital.co/contact/
 
 Before proceeding, you must confirm acceptance of these terms.
-""",
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Start,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(48.dp))
-            Button(
-                onClick = {
-                    viewModel.acceptTermsOfUse()
-                    onAccept()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen)
-            ) {
-                Text("Accept Terms of Use", color = MaterialTheme.colorScheme.onPrimary)
-            }
+        Box(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "Terms of Use",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    color = com.networkedcapital.rep.presentation.theme.RepGreen
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Card(
+                    shape = MaterialTheme.shapes.medium,
+                    colors = CardDefaults.cardColors(containerColor = com.networkedcapital.rep.presentation.theme.RepLightGray),
+                    modifier = Modifier.fillMaxWidth().weight(1f)
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
+                            Text(
+                                text = """
     }
 }
 
@@ -152,6 +128,28 @@ fun AboutRepScreen(
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.fillMaxWidth()
                     )
+                                style = MaterialTheme.typography.bodyLarge,
+                                textAlign = TextAlign.Start,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
+            Button(
+                onClick = {
+                    viewModel.acceptTermsOfUse()
+                    onAccept()
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen)
+            ) {
+                Text("Accept Terms of Use", color = MaterialTheme.colorScheme.onPrimary)
+            }
+        }
                     Spacer(modifier = Modifier.height(24.dp))
                     Button(
                         onClick = {
@@ -196,51 +194,48 @@ fun AboutRepScreen(
                     colors = CardDefaults.cardColors(containerColor = com.networkedcapital.rep.presentation.theme.RepLightGray),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            OutlinedTextField(
-                                value = firstName,
-                                onValueChange = { firstName = it },
-                                label = { Text("First Name") },
-                                modifier = Modifier.weight(1f)
+                    Box(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = "About Rep",
+                                style = MaterialTheme.typography.headlineLarge,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                color = com.networkedcapital.rep.presentation.theme.RepGreen
                             )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            OutlinedTextField(
-                                value = lastName,
-                                onValueChange = { lastName = it },
-                                label = { Text("Last Name") },
-                                modifier = Modifier.weight(1f)
-                            )
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Card(
+                                shape = MaterialTheme.shapes.medium,
+                                colors = CardDefaults.cardColors(containerColor = com.networkedcapital.rep.presentation.theme.RepLightGray),
+                                modifier = Modifier.fillMaxWidth().weight(1f)
+                            ) {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
+                                        Text(
+                                            text = "Rep is a platform for representatives to connect, set goals, and collaborate.\n\nRep empowers you to build your network, achieve your goals, and work together with other reps in a secure, supportive environment.",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            textAlign = TextAlign.Center,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
+                                }
+                            }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        OutlinedTextField(
-                            value = email,
-                            onValueChange = { email = it },
-                            label = { Text("Email") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        OutlinedTextField(
-                            value = broadcast,
-                            onValueChange = { broadcast = it },
-                            label = { Text("Broadcast (optional)") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        // Rep Type Picker (Stable DropdownMenu)
-                        var repTypeDropdownExpanded by remember { mutableStateOf(false) }
-                        Box {
-                            OutlinedTextField(
-                                value = repType,
-                                onValueChange = {},
-                                label = { Text("Rep Type") },
-                                readOnly = true,
-                                trailingIcon = {
-                                    IconButton(onClick = { repTypeDropdownExpanded = !repTypeDropdownExpanded }) {
-                                        Icon(
-                                            imageVector = if (repTypeDropdownExpanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
+                        Button(
+                            onClick = {
+                                viewModel.continueAboutRep()
+                                onContinue()
+                            },
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .height(56.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen)
+                        ) {
+                            Text("Continue", color = MaterialTheme.colorScheme.onPrimary)
+                        }
+                    }
                                             contentDescription = null
                                         )
                                     }
