@@ -103,73 +103,35 @@ Before proceeding, you must confirm acceptance of these terms.
             Button(
                 onClick = {
                     viewModel.acceptTermsOfUse()
-                    Card(
-                        shape = MaterialTheme.shapes.medium,
-                        colors = CardDefaults.cardColors(containerColor = com.networkedcapital.rep.presentation.theme.RepLightGray),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
-                            Text(
-                                text = """
-        Terms of Use:  
-        Version: 1.1
-        Effective Date: 7/30/2025
-        App Name: Rep 1
-        Developer: Networked Capital Inc.
+                    onAccept()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen)
+            ) {
+                Text("Accept Terms of Use", color = MaterialTheme.colorScheme.onPrimary)
+            }
+        }
+    }
+}
 
-        Welcome to Rep. By continuing, you agree to the following community guidelines and terms:
-
-        1. Community Standards
-        Users must not post objectionable, offensive, or abusive content.
-        Hate speech, harassment, and explicit material are strictly prohibited.
-        Violators may have their content removed and accounts suspended or banned.
-
-        2. User Responsibilities
-        You are solely responsible for the content you share, create, or promote.
-        Impersonation, deception, or targeted harassment is not tolerated.
-
-        3. Moderation & Enforcement
-        Rep reserves the right to monitor, moderate, and remove content at its discretion.
-        Inappropriate content can be flagged by users and reviewed by our team.
-        Users can block others to prevent unwanted or abusive interactions.
-
-        4. Removal of Objectionable Content    
-        We will review flagged content and remove content that violates this policy within 24 hours of the content being flagged. Users who repeatedly violate our content policy will be ejected from the platform. 
-
-        5. Intellectual Property
-        Rep and its underlying software, design, content, trademarks, logos, and features are the exclusive property of Networked Capital Inc., unless otherwise noted.
-        Users are not permitted to modify, reverse-engineer, reproduce, distribute, or exploit any part of the app or its codebase without prior written consent.
-        All feedback, suggestions, or feature ideas submitted by users may be used by Networked Capital Inc. to improve Rep, with no obligation of compensation unless explicitly agreed upon.
-        Unauthorized use of Rep’s intellectual property may result in termination of service and legal action.
-
-        6. Future Licensing
-        Certain components of Rep may, in the future, be released under an open-source license. However, until such licensing is explicitly announced and documented by Networked Capital Inc., all elements of the Rep software remain proprietary and fully protected under applicable intellectual property laws. Future licensing decisions will not retroactively affect ownership rights, nor shall they be construed as a waiver of any current protections.
-
-        7. Agreement
-        By using Rep, you acknowledge and agree to uphold these standards.
-        For questions, contact us via our website at:  https://networkedcapital.co/contact/
-
-        Before proceeding, you must confirm acceptance of these terms.
-        """,
-                                style = MaterialTheme.typography.bodyLarge,
-                                textAlign = TextAlign.Start,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(24.dp))
-                            Button(
-                                onClick = {
-                                    viewModel.acceptTermsOfUse()
-                                    onAccept()
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(56.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen)
-                            ) {
-                                Text("Accept Terms of Use", color = MaterialTheme.colorScheme.onPrimary)
-                            }
-                        }
-                    }
+@Composable
+fun AboutRepScreen(
+    onContinue: () -> Unit,
+    viewModel: com.networkedcapital.rep.presentation.auth.AuthViewModel = hiltViewModel()
+) {
+    Surface(
+        color = com.networkedcapital.rep.presentation.theme.RepBackground,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
             Text(
                 text = "About Rep",
                 style = MaterialTheme.typography.headlineLarge,
@@ -183,28 +145,26 @@ Before proceeding, you must confirm acceptance of these terms.
                 colors = CardDefaults.cardColors(containerColor = com.networkedcapital.rep.presentation.theme.RepLightGray),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Rep is a platform for representatives to connect, set goals, and collaborate.\n\nRep empowers you to build your network, achieve your goals, and work together with other reps in a secure, supportive environment.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Button(
-                        onClick = {
-                            viewModel.continueAboutRep()
-                            onContinue()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen)
-                    ) {
-                        Text("Continue", color = MaterialTheme.colorScheme.onPrimary)
-                    }
-                }
+                Text(
+                    text = "Rep is a platform for representatives to connect, set goals, and collaborate.\n\nRep empowers you to build your network, achieve your goals, and work together with other reps in a secure, supportive environment.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(48.dp))
+            Button(
+                onClick = {
+                    viewModel.continueAboutRep()
+                    onContinue()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen)
+            ) {
+                Text("Continue", color = MaterialTheme.colorScheme.onPrimary)
             }
         }
     }
