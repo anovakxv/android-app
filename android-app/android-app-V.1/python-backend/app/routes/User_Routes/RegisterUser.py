@@ -84,13 +84,24 @@ def api_register_user_multipart():
     db.session.add(new_user)
     db.session.commit()
     token = jwt.encode({'user_id': new_user.id}, 'your-secret-key', algorithm='HS256')
+    # Build full user dict for frontend
     user_data = {
         "id": new_user.id,
         "message": "Registration successful",
         "email": new_user.email,
         "username": new_user.username,
         "fname": new_user.fname,
-        "lname": new_user.lname
-        # Add other fields as needed
+        "lname": new_user.lname,
+        "phone": new_user.phone,
+        "about": new_user.about,
+        "manual_city": new_user.manual_city,
+        "users_types_id": new_user.users_types_id,
+        "profile_picture_url": getattr(new_user, 'profile_picture_url', None),
+        "skills": [], # Add skills if you have them
+        "broadcast": getattr(new_user, 'broadcast', None),
+        "other_skill": getattr(new_user, 'other_skill', None),
+        "confirmed": getattr(new_user, 'confirmed', True),
+        "device_token": getattr(new_user, 'device_token', None),
+        "twitter_id": getattr(new_user, 'twitter_id', None)
     }
     return jsonify({"result": user_data, "token": token}), 201
