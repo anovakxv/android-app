@@ -121,8 +121,16 @@ fun EditProfileScreen(
     onProfileSaved: () -> Unit,
     viewModel: com.networkedcapital.rep.presentation.auth.AuthViewModel = hiltViewModel()
 ) {
-    var name by remember { mutableStateOf("") }
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var broadcast by remember { mutableStateOf("") }
+    var city by remember { mutableStateOf("") }
+    var about by remember { mutableStateOf("") }
+    var otherSkill by remember { mutableStateOf("") }
+    var repType by remember { mutableStateOf("Lead") }
+    val repTypes = listOf("Lead", "Specialist", "Partner", "Founder")
+    // TODO: Add skills and profile image upload logic
     val authState = viewModel.authState.collectAsState().value
     val isLoading = authState.isLoading
     val errorMessage = authState.errorMessage
@@ -153,12 +161,21 @@ fun EditProfileScreen(
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    OutlinedTextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        label = { Text("Name") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedTextField(
+                            value = firstName,
+                            onValueChange = { firstName = it },
+                            label = { Text("First Name") },
+                            modifier = Modifier.weight(1f)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        OutlinedTextField(
+                            value = lastName,
+                            onValueChange = { lastName = it },
+                            label = { Text("Last Name") },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedTextField(
                         value = email,
@@ -166,6 +183,60 @@ fun EditProfileScreen(
                         label = { Text("Email") },
                         modifier = Modifier.fillMaxWidth()
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = broadcast,
+                        onValueChange = { broadcast = it },
+                        label = { Text("Broadcast (optional)") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    // Rep Type Picker
+                    ExposedDropdownMenuBox(
+                        expanded = false,
+                        onExpandedChange = {}
+                    ) {
+                        OutlinedTextField(
+                            value = repType,
+                            onValueChange = {},
+                            label = { Text("Rep Type") },
+                            readOnly = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = false,
+                            onDismissRequest = {}
+                        ) {
+                            repTypes.forEach { type ->
+                                DropdownMenuItem(
+                                    text = { Text(type) },
+                                    onClick = { repType = type }
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = city,
+                        onValueChange = { city = it },
+                        label = { Text("City") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = about,
+                        onValueChange = { about = it },
+                        label = { Text("About") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = otherSkill,
+                        onValueChange = { otherSkill = it },
+                        label = { Text("Other Skill") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    // TODO: Add skills picker and profile image upload
                 }
             }
             Spacer(modifier = Modifier.height(32.dp))
@@ -177,7 +248,8 @@ fun EditProfileScreen(
             }
             Button(
                 onClick = {
-                    viewModel.saveProfile(name, email)
+                    // TODO: Pass all fields to backend
+                    viewModel.saveProfile(firstName, lastName, email, broadcast, repType, city, about, otherSkill)
                     onProfileSaved()
                 },
                 modifier = Modifier
