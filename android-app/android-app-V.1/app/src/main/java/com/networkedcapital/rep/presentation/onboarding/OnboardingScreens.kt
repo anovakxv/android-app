@@ -99,19 +99,24 @@ Before proceeding, you must confirm acceptance of these terms.
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(48.dp))}
-            
-            Button(
-                onClick = {
-                    viewModel.acceptTermsOfUse()
-                    onAccept()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen)
+            Spacer(modifier = Modifier.height(48.dp))
+
+            Surface(
+                color = com.networkedcapital.rep.presentation.theme.RepBackground,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Accept Terms of Use", color = MaterialTheme.colorScheme.onPrimary)
+                Button(
+                    onClick = {
+                        viewModel.acceptTermsOfUse()
+                        onAccept()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen)
+                ) {
+                    Text("Accept Terms of Use", color = MaterialTheme.colorScheme.onPrimary)
+                }
             }
         }
     }
