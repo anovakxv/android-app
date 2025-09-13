@@ -47,7 +47,9 @@ fun TermsOfUseScreen(
             Card(
                 shape = MaterialTheme.shapes.medium,
                 colors = CardDefaults.cardColors(containerColor = com.networkedcapital.rep.presentation.theme.RepLightGray),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
             ) {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
                     Text(
