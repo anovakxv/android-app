@@ -1,5 +1,6 @@
 package com.networkedcapital.rep.presentation.auth
 
+import android.util.Log
 import android.util.Patterns
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,8 +46,12 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
 
     // Navigate on successful login
-    LaunchedEffect(authState.jwtToken) {
-        if (authState.jwtToken.isNotEmpty() && authState.userId > 0) {
+    LaunchedEffect(authState.jwtToken, authState.isLoggedIn, authState.userId) {
+        val hasToken = authState.jwtToken.isNotEmpty()
+        val loggedIn = authState.isLoggedIn
+        Log.d("LoginScreen", "state: hasToken=$hasToken, isLoggedIn=$loggedIn, userId=${authState.userId}")
+        if (hasToken || loggedIn) {
+            Log.d("LoginScreen", "navigating to Main")
             onLoginSuccess()
         }
     }
