@@ -123,6 +123,7 @@ class AuthViewModel @Inject constructor(
                                 isRegistered = true,
                                 onboardingComplete = true,
                                 userId = user.id,
+                                jwtToken = authRepository.getToken() ?: "",
                                 errorMessage = null
                             )
                         },
@@ -142,7 +143,8 @@ class AuthViewModel @Inject constructor(
         _authState.value = _authState.value.copy(
             isLoggedIn = isLoggedIn,
             isRegistered = isLoggedIn,
-            onboardingComplete = isLoggedIn
+            onboardingComplete = isLoggedIn,
+            jwtToken = if (isLoggedIn) authRepository.getToken() ?: "" else ""
         )
         if (isLoggedIn) {
             getCurrentUser()

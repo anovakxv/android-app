@@ -198,6 +198,10 @@ class AuthRepository @Inject constructor(
         return authInterceptor.getToken() != null
     }
 
+    fun getToken(): String? {
+        return authInterceptor.getToken()
+    }
+
     suspend fun deleteProfile(): Flow<Result<Unit>> = flow {
         try {
             val response = authApiService.deleteProfile()
