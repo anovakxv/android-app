@@ -28,7 +28,7 @@ interface AuthApiService {
     @POST(ApiConfig.LOGOUT)
     suspend fun logout(): Response<LogoutResponse>
     
-    @GET(ApiConfig.GET_ME)
+    @GET(ApiConfig.PROFILE)
     suspend fun getProfile(): Response<User>
     
     @PUT(ApiConfig.EDIT_PROFILE)
