@@ -141,22 +141,18 @@ class AuthViewModel @Inject constructor(
     }
 
     private fun checkAuthStatus() {
-        val isLoggedIn = authRepository.isLoggedIn()
-        val token = if (isLoggedIn) authRepository.getToken() ?: "" else ""
-        var userIdFromToken: Int? = null
-        if (token.isNotEmpty()) {
-            userIdFromToken = parseUserIdFromToken(token)
-        }
+        // For emulator testing: require manual login even if a token exists.
+        // We still treat the user as registered/onboarded to avoid showing the Register/Onboarding screens.
+        val token = authRepository.getToken() ?: ""
+        val userIdFromToken = if (token.isNotEmpty()) parseUserIdFromToken(token) else null
         _authState.value = _authState.value.copy(
-            isLoggedIn = isLoggedIn,
-            isRegistered = isLoggedIn,
-            onboardingComplete = isLoggedIn,
-            jwtToken = token,
+            isLoggedIn = false, // force login screen on app start
+            isRegistered = true,
+            onboardingComplete = true,
+            jwtToken = "", // do not auto-navigate based on token presence
             userId = userIdFromToken ?: _authState.value.userId
         )
-        if (isLoggedIn) {
-            getCurrentUser()
-        }
+        // Do not auto-fetch profile; wait until user logs in explicitly.
     }
     
     fun register(

@@ -31,7 +31,7 @@ fun RepNavigation(
         startDestination = when {
             !authState.isRegistered -> Screen.Register.route
             !authState.onboardingComplete -> Screen.Onboarding.route
-            authState.jwtToken.isNotEmpty() && authState.userId > 0 -> Screen.Main.route
+            authState.isLoggedIn && authState.userId > 0 -> Screen.Main.route
             else -> Screen.Login.route
         },
         modifier = modifier

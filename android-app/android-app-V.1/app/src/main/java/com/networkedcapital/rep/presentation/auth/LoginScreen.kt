@@ -46,11 +46,10 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
 
     // Navigate on successful login
-    LaunchedEffect(authState.jwtToken, authState.isLoggedIn, authState.userId) {
-        val hasToken = authState.jwtToken.isNotEmpty()
+    LaunchedEffect(authState.isLoggedIn) {
         val loggedIn = authState.isLoggedIn
-        Log.d("LoginScreen", "state: hasToken=$hasToken, isLoggedIn=$loggedIn, userId=${authState.userId}")
-        if (hasToken || loggedIn) {
+        Log.d("LoginScreen", "state: isLoggedIn=$loggedIn, userId=${authState.userId}")
+        if (loggedIn) {
             Log.d("LoginScreen", "navigating to Main")
             onLoginSuccess()
         }
