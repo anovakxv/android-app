@@ -232,6 +232,8 @@ class AuthViewModel @Inject constructor(
                     result.fold(
                         onSuccess = { user ->
                             _currentUser.value = user
+                            // Ensure userId is populated so navigation can proceed
+                            _authState.value = _authState.value.copy(userId = user.id)
                         },
                         onFailure = {
                             // If profile fetch fails, user might need to re-login
