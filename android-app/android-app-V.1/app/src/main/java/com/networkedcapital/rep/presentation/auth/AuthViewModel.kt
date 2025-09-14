@@ -8,6 +8,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.util.Base64
+import org.json.JSONObject
 
 data class AuthState(
     val isRegistered: Boolean = false,
@@ -140,11 +142,17 @@ class AuthViewModel @Inject constructor(
 
     private fun checkAuthStatus() {
         val isLoggedIn = authRepository.isLoggedIn()
+        val token = if (isLoggedIn) authRepository.getToken() ?: "" else ""
+        var userIdFromToken: Int? = null
+        if (token.isNotEmpty()) {
+            userIdFromToken = parseUserIdFromToken(token)
+        }
         _authState.value = _authState.value.copy(
             isLoggedIn = isLoggedIn,
             isRegistered = isLoggedIn,
             onboardingComplete = isLoggedIn,
-            jwtToken = if (isLoggedIn) authRepository.getToken() ?: "" else ""
+            jwtToken = token,
+            userId = userIdFromToken ?: _authState.value.userId
         )
         if (isLoggedIn) {
             getCurrentUser()
@@ -241,6 +249,20 @@ class AuthViewModel @Inject constructor(
                         }
                     )
                 }
+        }
+    }
+
+    private fun parseUserIdFromToken(token: String): Int? {
+        return try {
+            val parts = token.split('.')
+            if (parts.size < 2) return null
+            val payload = parts[1]
+            val decoded = String(Base64.decode(payload, Base64.URL_SAFE or Base64.NO_WRAP))
+            val json = JSONObject(decoded)
+            val id = json.optInt("user_id", 0)
+            if (id > 0) id else null
+        } catch (e: Exception) {
+            null
         }
     }
     
