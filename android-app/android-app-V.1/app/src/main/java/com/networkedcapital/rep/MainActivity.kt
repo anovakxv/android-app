@@ -43,67 +43,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             Surface(color = Color.White) {
-                NavHost(navController = navController, startDestination = "login") {
-
-                    composable("login") {
-                        LoginScreen(
-                            onLoginSuccess = {
-                                navController.navigate("main") {
-                                    popUpTo("login") { inclusive = true }
-                                }
-                            },
-                            onNavigateToSignUp = { navController.navigate("register") },
-                            onNavigateToForgotPassword = { navController.navigate("forgot") }
-                        )
-                    }
-
-                    composable("register") {
-                        RegisterScreen(
-                            onNavigateToLogin = {
-                                navController.popBackStack("login", inclusive = false)
-                            },
-                            onRegistrationSuccess = { navController.navigate("editProfile") }
-                        )
-                    }
-
-                    composable("editProfile") {
-                        EditProfileScreen(onProfileSaved = { navController.navigate("terms") })
-                    }
-
-                    composable("terms") {
-                        TermsOfUseScreen(onAccept = { navController.navigate("about") })
-                    }
-
-                    composable("about") {
-                        AboutRepScreen(onContinue = { navController.navigate("main") })
-                    }
-
-                    composable("forgot") {
-                        // TODO: Replace with real ForgotPasswordScreen
-                        Text("Forgot Password Screen Placeholder")
-                    }
-
-                    // Onboarding flow: Terms -> About -> EditProfile
-                    composable("terms") {
-                        TermsOfUseScreen(onAccept = { navController.navigate("about") })
-                    }
-                    composable("about") {
-                        AboutRepScreen(onContinue = { navController.navigate("editProfile") })
-                    }
-                    composable("editProfile") {
-                        EditProfileScreen(onProfileSaved = { navController.navigate("main") })
-                    }
-
-                    composable("main") {
-                        MainScreen(
-                            onNavigateToProfile = {},
-                            onNavigateToPortalDetail = {},
-                            onNavigateToPersonDetail = {},
-                            onNavigateToChat = {},
-                            onLogout = {}
-                        )
-                    }
-                }
+                com.networkedcapital.rep.presentation.navigation.RepNavigation(
+                    navController = navController,
+                    authViewModel = com.networkedcapital.rep.presentation.auth.AuthViewModel()
+                )
             }
         }
     }
