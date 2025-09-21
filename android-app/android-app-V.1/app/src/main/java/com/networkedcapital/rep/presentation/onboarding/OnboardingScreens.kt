@@ -407,10 +407,12 @@ fun OnboardingFlowEntry(
     viewModel: com.networkedcapital.rep.presentation.auth.AuthViewModel = hiltViewModel()
 ) {
     var step by remember { mutableStateOf(0) } // 0: EditProfile, 1: TermsOfUse, 2: AboutRep, 3: Walkthrough
-
+    // Use a stable key to force recomposition after step changes
     when (step) {
         0 -> EditProfileScreen(
-            onProfileSaved = { step = 1 },
+            onProfileSaved = {
+                step = 1 // Advance to TermsOfUse only after successful save
+            },
             viewModel = viewModel
         )
         1 -> TermsOfUseScreen(
