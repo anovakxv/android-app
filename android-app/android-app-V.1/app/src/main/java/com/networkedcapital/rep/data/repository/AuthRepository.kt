@@ -111,8 +111,11 @@ class AuthRepository @Inject constructor(
                     if (user != null) {
                         authInterceptor.saveToken(registerResponse.token)
                         emit(Result.success(user))
+                    } else if (registerResponse.result is String && (registerResponse.result as String).contains("success", ignoreCase = true)) {
+                        // Treat as success even if result is a string
+                        authInterceptor.saveToken(registerResponse.token)
+                        emit(Result.success(User())) // Use default User object
                     } else {
-                        // If result is a string, emit failure with message
                         emit(Result.failure(Exception("Registration failed: ${registerResponse.result}")))
                     }
                 } else {
