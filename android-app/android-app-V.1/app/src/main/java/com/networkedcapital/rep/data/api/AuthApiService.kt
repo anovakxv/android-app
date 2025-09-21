@@ -34,7 +34,7 @@ interface AuthApiService {
     suspend fun getProfile(): Response<User>
     
     @POST(ApiConfig.EDIT_PROFILE)
-    suspend fun updateProfile(@Body user: User): Response<User>
+    suspend fun updateProfile(@Body user: User): Response<UserEditResponse>
     
     @DELETE(ApiConfig.DELETE_PROFILE)
     suspend fun deleteProfile(): Response<Unit>
