@@ -5,6 +5,8 @@ import retrofit2.Response
 import retrofit2.http.*
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 interface AuthApiService {
     
@@ -58,8 +60,7 @@ data class LoginResponse(
     val token: String
 )
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+
 
 @JsonClass(generateAdapter = true)
 data class RegisterResponse(
