@@ -70,9 +70,13 @@ class AuthStateect constructor(
             if (response.isSuccessful) {
                 val registerResponse = response.body()
                 if (registerResponse != null) {
-                    // Save token
-                    authInterceptor.saveToken(registerResponse.token)
-                    emit(Result.success(registerResponse.result))
+                    val user = registerResponse.result as? User
+                    if (user != null) {
+                        authInterceptor.saveToken(registerResponse.token)
+                        emit(Result.success(user))
+                    } else {
+                        emit(Result.failure(Exception("Registration failed: ${registerResponse.result}")))
+                    }
                 } else {
                     emit(Result.failure(Exception("Invalid response")))
                 }

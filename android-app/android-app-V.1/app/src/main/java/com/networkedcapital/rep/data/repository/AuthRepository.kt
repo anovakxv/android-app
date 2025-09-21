@@ -106,11 +106,15 @@ class AuthRepository @Inject constructor(
             if (response.isSuccessful) {
                 val registerResponse = response.body()
                 if (registerResponse != null) {
-                    // Debug: print nested skills mapping
-                    println("[AuthRepository] registerResponse.result.skills: ${registerResponse.result.skills}")
-                    // Save token
-                    authInterceptor.saveToken(registerResponse.token)
-                    emit(Result.success(registerResponse.result))
+                    // Try to cast result to User
+                    val user = registerResponse.result as? User
+                    if (user != null) {
+                        authInterceptor.saveToken(registerResponse.token)
+                        emit(Result.success(user))
+                    } else {
+                        // If result is a string, emit failure with message
+                        emit(Result.failure(Exception("Registration failed: ${registerResponse.result}")))
+                    }
                 } else {
                     emit(Result.failure(Exception("Invalid response")))
                 }
