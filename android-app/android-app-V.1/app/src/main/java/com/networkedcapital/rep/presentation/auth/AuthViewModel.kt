@@ -56,7 +56,9 @@ class AuthViewModel @Inject constructor(
         about: String,
         otherSkill: String,
         skills: Set<String>,
-        profileImageUri: String?
+        profileImageUri: String?,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
     ) {
         viewModelScope.launch {
             _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
@@ -66,11 +68,15 @@ class AuthViewModel @Inject constructor(
                 authRepository.uploadProfileImage(profileImageUri)
                     .catch { throwable ->
                         _authState.value = _authState.value.copy(errorMessage = throwable.message ?: "Image upload failed")
+                        onError(throwable.message ?: "Image upload failed")
                     }
                     .collect { result ->
                         result.fold(
                             onSuccess = { url -> imageUrl = url },
-                            onFailure = { throwable -> _authState.value = _authState.value.copy(errorMessage = throwable.message ?: "Image upload failed") }
+                            onFailure = { throwable -> 
+                                _authState.value = _authState.value.copy(errorMessage = throwable.message ?: "Image upload failed")
+                                onError(throwable.message ?: "Image upload failed")
+                            }
                         )
                     }
             }
@@ -82,6 +88,7 @@ class AuthViewModel @Inject constructor(
                         isLoading = false,
                         errorMessage = throwable.message ?: "Profile update failed"
                     )
+                    onError(throwable.message ?: "Profile update failed")
                 }
                 .collect { result ->
                     result.fold(
@@ -93,12 +100,14 @@ class AuthViewModel @Inject constructor(
                                 userId = user.id,
                                 errorMessage = null
                             )
+                            onSuccess()
                         },
                         onFailure = { throwable ->
                             _authState.value = _authState.value.copy(
                                 isLoading = false,
                                 errorMessage = throwable.message ?: "Profile update failed"
                             )
+                            onError(throwable.message ?: "Profile update failed")
                         }
                     )
                 }

@@ -214,6 +214,7 @@ fun EditProfileScreen(
     }
     val isLoading = authState.isLoading
     val errorMessage = authState.errorMessage
+    var saveError by remember { mutableStateOf<String?>(null) }
     Surface(
         color = com.networkedcapital.rep.presentation.theme.RepBackground,
         modifier = Modifier.fillMaxSize()
@@ -249,9 +250,10 @@ fun EditProfileScreen(
                                 about,
                                 otherSkill,
                                 selectedSkills.map { it.displayName }.toSet(),
-                                profileImageUri?.toString()
+                                profileImageUri?.toString(),
+                                onSuccess = { saveError = null; onProfileSaved() },
+                                onError = { msg -> saveError = msg }
                             )
-                            onProfileSaved()
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen),
                         modifier = Modifier
@@ -390,6 +392,9 @@ fun EditProfileScreen(
                 }
                 if (errorMessage != null) {
                     Text(text = errorMessage ?: "", color = MaterialTheme.colorScheme.error)
+                }
+                if (saveError != null) {
+                    Text(text = saveError ?: "", color = MaterialTheme.colorScheme.error)
                 }
             }
         }
