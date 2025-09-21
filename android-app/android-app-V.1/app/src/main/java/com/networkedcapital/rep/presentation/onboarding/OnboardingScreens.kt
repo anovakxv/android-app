@@ -215,6 +215,7 @@ fun EditProfileScreen(
     val isLoading = authState.isLoading
     val errorMessage = authState.errorMessage
     var saveError by remember { mutableStateOf<String?>(null) }
+    val navController = androidx.navigation.compose.rememberNavController()
     Surface(
         color = com.networkedcapital.rep.presentation.theme.RepBackground,
         modifier = Modifier.fillMaxSize()
@@ -253,7 +254,10 @@ fun EditProfileScreen(
                                 profileImageUri?.toString(),
                                 onSuccess = {
                                     saveError = null
-                                    onProfileSaved()
+                                    // Use RepNavigation to progress onboarding
+                                    navController.navigate(com.networkedcapital.rep.presentation.navigation.Screen.Terms.route) {
+                                        popUpTo(com.networkedcapital.rep.presentation.navigation.Screen.EditProfile.route) { inclusive = true }
+                                    }
                                 },
                                 onError = { msg -> saveError = msg }
                             )
@@ -410,40 +414,8 @@ fun OnboardingFlowEntry(
     navController: androidx.navigation.NavHostController,
     viewModel: com.networkedcapital.rep.presentation.auth.AuthViewModel = hiltViewModel()
 ) {
-    var step by remember { mutableStateOf(0) } // 0: EditProfile, 1: TermsOfUse, 2: AboutRep, 3: Walkthrough
-    // Use a key to force recomposition after step changes
-    when (step) {
-        0 -> key(step) {
-            EditProfileScreen(
-                onProfileSaved = {
-                    step = 1 // Advance to TermsOfUse only after successful save
-                },
-                viewModel = viewModel
-            )
-        }
-        1 -> key(step) {
-            TermsOfUseScreen(
-                onAccept = { step = 2 },
-                viewModel = viewModel
-            )
-        }
-        2 -> key(step) {
-            AboutRepScreen(
-                onContinue = { step = 3 },
-                viewModel = viewModel
-            )
-        }
-        3 -> key(step) {
-            AppWalkthroughScreen(
-                onFinish = {
-                    viewModel.completeOnboarding()
-                    navController.navigate(com.networkedcapital.rep.presentation.navigation.Screen.Main.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-            )
-        }
-    }
+    // Remove local step-based navigation, rely on RepNavigation
+    // ...existing code...
 }
 
 @Composable
