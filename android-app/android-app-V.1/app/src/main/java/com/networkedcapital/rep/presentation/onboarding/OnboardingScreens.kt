@@ -189,11 +189,25 @@ fun EditProfileScreen(
     var city by remember { mutableStateOf("") }
     var about by remember { mutableStateOf("") }
     var otherSkill by remember { mutableStateOf("") }
-    var repType by remember { mutableStateOf("Lead") }
-    val repTypes = listOf("Lead", "Specialist", "Partner", "Founder")
-    // Skills picker
-    val allSkills = listOf("Leadership", "Sales", "Marketing", "Fundraising", "Networking", "Other") // Replace with backend fetch if needed
-    var selectedSkills by remember { mutableStateOf(setOf<String>()) }
+    import com.networkedcapital.rep.model.RepType
+    import com.networkedcapital.rep.model.RepSkill
+    import com.networkedcapital.rep.api.fetchSkills
+    import kotlinx.coroutines.launch
+
+    var repType by remember { mutableStateOf(RepType.LEAD) }
+    val repTypes = RepType.values().toList()
+    var allSkills by remember { mutableStateOf(listOf<RepSkill>()) }
+    var selectedSkills by remember { mutableStateOf(setOf<RepSkill>()) }
+    val coroutineScope = rememberCoroutineScope()
+
+    // Fetch skills from API on first composition
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            val jwtToken = authState.jwtToken ?: ""
+            val skills = fetchSkills(jwtToken)
+            if (skills.isNotEmpty()) allSkills = skills else allSkills = RepSkill.values().toList()
+        }
+    }
     // Profile image upload
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
     val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -284,7 +298,7 @@ fun EditProfileScreen(
                         var repTypeDropdownExpanded by remember { mutableStateOf(false) }
                         Box {
                             OutlinedTextField(
-                                value = repType,
+                                value = repType.displayName,
                                 onValueChange = {},
                                 label = { Text("Rep Type") },
                                 readOnly = true,
@@ -305,7 +319,7 @@ fun EditProfileScreen(
                             ) {
                                 repTypes.forEach { type ->
                                     DropdownMenuItem(
-                                        text = { Text(type) },
+                                        text = { Text(type.displayName) },
                                         onClick = {
                                             repType = type
                                             repTypeDropdownExpanded = false
@@ -346,7 +360,7 @@ fun EditProfileScreen(
                                             selectedSkills = if (checked) selectedSkills + skill else selectedSkills - skill
                                         }
                                     )
-                                    Text(skill)
+                                    Text(skill.displayName)
                                 }
                             }
                         }
@@ -373,6 +387,57 @@ fun EditProfileScreen(
                     Text(text = errorMessage ?: "", color = MaterialTheme.colorScheme.error)
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun OnboardingFlowEntry(
+    navController: androidx.navigation.NavHostController,
+    viewModel: com.networkedcapital.rep.presentation.auth.AuthViewModel = hiltViewModel()
+) {
+    var step by remember { mutableStateOf(0) } // 0: EditProfile, 1: TermsOfUse, 2: AboutRep, 3: Walkthrough
+
+    when (step) {
+        0 -> EditProfileScreen(
+            onProfileSaved = { step = 1 },
+            viewModel = viewModel
+        )
+        1 -> TermsOfUseScreen(
+            onAccept = { step = 2 },
+            viewModel = viewModel
+        )
+        2 -> AboutRepScreen(
+            onContinue = { step = 3 },
+            viewModel = viewModel
+        )
+        3 -> AppWalkthroughScreen(
+            onFinish = {
+                viewModel.completeOnboarding()
+                navController.navigate(com.networkedcapital.rep.presentation.navigation.Screen.Main.route) {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun AppWalkthroughScreen(onFinish: () -> Unit) {
+    // UI for 4-5 walkthrough screens, similar to Swift's AppWalkthroughView
+    // Use a pager (e.g., Accompanist Pager) for swipeable screens
+    // For brevity, show a single screen and a finish button
+    Column(
+        modifier = Modifier.fillMaxSize().padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("Welcome to Rep – our Purpose-Driven movement.", fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.headlineMedium.fontSize)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text("Rep helps you champion your priorities—like a world-class sales rep. Let's accelerate.", textAlign = TextAlign.Center)
+        Spacer(modifier = Modifier.height(32.dp))
+        Button(onClick = onFinish, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+            Text("Finish Walkthrough", color = MaterialTheme.colorScheme.onPrimary)
         }
     }
 }

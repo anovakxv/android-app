@@ -58,18 +58,18 @@ fun RegisterScreen(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Already have an account?")
+            Text("Already have an account? :", fontSize = 16.sp, color = Color.Gray)
             TextButton(onClick = onNavigateToLogin) {
                 Text(
                     "Login",
                     color = RepGreen,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp,
+                    modifier = Modifier.height(60.dp).padding(horizontal = 24.dp)
                 )
             }
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
+        Spacer(modifier = Modifier.height(8.dp))
         // Rep Logo placeholder
         Card(
             modifier = Modifier.size(80.dp),
@@ -87,17 +87,15 @@ fun RegisterScreen(
                 )
             }
         }
-
         Spacer(modifier = Modifier.height(24.dp))
-
         Text(
             text = "Create Account:",
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF1A1C29),
+            fontSize = 20.sp
         )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
+        Spacer(modifier = Modifier.height(16.dp))
         // Name fields
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -107,28 +105,33 @@ fun RegisterScreen(
                 value = firstName,
                 onValueChange = { firstName = it },
                 placeholder = "First Name",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                autocapitalization = KeyboardCapitalization.Words
             )
             StyledRegisterTextField(
                 value = lastName,
                 onValueChange = { lastName = it },
                 placeholder = "Last Name",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                autocapitalization = KeyboardCapitalization.Words
             )
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Email:",
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF1A1C29),
+            fontSize = 20.sp,
+            modifier = Modifier.padding(top = 8.dp)
+        )
         StyledRegisterTextField(
             value = email,
             onValueChange = { email = it },
             placeholder = "Email address",
             keyboardType = KeyboardType.Email,
+            autocapitalization = KeyboardCapitalization.None,
             modifier = Modifier.fillMaxWidth()
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         StyledRegisterTextField(
             value = password,
             onValueChange = { password = it },
@@ -139,9 +142,6 @@ fun RegisterScreen(
             onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
             modifier = Modifier.fillMaxWidth()
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         StyledRegisterTextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
@@ -152,19 +152,15 @@ fun RegisterScreen(
             onPasswordVisibilityChange = { confirmPasswordVisible = !confirmPasswordVisible },
             modifier = Modifier.fillMaxWidth()
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         StyledRegisterTextField(
             value = phone,
             onValueChange = { phone = it },
             placeholder = "Phone number (optional)",
             keyboardType = KeyboardType.Phone,
+            autocapitalization = KeyboardCapitalization.None,
             modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(24.dp))
-
         // Error message
         authState.errorMessage?.let { error ->
             Text(
@@ -174,7 +170,6 @@ fun RegisterScreen(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
         }
-
         // Register button
         val isFormValid = firstName.isNotBlank() &&
                 lastName.isNotBlank() &&
@@ -182,14 +177,13 @@ fun RegisterScreen(
                 password.isNotBlank() &&
                 password == confirmPassword &&
                 password.length >= 6
-
         Button(
             onClick = { viewModel.register(firstName, lastName, email, password, phone) },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(54.dp),
+                .height(64.dp),
             enabled = !authState.isLoading && isFormValid,
-            shape = RoundedCornerShape(14.dp)
+            shape = RoundedCornerShape(16.dp)
         ) {
             if (authState.isLoading) {
                 CircularProgressIndicator(
@@ -197,9 +191,23 @@ fun RegisterScreen(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {
-                Text("Next", fontSize = 16.sp)
+                Text("Next", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
         }
+        Spacer(modifier = Modifier.height(24.dp))
+        // Progress bar at bottom
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(134.dp)
+                    .height(5.dp)
+                    .background(Color.Black, RoundedCornerShape(100.dp))
+            )
+        }
+        Spacer(modifier = Modifier.height(40.dp))
     }
 }
 
