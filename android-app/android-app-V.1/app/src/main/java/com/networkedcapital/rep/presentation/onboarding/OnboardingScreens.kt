@@ -251,10 +251,14 @@ fun EditProfileScreen(
                                 otherSkill,
                                 selectedSkills.map { it.displayName }.toSet(),
                                 profileImageUri?.toString(),
-                                onSuccess = { saveError = null; onProfileSaved() },
+                                onSuccess = {
+                                    saveError = null
+                                    onProfileSaved()
+                                },
                                 onError = { msg -> saveError = msg }
                             )
                         },
+                        enabled = !isLoading,
                         colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen),
                         modifier = Modifier
                             .height(36.dp)
