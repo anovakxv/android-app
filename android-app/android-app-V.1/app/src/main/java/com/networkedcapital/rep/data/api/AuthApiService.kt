@@ -58,8 +58,14 @@ data class LoginResponse(
     val token: String
 )
 
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
+
+@JsonClass(generateAdapter = true)
 data class RegisterResponse(
-    val result: User,
+    @Json(name = "result")
+    val result: Any?,
+    @Json(name = "token")
     val token: String
 )
 
