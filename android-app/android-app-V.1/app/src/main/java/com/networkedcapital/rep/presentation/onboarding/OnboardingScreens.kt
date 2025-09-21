@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import android.util.Log
 
 @Composable
 fun TermsOfUseScreen(
@@ -112,6 +113,11 @@ Before proceeding, you must confirm acceptance of these terms.
                     onClick = {
                         viewModel.acceptTermsOfUse()
                         onAccept()
+                        Log.d("TermsOfUseScreen", "Accept Terms button clicked")
+        viewModel.acceptTermsOfUse()
+        Log.d("TermsOfUseScreen", "Calling onAccept callback")
+        onAccept()
+    },
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -239,26 +245,33 @@ fun EditProfileScreen(
                         color = com.networkedcapital.rep.presentation.theme.RepGreen,
                         modifier = Modifier.weight(1f)
                     )
-                    Button(
-                        onClick = {
-                            viewModel.saveProfile(
-                                firstName,
-                                lastName,
-                                email,
-                                broadcast,
-                                repType.displayName,
-                                city,
-                                about,
-                                otherSkill,
-                                selectedSkills.map { it.displayName }.toSet(),
-                                profileImageUri?.toString(),
-                                onSuccess = {
-                                    saveError = null
-                                    onProfileSaved()
-                                },
-                                onError = { msg -> saveError = msg }
-                            )
-                        },
+                   Button(
+    onClick = {
+        Log.d("EditProfileScreen", "Save button clicked")
+        viewModel.saveProfile(
+            firstName,
+            lastName,
+            email,
+            broadcast,
+            repType.displayName,
+            city,
+            about,
+            otherSkill,
+            selectedSkills.map { it.displayName }.toSet(),
+            profileImageUri?.toString(),
+            onSuccess = {
+                Log.d("EditProfileScreen", "onSuccess callback triggered")
+                saveError = null
+                onProfileSaved()
+            },
+            onError = { msg ->
+                Log.d("EditProfileScreen", "onError callback triggered: $msg")
+                saveError = msg
+            }
+        )
+    },
+    // ...existing code...
+)
                         enabled = !isLoading,
                         colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen),
                         modifier = Modifier
