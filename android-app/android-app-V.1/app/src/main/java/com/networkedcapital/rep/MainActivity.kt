@@ -43,9 +43,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             Surface(color = Color.White) {
+                val authViewModel = androidx.hilt.navigation.compose.hiltViewModel<com.networkedcapital.rep.presentation.auth.AuthViewModel>()
                 com.networkedcapital.rep.presentation.navigation.RepNavigation(
                     navController = navController,
-                    authViewModel = com.networkedcapital.rep.presentation.auth.AuthViewModel()
+                    authViewModel = authViewModel
                 )
             }
         }
