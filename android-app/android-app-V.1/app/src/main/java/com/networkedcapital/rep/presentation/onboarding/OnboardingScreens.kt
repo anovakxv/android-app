@@ -17,14 +17,12 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import coil.compose.rememberAsyncImagePainter
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 
-@androidx.compose.material3.ExperimentalMaterial3Api
 @Composable
 fun TermsOfUseScreen(
     onAccept: () -> Unit,
