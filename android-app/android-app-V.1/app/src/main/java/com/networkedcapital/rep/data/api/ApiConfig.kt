@@ -6,7 +6,7 @@ object ApiConfig {
     // - "http://10.0.2.2:5000/" (Android emulator accessing host machine)
     // - "http://localhost:5000/" (if running on same machine)
     // - "http://192.168.1.xxx:5000/" (specific IP address)
-    const val BASE_URL = "http://10.0.2.2:5000/"
+    const val BASE_URL = "https://rep-june2025.onrender.com/"
     
     // Authentication endpoints - match Flask LoginActions.py
     const val LOGIN = "api/user/login"
