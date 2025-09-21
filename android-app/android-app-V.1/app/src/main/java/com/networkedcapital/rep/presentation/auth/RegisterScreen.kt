@@ -105,15 +105,13 @@ fun RegisterScreen(
                 value = firstName,
                 onValueChange = { firstName = it },
                 placeholder = "First Name",
-                modifier = Modifier.weight(1f),
-                autocapitalization = KeyboardCapitalization.Words
+                modifier = Modifier.weight(1f)
             )
             StyledRegisterTextField(
                 value = lastName,
                 onValueChange = { lastName = it },
                 placeholder = "Last Name",
-                modifier = Modifier.weight(1f),
-                autocapitalization = KeyboardCapitalization.Words
+                modifier = Modifier.weight(1f)
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -129,7 +127,6 @@ fun RegisterScreen(
             onValueChange = { email = it },
             placeholder = "Email address",
             keyboardType = KeyboardType.Email,
-            autocapitalization = KeyboardCapitalization.None,
             modifier = Modifier.fillMaxWidth()
         )
         StyledRegisterTextField(
@@ -157,7 +154,6 @@ fun RegisterScreen(
             onValueChange = { phone = it },
             placeholder = "Phone number (optional)",
             keyboardType = KeyboardType.Phone,
-            autocapitalization = KeyboardCapitalization.None,
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(24.dp))
