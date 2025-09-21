@@ -128,11 +128,11 @@ class AuthStateect constructor(
         try {
             val response = authApiService.updateProfile(user)
             if (response.isSuccessful) {
-                val updatedUser = response.body()
-                if (updatedUser != null) {
-                    emit(Result.success(updatedUser))
+                val editResponse = response.body()
+                if (editResponse != null && editResponse.result != null) {
+                    emit(Result.success(editResponse.result))
                 } else {
-                    emit(Result.failure(Exception("Update failed")))
+                    emit(Result.failure(Exception("Update failed: missing user data")))
                 }
             } else {
                 emit(Result.failure(Exception("Profile update failed: ${response.message()}")))
