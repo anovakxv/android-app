@@ -274,13 +274,6 @@ fun EditProfileScreen(
                     ) {
                         Text("Save", color = MaterialTheme.colorScheme.onPrimary)
                     }
-                        enabled = !isLoading,
-                        colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen),
-                        modifier = Modifier
-                            .height(36.dp)
-                    ) {
-                        Text("Save", color = MaterialTheme.colorScheme.onPrimary)
-                    }
                 }
                 Spacer(modifier = Modifier.height(24.dp))
                 Card(
