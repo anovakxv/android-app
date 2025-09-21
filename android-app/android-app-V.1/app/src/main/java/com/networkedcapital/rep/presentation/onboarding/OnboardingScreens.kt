@@ -194,6 +194,7 @@ fun EditProfileScreen(
     var about by remember { mutableStateOf("") }
     var otherSkill by remember { mutableStateOf("") }
 
+    val authState = viewModel.authState.collectAsState().value
     var repType by remember { mutableStateOf(RepType.LEAD) }
     val repTypes = RepType.values().toList()
     var allSkills by remember { mutableStateOf(listOf<RepSkill>()) }
@@ -213,7 +214,6 @@ fun EditProfileScreen(
     val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         profileImageUri = uri
     }
-    val authState = viewModel.authState.collectAsState().value
     val isLoading = authState.isLoading
     val errorMessage = authState.errorMessage
     Surface(
@@ -242,8 +242,15 @@ fun EditProfileScreen(
                     Button(
                         onClick = {
                             viewModel.saveProfile(
-                                firstName, lastName, email, broadcast, repType, city, about, otherSkill,
-                                selectedSkills,
+                                firstName,
+                                lastName,
+                                email,
+                                broadcast,
+                                repType.displayName,
+                                city,
+                                about,
+                                otherSkill,
+                                selectedSkills.map { it.displayName }.toSet(),
                                 profileImageUri?.toString()
                             )
                             onProfileSaved()
