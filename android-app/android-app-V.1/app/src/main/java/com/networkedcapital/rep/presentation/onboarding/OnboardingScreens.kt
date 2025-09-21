@@ -1,4 +1,8 @@
 package com.networkedcapital.rep.presentation.onboarding
+import com.networkedcapital.rep.model.RepType
+import com.networkedcapital.rep.model.RepSkill
+import com.networkedcapital.rep.api.fetchSkills
+import kotlinx.coroutines.launch
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -189,10 +193,6 @@ fun EditProfileScreen(
     var city by remember { mutableStateOf("") }
     var about by remember { mutableStateOf("") }
     var otherSkill by remember { mutableStateOf("") }
-    import com.networkedcapital.rep.model.RepType
-    import com.networkedcapital.rep.model.RepSkill
-    import com.networkedcapital.rep.api.fetchSkills
-    import kotlinx.coroutines.launch
 
     var repType by remember { mutableStateOf(RepType.LEAD) }
     val repTypes = RepType.values().toList()
