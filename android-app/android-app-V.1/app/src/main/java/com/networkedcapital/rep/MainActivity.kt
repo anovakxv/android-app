@@ -33,7 +33,7 @@ import com.networkedcapital.rep.presentation.onboarding.EditProfileScreen
 import com.networkedcapital.rep.presentation.onboarding.TermsOfUseScreen
 import com.networkedcapital.rep.presentation.onboarding.AboutRepScreen
 import com.networkedcapital.rep.presentation.main.MainScreen
-import com.networkedcapital.rep.presentation.auth.OnboardingScreen
+// Removed unresolved import for OnboardingScreen
 
 @androidx.compose.material3.ExperimentalMaterial3Api
 @AndroidEntryPoint
@@ -83,10 +83,15 @@ class MainActivity : ComponentActivity() {
                         Text("Forgot Password Screen Placeholder")
                     }
 
-                    composable("onboarding") {
-                        OnboardingScreen(
-                            onOnboardingComplete = { navController.navigate("main") }
-                        )
+                    // Onboarding flow: Terms -> About -> EditProfile
+                    composable("terms") {
+                        TermsOfUseScreen(onAccept = { navController.navigate("about") })
+                    }
+                    composable("about") {
+                        AboutRepScreen(onContinue = { navController.navigate("editProfile") })
+                    }
+                    composable("editProfile") {
+                        EditProfileScreen(onProfileSaved = { navController.navigate("main") })
                     }
 
                     composable("main") {
