@@ -255,7 +255,7 @@ fun EditProfileScreen(
                                 onSuccess = {
                                     saveError = null
                                     // Use RepNavigation to progress onboarding
-                                    navController.navigate(com.networkedcapital.rep.presentation.navigation.Screen.Terms.route) {
+                                    navController.navigate(com.networkedcapital.rep.presentation.navigation.Screen.Onboarding.route) {
                                         popUpTo(com.networkedcapital.rep.presentation.navigation.Screen.EditProfile.route) { inclusive = true }
                                     }
                                 },
