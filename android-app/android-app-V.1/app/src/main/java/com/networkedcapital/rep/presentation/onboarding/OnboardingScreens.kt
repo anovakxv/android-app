@@ -111,13 +111,10 @@ Before proceeding, you must confirm acceptance of these terms.
             ) {
                 Button(
                     onClick = {
-                        viewModel.acceptTermsOfUse()
-                        onAccept()
                         Log.d("TermsOfUseScreen", "Accept Terms button clicked")
-        viewModel.acceptTermsOfUse()
-        Log.d("TermsOfUseScreen", "Calling onAccept callback")
-        onAccept()
-    },
+                        viewModel.acceptTermsOfUse()
+                        Log.d("TermsOfUseScreen", "Calling onAccept callback")
+                        onAccept()
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -245,33 +242,38 @@ fun EditProfileScreen(
                         color = com.networkedcapital.rep.presentation.theme.RepGreen,
                         modifier = Modifier.weight(1f)
                     )
-                   Button(
-    onClick = {
-        Log.d("EditProfileScreen", "Save button clicked")
-        viewModel.saveProfile(
-            firstName,
-            lastName,
-            email,
-            broadcast,
-            repType.displayName,
-            city,
-            about,
-            otherSkill,
-            selectedSkills.map { it.displayName }.toSet(),
-            profileImageUri?.toString(),
-            onSuccess = {
-                Log.d("EditProfileScreen", "onSuccess callback triggered")
-                saveError = null
-                onProfileSaved()
-            },
-            onError = { msg ->
-                Log.d("EditProfileScreen", "onError callback triggered: $msg")
-                saveError = msg
-            }
-        )
-    },
-    // ...existing code...
-)
+                    Button(
+                        onClick = {
+                            Log.d("EditProfileScreen", "Save button clicked")
+                            viewModel.saveProfile(
+                                firstName,
+                                lastName,
+                                email,
+                                broadcast,
+                                repType.displayName,
+                                city,
+                                about,
+                                otherSkill,
+                                selectedSkills.map { it.displayName }.toSet(),
+                                profileImageUri?.toString(),
+                                onSuccess = {
+                                    Log.d("EditProfileScreen", "onSuccess callback triggered")
+                                    saveError = null
+                                    onProfileSaved()
+                                },
+                                onError = { msg ->
+                                    Log.d("EditProfileScreen", "onError callback triggered: $msg")
+                                    saveError = msg
+                                }
+                            )
+                        },
+                        enabled = !isLoading,
+                        colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen),
+                        modifier = Modifier
+                            .height(36.dp)
+                    ) {
+                        Text("Save", color = MaterialTheme.colorScheme.onPrimary)
+                    }
                         enabled = !isLoading,
                         colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen),
                         modifier = Modifier
