@@ -215,7 +215,7 @@ fun EditProfileScreen(
     val isLoading = authState.isLoading
     val errorMessage = authState.errorMessage
     var saveError by remember { mutableStateOf<String?>(null) }
-    val navController = androidx.navigation.compose.rememberNavController()
+    // Use navigation from parent composable (RepNavigation)
     Surface(
         color = com.networkedcapital.rep.presentation.theme.RepBackground,
         modifier = Modifier.fillMaxSize()
@@ -254,10 +254,7 @@ fun EditProfileScreen(
                                 profileImageUri?.toString(),
                                 onSuccess = {
                                     saveError = null
-                                    // Use RepNavigation to progress onboarding
-                                    navController.navigate(com.networkedcapital.rep.presentation.navigation.Screen.Onboarding.route) {
-                                        popUpTo(com.networkedcapital.rep.presentation.navigation.Screen.EditProfile.route) { inclusive = true }
-                                    }
+                                    onProfileSaved()
                                 },
                                 onError = { msg -> saveError = msg }
                             )
