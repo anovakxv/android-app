@@ -46,7 +46,7 @@ fun RepNavigation(
                     }
                 },
                 onRegistrationSuccess = {
-                    navController.navigate(Screen.Onboarding.route) {
+                    navController.navigate(Screen.EditProfile.route) {
                         popUpTo(Screen.Register.route) { inclusive = true }
                     }
                 }
@@ -71,6 +71,16 @@ fun RepNavigation(
             )
         }
 
+        composable(Screen.EditProfile.route) {
+            EditProfileScreen(
+                onProfileSaved = {
+                    navController.navigate(Screen.Onboarding.route) {
+                        popUpTo(Screen.EditProfile.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+        
         composable(Screen.Onboarding.route) {
             TermsOfUseScreen(
                 onAccept = {
@@ -84,18 +94,8 @@ fun RepNavigation(
         composable(Screen.AboutRep.route) {
             AboutRepScreen(
                 onContinue = {
-                    navController.navigate(Screen.EditProfile.route) {
-                        popUpTo(Screen.AboutRep.route) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        composable(Screen.EditProfile.route) {
-            EditProfileScreen(
-                onProfileSaved = {
                     navController.navigate(Screen.Main.route) {
-                        popUpTo(Screen.EditProfile.route) { inclusive = true }
+                        popUpTo(Screen.AboutRep.route) { inclusive = true }
                     }
                 }
             )
