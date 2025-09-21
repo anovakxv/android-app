@@ -52,7 +52,7 @@ fun RepNavigation(
                 }
             )
         }
-        
+
         composable(Screen.Login.route) {
             LoginScreen(
                 onLoginSuccess = {
@@ -66,40 +66,39 @@ fun RepNavigation(
                     }
                 },
                 onNavigateToForgotPassword = {
-                    // You can navigate to a forgot password screen if you have one, or just pop for now
                     navController.popBackStack()
                 }
             )
         }
-        
+
         composable(Screen.Onboarding.route) {
-                TermsOfUseScreen(
-                    onAccept = {
-                        navController.navigate(Screen.AboutRep.route) {
-                            popUpTo(Screen.Onboarding.route) { inclusive = true }
-                        }
+            TermsOfUseScreen(
+                onAccept = {
+                    navController.navigate(Screen.AboutRep.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
                     }
-                )
-            }
+                }
+            )
+        }
 
-            composable(Screen.AboutRep.route) {
-                AboutRepScreen(
-                    onContinue = {
-                        navController.navigate(Screen.EditProfile.route) {
-                            popUpTo(Screen.AboutRep.route) { inclusive = true }
-                        }
+        composable(Screen.AboutRep.route) {
+            AboutRepScreen(
+                onContinue = {
+                    navController.navigate(Screen.EditProfile.route) {
+                        popUpTo(Screen.AboutRep.route) { inclusive = true }
                     }
-                )
-            }
+                }
+            )
+        }
 
-            composable(Screen.EditProfile.route) {
-                EditProfileScreen(
-                    onProfileSaved = {
-                        navController.navigate(Screen.Main.route) {
-                            popUpTo(Screen.EditProfile.route) { inclusive = true }
-                        }
+        composable(Screen.EditProfile.route) {
+            EditProfileScreen(
+                onProfileSaved = {
+                    navController.navigate(Screen.Main.route) {
+                        popUpTo(Screen.EditProfile.route) { inclusive = true }
                     }
-                )
+                }
+            )
         }
         
         composable(Screen.Main.route) {
