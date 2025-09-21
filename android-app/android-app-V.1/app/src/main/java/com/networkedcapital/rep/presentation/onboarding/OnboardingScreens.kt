@@ -411,30 +411,38 @@ fun OnboardingFlowEntry(
     viewModel: com.networkedcapital.rep.presentation.auth.AuthViewModel = hiltViewModel()
 ) {
     var step by remember { mutableStateOf(0) } // 0: EditProfile, 1: TermsOfUse, 2: AboutRep, 3: Walkthrough
-    // Use a stable key to force recomposition after step changes
+    // Use a key to force recomposition after step changes
     when (step) {
-        0 -> EditProfileScreen(
-            onProfileSaved = {
-                step = 1 // Advance to TermsOfUse only after successful save
-            },
-            viewModel = viewModel
-        )
-        1 -> TermsOfUseScreen(
-            onAccept = { step = 2 },
-            viewModel = viewModel
-        )
-        2 -> AboutRepScreen(
-            onContinue = { step = 3 },
-            viewModel = viewModel
-        )
-        3 -> AppWalkthroughScreen(
-            onFinish = {
-                viewModel.completeOnboarding()
-                navController.navigate(com.networkedcapital.rep.presentation.navigation.Screen.Main.route) {
-                    popUpTo(0) { inclusive = true }
+        0 -> key(step) {
+            EditProfileScreen(
+                onProfileSaved = {
+                    step = 1 // Advance to TermsOfUse only after successful save
+                },
+                viewModel = viewModel
+            )
+        }
+        1 -> key(step) {
+            TermsOfUseScreen(
+                onAccept = { step = 2 },
+                viewModel = viewModel
+            )
+        }
+        2 -> key(step) {
+            AboutRepScreen(
+                onContinue = { step = 3 },
+                viewModel = viewModel
+            )
+        }
+        3 -> key(step) {
+            AppWalkthroughScreen(
+                onFinish = {
+                    viewModel.completeOnboarding()
+                    navController.navigate(com.networkedcapital.rep.presentation.navigation.Screen.Main.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 }
 
