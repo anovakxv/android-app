@@ -171,13 +171,13 @@ fun EditProfileScreen(
                 ) {
                     StyledProfileTextField(
                         value = firstName,
-                        onValueChange = { value -> firstName = value },
+                        onValueChange = { firstName = it },
                         placeholder = "First Name",
                         modifier = Modifier.weight(1f)
                     )
                     StyledProfileTextField(
                         value = lastName,
-                        onValueChange = { value -> lastName = value },
+                        onValueChange = { lastName = it },
                         placeholder = "Last Name",
                         modifier = Modifier.weight(1f)
                     )
@@ -185,14 +185,14 @@ fun EditProfileScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 StyledProfileTextField(
                     value = email,
-                    onValueChange = { value -> email = value },
+                    onValueChange = { email = it },
                     placeholder = "Email",
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 StyledProfileTextField(
                     value = broadcast,
-                    onValueChange = { value -> broadcast = value },
+                    onValueChange = { broadcast = it },
                     placeholder = "Broadcast (optional)",
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -201,33 +201,33 @@ fun EditProfileScreen(
                 // ...existing code for dropdown...
                 StyledProfileTextField(
                     value = city,
-                    onValueChange = { value -> city = value },
+                    onValueChange = { city = it },
                     placeholder = "City",
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 StyledProfileTextField(
                     value = about,
-                    onValueChange = { value -> about = value },
+                    onValueChange = { about = it },
                     placeholder = "About",
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 StyledProfileTextField(
                     value = otherSkill,
-                    onValueChange = { value -> otherSkill = value },
+                    onValueChange = { otherSkill = it },
                     placeholder = "Other Skill",
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("Skills", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = com.networkedcapital.rep.presentation.theme.RepGreen)
                 Column {
-                    viewModel.allSkills?.forEach { skill: RepSkill ->
+                    viewModel.allSkills.forEach { skill ->
                         MultipleSelectionRow(
                             skill = skill,
                             isSelected = selectedSkills.contains(skill),
                             onClick = {
-                                selectedSkills = if (selectedSkills.contains(skill)) selectedSkills.minus(skill) else selectedSkills.plus(skill)
+                                selectedSkills = if (selectedSkills.contains(skill)) selectedSkills - skill else selectedSkills + skill
                             }
                         )
                     }
