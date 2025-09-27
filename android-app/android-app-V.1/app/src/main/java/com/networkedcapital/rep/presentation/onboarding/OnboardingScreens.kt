@@ -1,10 +1,7 @@
 
 
 
-}
-}
-}
-}
+
 package com.networkedcapital.rep.presentation.onboarding
 import com.networkedcapital.rep.model.RepType
 import com.networkedcapital.rep.model.RepSkill
