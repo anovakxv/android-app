@@ -90,14 +90,13 @@ fun MainScreen(
             Spacer(modifier = Modifier.width(12.dp))
 
             // Segmented Picker
+            val sectionList = listOf("OPEN", "NTWK", "ALL")
+            val selectedIndex = sectionList.indexOf(uiState.selectedSection)
             SegmentedControl(
-                sections = listOf("OPEN", "NTWK", "ALL"),
-                selectedSection = when (uiState.selectedSection) {
-                    "OPEN" -> "OPEN"
-                    "NTWK" -> "NTWK"
-                    else -> "ALL"
-                },
-                onSectionSelected = { section ->
+                sections = sectionList,
+                selectedIndex = if (selectedIndex >= 0) selectedIndex else 0,
+                onSectionSelected = { idx ->
+                    val section = sectionList.getOrNull(idx) ?: "ALL"
                     viewModel.onSectionSelected(section)
                 },
                 modifier = Modifier.weight(1f)
@@ -419,8 +418,8 @@ private fun String?.firstOrNull(): String {
 @Composable
 fun SegmentedControl(
     sections: List<String>,
-    selectedSection: String,
-    onSectionSelected: (String) -> Unit,
+    selectedIndex: Int,
+    onSectionSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -432,7 +431,7 @@ fun SegmentedControl(
             .padding(4.dp)
     ) {
         sections.forEachIndexed { idx, section ->
-            val isSelected = section == selectedSection
+            val isSelected = idx == selectedIndex
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -440,7 +439,7 @@ fun SegmentedControl(
                         if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
                         RoundedCornerShape(6.dp)
                     )
-                    .clickable { onSectionSelected(section) }
+                    .clickable { onSectionSelected(idx) }
                     .padding(vertical = 8.dp, horizontal = 12.dp),
                 contentAlignment = Alignment.Center
             ) {
