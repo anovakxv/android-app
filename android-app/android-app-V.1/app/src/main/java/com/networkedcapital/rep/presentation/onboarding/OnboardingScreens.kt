@@ -189,24 +189,37 @@ fun AboutRepScreen(
 }
 
 @Composable
+
 fun EditProfileScreen(
+    firstName: String,
+    lastName: String,
+    email: String,
+    broadcast: String,
+    repType: RepType,
+    city: String,
+    about: String,
+    otherSkill: String,
+    skills: Set<RepSkill>,
+    profileImageUri: Uri?,
+    isLoading: Boolean,
+    errorMessage: String?,
+    saveError: String?,
+    onFirstNameChange: (String) -> Unit,
+    onLastNameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onBroadcastChange: (String) -> Unit,
+    onRepTypeChange: (RepType) -> Unit,
+    onCityChange: (String) -> Unit,
+    onAboutChange: (String) -> Unit,
+    onOtherSkillChange: (String) -> Unit,
+    onSkillsChange: (Set<RepSkill>) -> Unit,
+    onProfileImageChange: (Uri?) -> Unit,
+    onSave: () -> Unit,
+    imagePickerLauncher: androidx.activity.result.ActivityResultLauncher<String>,
     onProfileSaved: () -> Unit,
     viewModel: com.networkedcapital.rep.presentation.auth.AuthViewModel = hiltViewModel()
 ) {
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var broadcast by remember { mutableStateOf("") }
-    var city by remember { mutableStateOf("") }
-    var about by remember { mutableStateOf("") }
-    var otherSkill by remember { mutableStateOf("") }
-
-    val authState = viewModel.authState.collectAsState().value
-    var repType by remember { mutableStateOf(RepType.LEAD) }
     val repTypes = RepType.values().toList()
-    var allSkills by remember { mutableStateOf(listOf<RepSkill>()) }
-    var selectedSkills by remember { mutableStateOf(setOf<RepSkill>()) }
-    val coroutineScope = rememberCoroutineScope()
 
     Surface(
         color = com.networkedcapital.rep.presentation.theme.RepBackground,
@@ -229,7 +242,7 @@ fun EditProfileScreen(
             ) {
                 IconButton(onClick = { /* TODO: handle cancel/back */ }) {
                     Icon(
-                        imageVector = Icons.Filled.ArrowDropUp, // Use chevron left if available
+                        imageVector = Icons.Filled.ArrowDropUp,
                         contentDescription = "Back",
                         tint = com.networkedcapital.rep.presentation.theme.RepGreen,
                         modifier = Modifier.size(28.dp)
@@ -247,9 +260,7 @@ fun EditProfileScreen(
                 TextButton(
                     onClick = {
                         Log.d("EditProfileScreen", "Save button clicked")
-                        viewModel.saveProfile(
-                            /* ...existing code... */
-                        )
+                        onSave()
                     },
                     enabled = !isLoading,
                     modifier = Modifier.align(Alignment.CenterVertically)
@@ -285,7 +296,7 @@ fun EditProfileScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowDropDown, // Use person icon if available
+                            imageVector = Icons.Filled.ArrowDropDown,
                             contentDescription = "No Profile Image",
                             tint = Color.Gray,
                             modifier = Modifier.size(48.dp)
@@ -314,13 +325,13 @@ fun EditProfileScreen(
                 ) {
                     StyledProfileTextField(
                         value = firstName,
-                        onValueChange = { firstName = it },
+                        onValueChange = onFirstNameChange,
                         placeholder = "First Name",
                         modifier = Modifier.weight(1f)
                     )
                     StyledProfileTextField(
                         value = lastName,
-                        onValueChange = { lastName = it },
+                        onValueChange = onLastNameChange,
                         placeholder = "Last Name",
                         modifier = Modifier.weight(1f)
                     )
@@ -328,14 +339,14 @@ fun EditProfileScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 StyledProfileTextField(
                     value = email,
-                    onValueChange = { email = it },
+                    onValueChange = onEmailChange,
                     placeholder = "Email",
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 StyledProfileTextField(
                     value = broadcast,
-                    onValueChange = { broadcast = it },
+                    onValueChange = onBroadcastChange,
                     placeholder = "Broadcast (optional)",
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -344,33 +355,34 @@ fun EditProfileScreen(
                 // ...existing code for dropdown...
                 StyledProfileTextField(
                     value = city,
-                    onValueChange = { city = it },
+                    onValueChange = onCityChange,
                     placeholder = "City",
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 StyledProfileTextField(
                     value = about,
-                    onValueChange = { about = it },
+                    onValueChange = onAboutChange,
                     placeholder = "About",
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 StyledProfileTextField(
                     value = otherSkill,
-                    onValueChange = { otherSkill = it },
+                    onValueChange = onOtherSkillChange,
                     placeholder = "Other Skill",
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("Skills", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = com.networkedcapital.rep.presentation.theme.RepGreen)
                 Column {
-                    allSkills.forEach { skill ->
+                    skills.forEach { skill ->
                         MultipleSelectionRow(
                             skill = skill,
-                            isSelected = selectedSkills.contains(skill),
+                            isSelected = skills.contains(skill),
                             onClick = {
-                                selectedSkills = if (selectedSkills.contains(skill)) selectedSkills - skill else selectedSkills + skill
+                                val newSkills = if (skills.contains(skill)) skills - skill else skills + skill
+                                onSkillsChange(newSkills)
                             }
                         )
                     }
