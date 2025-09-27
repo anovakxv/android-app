@@ -402,8 +402,8 @@ fun MultipleSelectionRow(skill: RepSkill, isSelected: Boolean, onClick: () -> Un
             }
         }
     }
-
-// Remove misplaced closing brace and ensure top-level composables
+@Composable
+fun StyledProfileTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
