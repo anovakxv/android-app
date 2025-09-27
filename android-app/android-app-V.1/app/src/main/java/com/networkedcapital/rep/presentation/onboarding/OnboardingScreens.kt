@@ -1,216 +1,3 @@
-@Composable
-fun EditProfileScreen(
-    onProfileSaved: () -> Unit,
-    viewModel: com.networkedcapital.rep.presentation.auth.AuthViewModel = hiltViewModel()
-) {
-    val authState = viewModel.authState.collectAsState().value
-    var firstName by remember { mutableStateOf(authState.firstName ?: "") }
-    var lastName by remember { mutableStateOf(authState.lastName ?: "") }
-    var email by remember { mutableStateOf(authState.email ?: "") }
-    var broadcast by remember { mutableStateOf(authState.broadcast ?: "") }
-    var city by remember { mutableStateOf(authState.city ?: "") }
-    var about by remember { mutableStateOf(authState.about ?: "") }
-    var otherSkill by remember { mutableStateOf(authState.otherSkill ?: "") }
-    var repType by remember { mutableStateOf(authState.repType ?: RepType.LEAD) }
-    var selectedSkills by remember { mutableStateOf(authState.skills ?: emptySet<RepSkill>()) }
-    var profileImageUri by remember { mutableStateOf(authState.profileImageUri) }
-    val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        profileImageUri = uri
-    }
-    val isLoading = authState.isLoading
-    val errorMessage = authState.errorMessage
-    val saveError = authState.saveError
-
-    Surface(
-        color = com.networkedcapital.rep.presentation.theme.RepBackground,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 0.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Header
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .background(Color.White),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { /* TODO: handle cancel/back */ }) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowDropUp,
-                        contentDescription = "Back",
-                        tint = com.networkedcapital.rep.presentation.theme.RepGreen,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = "Edit Profile",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    color = Color.Black,
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                TextButton(
-                    onClick = {
-                        viewModel.saveProfile(
-                            firstName,
-                            lastName,
-                            email,
-                            broadcast,
-                            repType,
-                            city,
-                            about,
-                            otherSkill,
-                            selectedSkills,
-                            profileImageUri
-                        )
-                        onProfileSaved()
-                    },
-                    enabled = !isLoading,
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                ) {
-                    Text(
-                        "Save",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
-                        color = com.networkedcapital.rep.presentation.theme.RepGreen
-                    )
-                }
-            }
-            // Profile image with edit overlay
-            Box(
-                modifier = Modifier
-                    .size(108.dp)
-                    .padding(top = 16.dp),
-                contentAlignment = Alignment.BottomEnd
-            ) {
-                if (profileImageUri != null) {
-                    androidx.compose.foundation.Image(
-                        painter = rememberAsyncImagePainter(profileImageUri),
-                        contentDescription = "Profile Image",
-                        modifier = Modifier
-                            .size(108.dp)
-                            .background(Color(0xFFF7F7F7), shape = RoundedCornerShape(54.dp))
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .size(108.dp)
-                            .background(Color(0xFFF7F7F7), shape = RoundedCornerShape(54.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowDropDown,
-                            contentDescription = "No Profile Image",
-                            tint = Color.Gray,
-                            modifier = Modifier.size(48.dp)
-                        )
-                    }
-                }
-                Button(
-                    onClick = { imagePickerLauncher.launch("image/*") },
-                    modifier = Modifier
-                        .offset(x = (-10).dp, y = 10.dp)
-                        .height(32.dp)
-                ) {
-                    Text("+Edit\nPhoto", fontSize = 12.sp)
-                }
-            }
-            // Info fields
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalAlignment = Alignment.Start
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(11.dp)
-                ) {
-                    StyledProfileTextField(
-                        value = firstName,
-                        onValueChange = { firstName = it },
-                        placeholder = "First Name",
-                        modifier = Modifier.weight(1f)
-                    )
-                    StyledProfileTextField(
-                        value = lastName,
-                        onValueChange = { lastName = it },
-                        placeholder = "Last Name",
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                StyledProfileTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    placeholder = "Email",
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                StyledProfileTextField(
-                    value = broadcast,
-                    onValueChange = { broadcast = it },
-                    placeholder = "Broadcast (optional)",
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                // Rep Type Picker
-                // ...existing code for dropdown...
-                StyledProfileTextField(
-                    value = city,
-                    onValueChange = { city = it },
-                    placeholder = "City",
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                StyledProfileTextField(
-                    value = about,
-                    onValueChange = { about = it },
-                    placeholder = "About",
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                StyledProfileTextField(
-                    value = otherSkill,
-                    onValueChange = { otherSkill = it },
-                    placeholder = "Other Skill",
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("Skills", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = com.networkedcapital.rep.presentation.theme.RepGreen)
-                Column {
-                    viewModel.allSkills.forEach { skill ->
-                        MultipleSelectionRow(
-                            skill = skill,
-                            isSelected = selectedSkills.contains(skill),
-                            onClick = {
-                                selectedSkills = if (selectedSkills.contains(skill)) selectedSkills - skill else selectedSkills + skill
-                            }
-                        )
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            if (isLoading) {
-                CircularProgressIndicator()
-            }
-            if (errorMessage != null) {
-                Text(text = errorMessage ?: "", color = MaterialTheme.colorScheme.error)
-            }
-            if (saveError != null) {
-                Text(text = saveError ?: "", color = MaterialTheme.colorScheme.error)
-            }
-        }
-    }
-}
 package com.networkedcapital.rep.presentation.onboarding
 import com.networkedcapital.rep.model.RepType
 import com.networkedcapital.rep.model.RepSkill
@@ -478,7 +265,217 @@ fun MultipleSelectionRow(skill: RepSkill, isSelected: Boolean, onClick: () -> Un
         }
     }
 }
-// ...existing code...
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                ) {
+                    Text(
+                        "Save",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = com.networkedcapital.rep.presentation.theme.RepGreen
+                    )
+                }
+            }
+            // Profile image with edit overlay
+            Box(
+                modifier = Modifier
+                    .size(108.dp)
+                    .padding(top = 16.dp),
+                contentAlignment = Alignment.BottomEnd
+            ) {
+                if (profileImageUri != null) {
+                    androidx.compose.foundation.Image(
+                        painter = rememberAsyncImagePainter(profileImageUri),
+                        contentDescription = "Profile Image",
+                        modifier = Modifier
+                            .size(108.dp)
+                            .background(Color(0xFFF7F7F7), shape = RoundedCornerShape(54.dp))
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(108.dp)
+                            .background(Color(0xFFF7F7F7), shape = RoundedCornerShape(54.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowDropDown,
+                            contentDescription = "No Profile Image",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(48.dp)
+                        )
+                    }
+                }
+                Button(
+                    onClick = { imagePickerLauncher.launch("image/*") },
+                    modifier = Modifier
+                        .offset(x = (-10).dp, y = 10.dp)
+                        .height(32.dp)
+                ) {
+                    Text("+Edit\nPhoto", fontSize = 12.sp)
+                }
+            }
+            // Info fields
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(11.dp)
+                ) {
+                    StyledProfileTextField(
+                        value = firstName,
+                        onValueChange = onFirstNameChange,
+                        placeholder = "First Name",
+                        modifier = Modifier.weight(1f)
+                    )
+                    StyledProfileTextField(
+                        value = lastName,
+                        onValueChange = onLastNameChange,
+                        placeholder = "Last Name",
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                StyledProfileTextField(
+                    value = email,
+                    onValueChange = onEmailChange,
+                    placeholder = "Email",
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                StyledProfileTextField(
+                    value = broadcast,
+                    onValueChange = onBroadcastChange,
+                    placeholder = "Broadcast (optional)",
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                // Rep Type Picker
+                // ...existing code for dropdown...
+                StyledProfileTextField(
+                    value = city,
+                    onValueChange = onCityChange,
+                    placeholder = "City",
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                StyledProfileTextField(
+                    value = about,
+                    onValueChange = onAboutChange,
+                    placeholder = "About",
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                StyledProfileTextField(
+                    value = otherSkill,
+                    onValueChange = onOtherSkillChange,
+                    placeholder = "Other Skill",
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Skills", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = com.networkedcapital.rep.presentation.theme.RepGreen)
+                Column {
+                    skills.forEach { skill ->
+                        MultipleSelectionRow(
+                            skill = skill,
+                            isSelected = skills.contains(skill),
+                            onClick = {
+                                val newSkills = if (skills.contains(skill)) skills - skill else skills + skill
+                                onSkillsChange(newSkills)
+                            }
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            if (isLoading) {
+                CircularProgressIndicator()
+            }
+            if (errorMessage != null) {
+                Text(text = errorMessage ?: "", color = MaterialTheme.colorScheme.error)
+            }
+            if (saveError != null) {
+                Text(text = saveError ?: "", color = MaterialTheme.colorScheme.error)
+            }
+        }
+    }
+
+// Remove misplaced closing brace and ensure top-level composables
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = {
+            Text(
+                placeholder,
+                color = Color(0xFF59595F),
+                fontSize = 16.sp,
+                fontFamily = androidx.compose.ui.text.font.FontFamily.SansSerif
+            )
+        },
+        singleLine = true,
+        modifier = modifier
+            .background(Color(0xFFF7F7F7), RoundedCornerShape(6.dp)),
+        shape = RoundedCornerShape(6.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = com.networkedcapital.rep.presentation.theme.RepGreen,
+            unfocusedBorderColor = com.networkedcapital.rep.presentation.theme.RepGreen,
+            cursorColor = Color.Black,
+            focusedLabelColor = com.networkedcapital.rep.presentation.theme.RepGreen
+        ),
+        textStyle = androidx.compose.ui.text.TextStyle(
+            color = Color.Black,
+            fontSize = 16.sp,
+            fontFamily = androidx.compose.ui.text.font.FontFamily.SansSerif
+        )
+    )
+}
+@Composable
+fun MultipleSelectionRow(skill: RepSkill, isSelected: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            skill.name,
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            color = com.networkedcapital.rep.presentation.theme.RepGreen,
+            modifier = Modifier.weight(1f)
+        )
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .background(Color.White, shape = RoundedCornerShape(14.dp))
+                .border(
+                    width = 2.dp,
+                    color = if (isSelected) com.networkedcapital.rep.presentation.theme.RepGreen else Color.Gray,
+                    shape = RoundedCornerShape(14.dp)
+                )
+                .clickable { onClick() },
+            contentAlignment = Alignment.Center
+        ) {
+            if (isSelected) {
+                Box(
+                    modifier = Modifier
+                        .size(18.dp)
+                        .background(com.networkedcapital.rep.presentation.theme.RepGreen, shape = RoundedCornerShape(9.dp))
+                )
+            }
+        }
+    }
+}
+}
 
 @Composable
 fun OnboardingFlowEntry(
