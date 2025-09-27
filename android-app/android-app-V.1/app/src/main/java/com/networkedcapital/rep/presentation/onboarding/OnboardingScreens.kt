@@ -190,81 +190,79 @@ fun AboutRepScreen(
 
 @Composable
 
-// Top-level composable definitions for use in EditProfileScreen and elsewhere
-@Composable
-fun StyledProfileTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    modifier: Modifier = Modifier
+fun EditProfileScreen(
+    firstName: String,
+    lastName: String,
+    email: String,
+    broadcast: String,
+    repType: RepType,
+    city: String,
+    about: String,
+    otherSkill: String,
+    skills: Set<RepSkill>,
+    profileImageUri: Uri?,
+    isLoading: Boolean,
+    errorMessage: String?,
+    saveError: String?,
+    onFirstNameChange: (String) -> Unit,
+    onLastNameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onBroadcastChange: (String) -> Unit,
+    onRepTypeChange: (RepType) -> Unit,
+    onCityChange: (String) -> Unit,
+    onAboutChange: (String) -> Unit,
+    onOtherSkillChange: (String) -> Unit,
+    onSkillsChange: (Set<RepSkill>) -> Unit,
+    onProfileImageChange: (Uri?) -> Unit,
+    onSave: () -> Unit,
+    imagePickerLauncher: androidx.activity.result.ActivityResultLauncher<String>,
+    onProfileSaved: () -> Unit,
+    viewModel: com.networkedcapital.rep.presentation.auth.AuthViewModel = hiltViewModel()
 ) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        placeholder = {
-            Text(
-                placeholder,
-                color = Color(0xFF59595F),
-                fontSize = 16.sp,
-                fontFamily = androidx.compose.ui.text.font.FontFamily.SansSerif
-            )
-        },
-        singleLine = true,
-        modifier = modifier
-            .background(Color(0xFFF7F7F7), RoundedCornerShape(6.dp)),
-        shape = RoundedCornerShape(6.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = com.networkedcapital.rep.presentation.theme.RepGreen,
-            unfocusedBorderColor = com.networkedcapital.rep.presentation.theme.RepGreen,
-            cursorColor = Color.Black,
-            focusedLabelColor = com.networkedcapital.rep.presentation.theme.RepGreen
-        ),
-        textStyle = androidx.compose.ui.text.TextStyle(
-            color = Color.Black,
-            fontSize = 16.sp,
-            fontFamily = androidx.compose.ui.text.font.FontFamily.SansSerif
-        )
-    )
-}
+    val repTypes = RepType.values().toList()
 
-@Composable
-fun MultipleSelectionRow(skill: RepSkill, isSelected: Boolean, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Surface(
+        color = com.networkedcapital.rep.presentation.theme.RepBackground,
+        modifier = Modifier.fillMaxSize()
     ) {
-        Text(
-            skill.name,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            color = com.networkedcapital.rep.presentation.theme.RepGreen,
-            modifier = Modifier.weight(1f)
-        )
-        Box(
+        Column(
             modifier = Modifier
-                .size(28.dp)
-                .background(Color.White, shape = RoundedCornerShape(14.dp))
-                .border(
-                    width = 2.dp,
-                    color = if (isSelected) com.networkedcapital.rep.presentation.theme.RepGreen else Color.Gray,
-                    shape = RoundedCornerShape(14.dp)
-                )
-                .clickable { onClick() },
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 0.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (isSelected) {
-                Box(
-                    modifier = Modifier
-                        .size(18.dp)
-                        .background(com.networkedcapital.rep.presentation.theme.RepGreen, shape = RoundedCornerShape(9.dp))
+            // Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .background(Color.White),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { /* TODO: handle cancel/back */ }) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowDropUp,
+                        contentDescription = "Back",
+                        tint = com.networkedcapital.rep.presentation.theme.RepGreen,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = "Edit Profile",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = Color.Black,
+                    modifier = Modifier.align(Alignment.CenterVertically)
                 )
-            }
-        }
-    }
-}
+                Spacer(modifier = Modifier.weight(1f))
+                TextButton(
+                    onClick = {
+                        Log.d("EditProfileScreen", "Save button clicked")
+                        onSave()
+                    },
+                    enabled = !isLoading,
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
                     Text(
