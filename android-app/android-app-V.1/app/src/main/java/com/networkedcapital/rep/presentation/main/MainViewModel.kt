@@ -30,6 +30,10 @@ data class MainUiState(
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
+    private val portalRepository: PortalRepository,
+    private val authRepository: AuthRepository
+) : ViewModel() {
+
     fun onSectionSelected(section: String) {
         val sectionIndex = when (section) {
             "OPEN" -> 0
@@ -46,9 +50,6 @@ class MainViewModel @Inject constructor(
             }
         }
     }
-    private val portalRepository: PortalRepository,
-    private val authRepository: AuthRepository
-) : ViewModel() {
 
     enum class MainPage { PORTALS, PEOPLE }
 
