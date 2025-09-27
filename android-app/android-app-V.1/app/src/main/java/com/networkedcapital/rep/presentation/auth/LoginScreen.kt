@@ -72,9 +72,31 @@ fun LoginScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
-            Text("Welcome Back,", fontSize = 32.sp, color = Color.Black)
-            Text("Sign in to continue", fontSize = 14.sp, color = Color.Gray)
+            // Header left-aligned
+            Spacer(modifier = Modifier.height(24.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Text(
+                        "Welcome Back,",
+                        fontSize = 32.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        "Sign in to continue",
+                        fontSize = 14.sp,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Normal
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+            }
             Spacer(modifier = Modifier.height(32.dp))
             // Email field
             StyledLoginTextField(
@@ -103,21 +125,24 @@ fun LoginScreen(
             ) {
                 Text(
                     text = "Forgot Password?",
-                    color = MaterialTheme.colorScheme.primary,
+                    color = Color(0xFF007AFF),
                     fontSize = 14.sp,
                     modifier = Modifier
                         .clickable { onNavigateToForgotPassword() }
                         .padding(8.dp)
+                        .background(Color.Transparent)
                 )
             }
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
+            // Login button prominent
             Button(
                 onClick = { viewModel.login(email, password) },
                 enabled = email.isNotBlank() && password.isNotBlank() && !authState.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(54.dp),
-                shape = RoundedCornerShape(14.dp)
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF30C053))
             ) {
                 if (authState.isLoading) {
                     CircularProgressIndicator(
@@ -126,20 +151,22 @@ fun LoginScreen(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Login", fontSize = 16.sp)
+                    Text("Login", fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
+            // Centered sign up row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
-                Text("New?")
+                Text("New?", fontSize = 16.sp)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Sign Up",
-                    color = MaterialTheme.colorScheme.primary,
+                    color = Color(0xFF30C053),
                     fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .clickable { onNavigateToSignUp() }
                         .padding(4.dp)
