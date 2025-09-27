@@ -1,34 +1,3 @@
-package com.networkedcapital.rep.presentation.onboarding
-import com.networkedcapital.rep.model.RepType
-import com.networkedcapital.rep.model.RepSkill
-import com.networkedcapital.rep.api.fetchSkills
-import kotlinx.coroutines.launch
-
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import coil.compose.rememberAsyncImagePainter
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
-import android.util.Log
-import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.border
 @Composable
 fun EditProfileScreen(
     onProfileSaved: () -> Unit,
@@ -241,6 +210,38 @@ fun EditProfileScreen(
             }
         }
     }
+}
+package com.networkedcapital.rep.presentation.onboarding
+import com.networkedcapital.rep.model.RepType
+import com.networkedcapital.rep.model.RepSkill
+import com.networkedcapital.rep.api.fetchSkills
+import kotlinx.coroutines.launch
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import coil.compose.rememberAsyncImagePainter
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import android.util.Log
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 
 @Composable
 fun TermsOfUseScreen(
