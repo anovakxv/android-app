@@ -231,59 +231,40 @@ fun EditProfileScreen(
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(
+                Text(
+                    text = "Edit Profile",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = com.networkedcapital.rep.presentation.theme.RepGreen,
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Edit Profile",
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = com.networkedcapital.rep.presentation.theme.RepGreen,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Button(
-                        onClick = {
-                            Log.d("EditProfileScreen", "Save button clicked")
-                            viewModel.saveProfile(
-                                firstName,
-                                lastName,
-                                email,
-                                broadcast,
-                                repType.displayName,
-                                city,
-                                about,
-                                otherSkill,
-                                selectedSkills.map { it.displayName }.toSet(),
-                                profileImageUri?.toString(),
-                                onSuccess = {
-                                    Log.d("EditProfileScreen", "onSuccess callback triggered")
-                                    saveError = null
-                                    onProfileSaved()
-                                },
-                                onError = { msg ->
-                                    Log.d("EditProfileScreen", "onError callback triggered: $msg")
-                                    saveError = msg
-                                }
-                            )
-                        },
-                        enabled = !isLoading,
-                        colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen),
-                        modifier = Modifier
-                            .height(36.dp)
-                    ) {
-                        Text("Save", color = MaterialTheme.colorScheme.onPrimary)
-                    }
-                }
-                Spacer(modifier = Modifier.height(24.dp))
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(20.dp))
                 Card(
-                    shape = MaterialTheme.shapes.medium,
+                    shape = RoundedCornerShape(18.dp),
                     colors = CardDefaults.cardColors(containerColor = com.networkedcapital.rep.presentation.theme.RepLightGray),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier.padding(20.dp)
                     ) {
+                        // Profile Image
+                        Text("Profile Image", style = MaterialTheme.typography.titleMedium)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Button(onClick = { imagePickerLauncher.launch("image/*") }) {
+                                Text(if (profileImageUri != null) "Change Image" else "Upload Image")
+                            }
+                            if (profileImageUri != null) {
+                                Spacer(modifier = Modifier.width(16.dp))
+                                androidx.compose.foundation.Image(
+                                    painter = coil.compose.rememberAsyncImagePainter(profileImageUri),
+                                    contentDescription = "Profile Image",
+                                    modifier = Modifier.size(64.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(18.dp))
+                        // Name fields
                         Row(modifier = Modifier.fillMaxWidth()) {
                             OutlinedTextField(
                                 value = firstName,
@@ -299,22 +280,9 @@ fun EditProfileScreen(
                                 modifier = Modifier.weight(1f)
                             )
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        OutlinedTextField(
-                            value = email,
-                            onValueChange = { email = it },
-                            label = { Text("Email") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        OutlinedTextField(
-                            value = broadcast,
-                            onValueChange = { broadcast = it },
-                            label = { Text("Broadcast (optional)") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        // Rep Type Picker (Stable DropdownMenu)
+                        Spacer(modifier = Modifier.height(18.dp))
+                        // Rep Type
+                        Text("Type", style = MaterialTheme.typography.titleMedium)
                         var repTypeDropdownExpanded by remember { mutableStateOf(false) }
                         Box {
                             OutlinedTextField(
@@ -348,28 +316,16 @@ fun EditProfileScreen(
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(18.dp))
+                        // City
                         OutlinedTextField(
                             value = city,
                             onValueChange = { city = it },
                             label = { Text("City") },
                             modifier = Modifier.fillMaxWidth()
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        OutlinedTextField(
-                            value = about,
-                            onValueChange = { about = it },
-                            label = { Text("About") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        OutlinedTextField(
-                            value = otherSkill,
-                            onValueChange = { otherSkill = it },
-                            label = { Text("Other Skill") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(18.dp))
+                        // Skills
                         Text("Skills", style = MaterialTheme.typography.titleMedium)
                         Column {
                             allSkills.forEach { skill ->
@@ -384,29 +340,77 @@ fun EditProfileScreen(
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text("Profile Image", style = MaterialTheme.typography.titleMedium)
-                        Button(onClick = { imagePickerLauncher.launch("image/*") }, modifier = Modifier.fillMaxWidth()) {
-                            Text(if (profileImageUri != null) "Change Image" else "Upload Image")
-                        }
-                        if (profileImageUri != null) {
-                            // Show image preview using Coil
-                            androidx.compose.foundation.Image(
-                                painter = coil.compose.rememberAsyncImagePainter(profileImageUri),
-                                contentDescription = "Profile Image",
-                                modifier = Modifier.size(96.dp)
-                            )
-                        }
+                        Spacer(modifier = Modifier.height(18.dp))
+                        // About
+                        OutlinedTextField(
+                            value = about,
+                            onValueChange = { about = it },
+                            label = { Text("About") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(18.dp))
+                        // Broadcast
+                        OutlinedTextField(
+                            value = broadcast,
+                            onValueChange = { broadcast = it },
+                            label = { Text("Broadcast") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(18.dp))
+                        // Other Skill
+                        OutlinedTextField(
+                            value = otherSkill,
+                            onValueChange = { otherSkill = it },
+                            label = { Text("Other Skill") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(28.dp))
+                Button(
+                    onClick = {
+                        Log.d("EditProfileScreen", "Save button clicked")
+                        viewModel.saveProfile(
+                            firstName,
+                            lastName,
+                            email,
+                            broadcast,
+                            repType.displayName,
+                            city,
+                            about,
+                            otherSkill,
+                            selectedSkills.map { it.displayName }.toSet(),
+                            profileImageUri?.toString(),
+                            onSuccess = {
+                                Log.d("EditProfileScreen", "onSuccess callback triggered")
+                                saveError = null
+                                onProfileSaved()
+                            },
+                            onError = { msg ->
+                                Log.d("EditProfileScreen", "onError callback triggered: $msg")
+                                saveError = msg
+                            }
+                        )
+                    },
+                    enabled = !isLoading,
+                    colors = ButtonDefaults.buttonColors(containerColor = com.networkedcapital.rep.presentation.theme.RepGreen),
+                    modifier = Modifier
+                        .height(48.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                ) {
+                    Text("Save", color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.titleMedium)
+                }
                 if (isLoading) {
+                    Spacer(modifier = Modifier.height(16.dp))
                     CircularProgressIndicator()
                 }
                 if (errorMessage != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(text = errorMessage ?: "", color = MaterialTheme.colorScheme.error)
                 }
                 if (saveError != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(text = saveError ?: "", color = MaterialTheme.colorScheme.error)
                 }
             }
