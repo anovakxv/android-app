@@ -23,6 +23,11 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import android.util.Log
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.clickable
 
 @Composable
 fun TermsOfUseScreen(
