@@ -91,7 +91,8 @@ fun MainScreen(
 
             // Segmented Picker
             val sectionList = listOf("OPEN", "NTWK", "ALL")
-            val selectedIndex = sectionList.indexOf(uiState.selectedSection)
+            val selectedSectionStr = uiState.selectedSection?.toString() ?: "ALL"
+            val selectedIndex = sectionList.indexOf(selectedSectionStr)
             SegmentedControl(
                 sections = sectionList,
                 selectedIndex = if (selectedIndex >= 0) selectedIndex else 0,
