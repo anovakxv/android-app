@@ -95,7 +95,7 @@ fun RegisterScreen(
             contentAlignment = Alignment.Center
         ) {
             androidx.compose.foundation.Image(
-                painter = painterResource(id = com.networkedcapital.rep.R.drawable.REPLogo),
+                painter = painterResource(id = com.networkedcapital.rep.R.drawable.replogo),
                 contentDescription = "REP Logo",
                 modifier = Modifier.size(64.dp)
             )
