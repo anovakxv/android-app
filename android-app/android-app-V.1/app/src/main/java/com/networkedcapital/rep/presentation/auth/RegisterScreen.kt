@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.networkedcapital.rep.presentation.theme.RepGreen
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.draw.border
+import androidx.compose.foundation.border
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
