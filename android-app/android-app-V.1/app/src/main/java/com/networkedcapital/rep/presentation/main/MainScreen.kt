@@ -54,104 +54,69 @@ fun MainScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopAppBar(
-                title = {
-                    if (uiState.showSearch) {
-                        OutlinedTextField(
-                            value = uiState.searchQuery,
-                            onValueChange = viewModel::onSearchQueryChange,
-                            placeholder = {
-                                Text(
-                                    "Search ${if (uiState.currentPage == MainPage.PORTALS) "portals" else "people"}...",
-                                    fontSize = 16.sp
-                                )
-                            },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                            keyboardActions = KeyboardActions(
-                                onSearch = {
-                                    keyboardController?.hide()
-                                }
-                            ),
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "Search",
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            },
-                            trailingIcon = {
-                                IconButton(
-                                    onClick = {
-                                        viewModel.toggleSearch()
-                                        keyboardController?.hide()
-                                    }
-                                ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xFFF9F9F9))
+                ) {
+                    // Top Bar: Profile, Segmented Picker, Search
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Profile image
+                        Box(modifier = Modifier.size(40.dp)) {
+                            IconButton(onClick = {
+                                uiState.currentUser?.id?.let { onNavigateToProfile(it) }
+                            }) {
+                                val profileImageUrl = uiState.currentUser?.profileImageUrlCompat
+                                if (!profileImageUrl.isNullOrEmpty()) {
+                                    AsyncImage(
+                                        model = profileImageUrl,
+                                        contentDescription = "Profile",
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .clip(CircleShape),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                } else {
                                     Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Close search",
-                                        modifier = Modifier.size(20.dp)
+                                        imageVector = Icons.Default.Person,
+                                        contentDescription = "Profile"
                                     )
                                 }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    } else {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            SegmentedControl(
-                                sections = listOf("OPEN", "NTWK", "ALL"),
-                                selectedSection = when (uiState.selectedSection) {
-                                    0 -> "OPEN"
-                                    1 -> "NTWK"
-                                    else -> "ALL"
-                                },
-                                onSectionSelected = { section ->
-                                    val sectionIdx = when (section) {
-                                        "OPEN" -> 0
-                                        "NTWK" -> 1
-                                        else -> 2
-                                    }
-                                    val userId = uiState.currentUser?.id ?: 0
-                                    viewModel.onSectionChanged(sectionIdx, userId)
-                                }
-                            )
-                        }
-                    }
-                },
-                navigationIcon = {
-                    if (!uiState.showSearch) {
-                        IconButton(onClick = {
-                            uiState.currentUser?.id?.let { onNavigateToProfile(it) }
-                        }) {
-                            val profileImageUrl = uiState.currentUser?.profileImageUrlCompat
-                            if (!profileImageUrl.isNullOrEmpty()) {
-                                AsyncImage(
-                                    model = profileImageUrl,
-                                    contentDescription = "Profile",
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .clip(CircleShape),
-                                    contentScale = ContentScale.Crop
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.Person,
-                                    contentDescription = "Profile"
-                                )
                             }
                         }
-                    }
-                },
-                actions = {
-                    if (!uiState.showSearch) {
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        // Segmented Picker
+                        SegmentedControl(
+                            sections = listOf("OPEN", "NTWK", "ALL"),
+                            selectedSection = when (uiState.selectedSection) {
+                                "OPEN" -> "OPEN"
+                                "NTWK" -> "NTWK"
+                                else -> "ALL"
+                            },
+                            onSectionSelected = { section ->
+                                viewModel.onSectionSelected(section)
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        // Search icon
                         IconButton(onClick = viewModel::toggleSearch) {
                             Icon(
                                 imageVector = Icons.Default.Search,
                                 contentDescription = "Search"
                             )
                         }
+
+                        // Add button
                         IconButton(onClick = { /* TODO: Add new portal/person */ }) {
                             Icon(
                                 imageVector = Icons.Default.Add,
@@ -159,103 +124,160 @@ fun MainScreen(
                             )
                         }
                     }
-                }
-            )
 
-            if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                when (uiState.currentPage) {
-                    MainPage.PORTALS -> {
-                        PortalsList(
-                            portals = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) {
-                                uiState.searchPortals
-                            } else {
-                                uiState.portals
+                    // Search Bar
+                    if (uiState.showSearch) {
+                        OutlinedTextField(
+                            value = uiState.searchQuery,
+                            onValueChange = viewModel::onSearchQueryChange,
+                            placeholder = { Text("Search portals or people") },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(
+                                onSearch = { keyboardController?.hide() }
+                            ),
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = null
+                                )
                             },
-                            onPortalClick = onNavigateToPortalDetail,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    MainPage.PEOPLE -> {
-                        PeopleList(
-                            people = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) {
-                                uiState.searchUsers
-                            } else {
-                                uiState.users
+                            trailingIcon = {
+                                IconButton(onClick = viewModel::toggleSearch) {
+                                    Icon(imageVector = Icons.Default.Close, contentDescription = "Close search")
+                                }
                             },
-                            onPersonClick = onNavigateToPersonDetail,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
-
-            BottomAppBar(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    Button(
-                        onClick = {
-                            val userId = uiState.currentUser?.id ?: 0
-                            viewModel.togglePage(userId)
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (uiState.currentPage == MainPage.PORTALS) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.surface
-                            }
-                        ),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = if (uiState.currentPage == MainPage.PORTALS) "PORTALS" else "PEOPLE",
-                            color = if (uiState.currentPage == MainPage.PORTALS) {
-                                MaterialTheme.colorScheme.onPrimary
-                            } else {
-                                MaterialTheme.colorScheme.onSurface
-                            }
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    // FIX: Use robust type checking for chat id
-                    IconButton(
-                        onClick = {
-                            val chatId = uiState.activeChats.firstOrNull()?.id
-                            val intId = when (chatId) {
-                                is Int -> chatId
-                                is String -> chatId.toIntOrNull()
-                                else -> null
+                    // Main Content: Portals/People List
+                    Box(modifier = Modifier.weight(1f)) {
+                        if (uiState.isLoading) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
                             }
-
-                            if (intId != null) {
-                                onNavigateToChat(intId)
-                            } else {
-                                Log.e("MainScreen", "Invalid or missing chat ID: $chatId")
+                        } else {
+                            when (uiState.currentPage) {
+                                MainPage.PORTALS -> {
+                                    PortalsList(
+                                        portals = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) {
+                                            uiState.searchPortals
+                                        } else {
+                                            uiState.portals
+                                        },
+                                        onPortalClick = onNavigateToPortalDetail,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
+                                MainPage.PEOPLE -> {
+                                    PeopleList(
+                                        people = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) {
+                                            uiState.searchUsers
+                                        } else {
+                                            uiState.users
+                                        },
+                                        onPersonClick = onNavigateToPersonDetail,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
                             }
                         }
+                    }
+
+                    // Bottom Bar: Page Switch, Chat, Safe Toggle
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.White)
+                            .padding(vertical = 8.dp, horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Badge(
-                            modifier = Modifier.offset(x = 8.dp, y = (-8).dp)
+                        // Page Switch Button
+                        Button(
+                            onClick = {
+                                val userId = uiState.currentUser?.id ?: 0
+                                viewModel.togglePage(userId)
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (uiState.currentPage == MainPage.PORTALS) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.surface
+                                }
+                            ),
+                            modifier = Modifier.weight(1f)
                         ) {
-                            if (uiState.activeChats.isNotEmpty()) {
-                                Text(
-                                    text = uiState.activeChats.size.toString(),
-                                    fontSize = 10.sp
+                            Text(
+                                text = if (uiState.currentPage == MainPage.PORTALS) "PORTALS" else "PEOPLE",
+                                color = if (uiState.currentPage == MainPage.PORTALS) {
+                                    MaterialTheme.colorScheme.onPrimary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                }
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        // Chat Icon with Badge
+                        Box {
+                            IconButton(
+                                onClick = {
+                                    val chatId = uiState.activeChats.firstOrNull()?.id
+                                    val intId = when (chatId) {
+                                        is Int -> chatId
+                                        is String -> chatId.toIntOrNull()
+                                        else -> null
+                                    }
+                                    if (intId != null) {
+                                        onNavigateToChat(intId)
+                                    } else {
+                                        Log.e("MainScreen", "Invalid or missing chat ID: $chatId")
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ChatBubble,
+                                    contentDescription = "Messages",
+                                    tint = if (uiState.activeChats.isNotEmpty()) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface
+                                    }
                                 )
                             }
+                            if (uiState.activeChats.isNotEmpty()) {
+                                Badge(
+                                    modifier = Modifier.offset(x = 20.dp, y = (-4).dp)
+                                ) {
+                                    Text(text = "${uiState.activeChats.size}", fontSize = 10.sp)
+                                }
+                            }
                         }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        // Safe Portals Toggle
+                        IconButton(
+                            onClick = {
+                                val userId = uiState.currentUser?.id ?: 0
+                                viewModel.toggleSafePortals(userId)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = if (uiState.showOnlySafePortals) Icons.Default.Shield else Icons.Default.Public,
+                                contentDescription = if (uiState.showOnlySafePortals) "Show All Portals" else "Show Safe Portals Only"
+                            )
+                        }
+                    }
+                }
                         Icon(
                             imageVector = Icons.Default.ChatBubble,
                             contentDescription = "Messages",
