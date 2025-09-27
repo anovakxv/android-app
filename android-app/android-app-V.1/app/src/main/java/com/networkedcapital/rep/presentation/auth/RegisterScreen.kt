@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import com.networkedcapital.rep.presentation.theme.RepGreen
 import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.border
+import androidx.compose.ui.res.painterResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,7 +95,7 @@ fun RegisterScreen(
             contentAlignment = Alignment.Center
         ) {
             androidx.compose.foundation.Image(
-                painter = coil.compose.rememberAsyncImagePainter(model = androidx.compose.ui.res.painterResource(id = com.networkedcapital.rep.R.drawable.REPLogo)),
+                painter = painterResource(id = com.networkedcapital.rep.R.drawable.REPLogo),
                 contentDescription = "REP Logo",
                 modifier = Modifier.size(64.dp)
             )
