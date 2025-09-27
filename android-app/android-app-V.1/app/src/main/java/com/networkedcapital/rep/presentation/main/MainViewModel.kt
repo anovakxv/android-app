@@ -30,6 +30,22 @@ data class MainUiState(
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
+    fun onSectionSelected(section: String) {
+        val sectionIndex = when (section) {
+            "OPEN" -> 0
+            "NTWK" -> 1
+            "ALL" -> 2
+            else -> 2
+        }
+        _uiState.update { state -> state.copy(selectedSection = sectionIndex) }
+        val userId = _uiState.value.currentUser?.id ?: 0
+        viewModelScope.launch {
+            when (_uiState.value.currentPage) {
+                MainPage.PORTALS -> fetchPortals(userId, sectionIndex, _uiState.value.showOnlySafePortals)
+                MainPage.PEOPLE -> fetchPeople(userId, sectionIndex)
+            }
+        }
+    }
     private val portalRepository: PortalRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
