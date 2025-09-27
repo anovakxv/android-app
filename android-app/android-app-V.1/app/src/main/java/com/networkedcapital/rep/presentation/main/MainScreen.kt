@@ -93,13 +93,14 @@ fun MainScreen(
             val sectionList = listOf("OPEN", "NTWK", "ALL")
             val selectedSectionStr = uiState.selectedSection?.toString() ?: "ALL"
             val selectedIndex = sectionList.indexOf(selectedSectionStr)
+            val onSectionSelected: (Int) -> Unit = { idx ->
+                val section = sectionList.getOrNull(idx) ?: "ALL"
+                viewModel.onSectionSelected(section)
+            }
             SegmentedControl(
                 sections = sectionList,
                 selectedIndex = if (selectedIndex >= 0) selectedIndex else 0,
-                onSectionSelected = { idx ->
-                    val section = sectionList.getOrNull(idx) ?: "ALL"
-                    viewModel.onSectionSelected(section)
-                },
+                onSectionSelected = onSectionSelected,
                 modifier = Modifier.weight(1f)
             )
 
