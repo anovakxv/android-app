@@ -18,6 +18,8 @@ import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.networkedcapital.rep.presentation.theme.RepGreen
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.border
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
