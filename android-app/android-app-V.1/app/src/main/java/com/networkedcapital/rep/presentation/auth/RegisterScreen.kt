@@ -85,7 +85,7 @@ fun RegisterScreen(
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
-        // Rep Logo as circle with shadow
+        // REPLogo image as circle with shadow
         Box(
             modifier = Modifier
                 .size(80.dp)
@@ -93,12 +93,10 @@ fun RegisterScreen(
                 .shadow(4.dp, shape = RoundedCornerShape(40.dp)),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "REP",
-                style = MaterialTheme.typography.titleLarge,
-                color = RepGreen,
-                fontWeight = FontWeight.Bold,
-                fontSize = 32.sp
+            androidx.compose.foundation.Image(
+                painter = coil.compose.rememberAsyncImagePainter(model = androidx.compose.ui.res.painterResource(id = com.networkedcapital.rep.R.drawable.REPLogo)),
+                contentDescription = "REP Logo",
+                modifier = Modifier.size(64.dp)
             )
         }
         Spacer(modifier = Modifier.height(24.dp))
