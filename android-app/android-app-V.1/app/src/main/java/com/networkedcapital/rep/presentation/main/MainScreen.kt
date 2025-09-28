@@ -91,33 +91,15 @@ fun MainScreen(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Rep Logo (center, acts as portal/people switch)
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .weight(1f)
-                    .clickable {
-                        val userId = uiState.currentUser?.id ?: 0
-                        viewModel.togglePage(userId)
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.replogo),
-                    contentDescription = "Rep Logo (Switch Portal/People)",
-                    modifier = Modifier.size(36.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            // Search icon (right)
+            // Search icon (center)
             IconButton(onClick = viewModel::toggleSearch) {
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Search"
                 )
             }
+
+            Spacer(modifier = Modifier.width(12.dp))
 
             // Add button (right)
             IconButton(onClick = { /* TODO: Add new portal/person */ }) {
@@ -194,63 +176,86 @@ fun MainScreen(
         }
 
         // Bottom Bar: Chat and Safe Toggle only (no page switch)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White)
-                .padding(vertical = 8.dp, horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Chat Icon with Badge
-            Box {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(vertical = 8.dp, horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                // Chat Icon with Badge
+                Box {
+                    IconButton(
+                        onClick = {
+                            val chatId = uiState.activeChats.firstOrNull()?.id
+                            val intId = when (chatId) {
+                                is Int -> chatId
+                                is String -> chatId.toIntOrNull()
+                                else -> null
+                            }
+                            if (intId != null) {
+                                onNavigateToChat(intId)
+                            } else {
+                                Log.e("MainScreen", "Invalid or missing chat ID: $chatId")
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ChatBubble,
+                            contentDescription = "Messages",
+                            tint = if (uiState.activeChats.isNotEmpty()) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            }
+                        )
+                    }
+                    if (uiState.activeChats.isNotEmpty()) {
+                        Badge(
+                            modifier = Modifier.offset(x = 20.dp, y = (-4).dp)
+                        ) {
+                            Text(text = "${uiState.activeChats.size}", fontSize = 10.sp)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // Safe Portals Toggle
                 IconButton(
                     onClick = {
-                        val chatId = uiState.activeChats.firstOrNull()?.id
-                        val intId = when (chatId) {
-                            is Int -> chatId
-                            is String -> chatId.toIntOrNull()
-                            else -> null
-                        }
-                        if (intId != null) {
-                            onNavigateToChat(intId)
-                        } else {
-                            Log.e("MainScreen", "Invalid or missing chat ID: $chatId")
-                        }
+                        val userId = uiState.currentUser?.id ?: 0
+                        viewModel.toggleSafePortals(userId)
                     }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ChatBubble,
-                        contentDescription = "Messages",
-                        tint = if (uiState.activeChats.isNotEmpty()) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        }
+                        imageVector = if (uiState.showOnlySafePortals) Icons.Default.Shield else Icons.Default.Public,
+                        contentDescription = if (uiState.showOnlySafePortals) "Show All Portals" else "Show Safe Portals Only"
                     )
-                }
-                if (uiState.activeChats.isNotEmpty()) {
-                    Badge(
-                        modifier = Modifier.offset(x = 20.dp, y = (-4).dp)
-                    ) {
-                        Text(text = "${uiState.activeChats.size}", fontSize = 10.sp)
-                    }
                 }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Safe Portals Toggle
-            IconButton(
-                onClick = {
-                    val userId = uiState.currentUser?.id ?: 0
-                    viewModel.toggleSafePortals(userId)
-                }
+            // Rep Logo as Floating Action Button (bottom right)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 24.dp, bottom = 16.dp)
             ) {
-                Icon(
-                    imageVector = if (uiState.showOnlySafePortals) Icons.Default.Shield else Icons.Default.Public,
-                    contentDescription = if (uiState.showOnlySafePortals) "Show All Portals" else "Show Safe Portals Only"
-                )
+                FloatingActionButton(
+                    onClick = {
+                        val userId = uiState.currentUser?.id ?: 0
+                        viewModel.togglePage(userId)
+                    },
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.replogo),
+                        contentDescription = "Rep Logo (Switch Portal/People)",
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
             }
         }
     }
