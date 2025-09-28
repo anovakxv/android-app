@@ -2,6 +2,8 @@ package com.networkedcapital.rep.presentation.main
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.networkedcapital.rep.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -63,7 +65,7 @@ fun MainScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Profile image
+            // Profile image (left)
             Box(modifier = Modifier.size(40.dp)) {
                 IconButton(onClick = {
                     uiState.currentUser?.id?.let { onNavigateToProfile(it) }
@@ -89,23 +91,27 @@ fun MainScreen(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Segmented Picker
-            val sectionList = listOf("OPEN", "NTWK", "ALL")
-            val selectedSectionStr = uiState.selectedSection?.toString() ?: "ALL"
-            val selectedIndex = sectionList.indexOf(selectedSectionStr)
-            SegmentedControl(
-                sections = sectionList,
-                selectedIndex = if (selectedIndex >= 0) selectedIndex else 0,
-                onSectionSelected = { idx ->
-                    val section = sectionList.getOrNull(idx) ?: "ALL"
-                    viewModel.onSectionSelected(section)
-                },
-                modifier = Modifier.weight(1f)
-            )
+            // Rep Logo (center, acts as portal/people switch)
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .weight(1f)
+                    .clickable {
+                        val userId = uiState.currentUser?.id ?: 0
+                        viewModel.togglePage(userId)
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.replogo),
+                    contentDescription = "Rep Logo (Switch Portal/People)",
+                    modifier = Modifier.size(36.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Search icon
+            // Search icon (right)
             IconButton(onClick = viewModel::toggleSearch) {
                 Icon(
                     imageVector = Icons.Default.Search,
@@ -113,7 +119,7 @@ fun MainScreen(
                 )
             }
 
-            // Add button
+            // Add button (right)
             IconButton(onClick = { /* TODO: Add new portal/person */ }) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -187,7 +193,7 @@ fun MainScreen(
             }
         }
 
-        // Bottom Bar: Page Switch, Chat, Safe Toggle
+        // Bottom Bar: Chat and Safe Toggle only (no page switch)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -196,33 +202,6 @@ fun MainScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Page Switch Button
-            Button(
-                onClick = {
-                    val userId = uiState.currentUser?.id ?: 0
-                    viewModel.togglePage(userId)
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (uiState.currentPage == MainPage.PORTALS) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.surface
-                    }
-                ),
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = if (uiState.currentPage == MainPage.PORTALS) "PORTALS" else "PEOPLE",
-                    color = if (uiState.currentPage == MainPage.PORTALS) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    }
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
             // Chat Icon with Badge
             Box {
                 IconButton(
