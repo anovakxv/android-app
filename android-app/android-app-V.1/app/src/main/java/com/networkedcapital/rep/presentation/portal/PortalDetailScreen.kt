@@ -696,7 +696,7 @@ fun GoalListItem(goal: Goal, onClick: () -> Unit) {
             }
             // Show bar chart if chartData exists
             if (goal.chartData != null && goal.chartData.isNotEmpty()) {
-                GoalBarChart(data = goal.chartData)
+                GoalBarChart(goal.chartData)
             }
         }
     }
