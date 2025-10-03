@@ -65,53 +65,58 @@ fun PortalDetailScreen(
             }
         } else if (uiState.portalDetail != null) {
             val portal = uiState.portalDetail!!
-            
-            Column(modifier = Modifier.fillMaxSize()) {
-                LazyColumn(modifier = Modifier.weight(1f)) {
-                    item {
-                        PortalDetailHeader(
-                            portalName = portal.name,
-                            onBackClick = onNavigateBack,
-                            onMoreClick = { showActionSheet = true }
-                        )
-                    }
-                    item {
-                        // Image Gallery
-                        val images = portal.aSections?.flatMap { it.aFiles } ?: emptyList()
-                        if (images.isNotEmpty()) {
-                            ImageGallery(
-                                images = images,
-                                onImageClick = { index ->
-                                    fullscreenImageIndex = index
-                                    showFullscreenImages = true
-                                }
-                            )
-                        }
-                    }
-                    item {
-                        // Segmented Control and Content
-                        PortalContentSection(
-                            portal = portal,
-                            goals = uiState.portalGoals,
-                            selectedSection = uiState.selectedSection,
-                            onSectionChange = viewModel::selectSection,
-                            onGoalClick = onNavigateToGoalDetail
+            // Main scrollable content
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 80.dp)
+            ) {
+                item {
+                    PortalDetailHeader(
+                        portalName = portal.name,
+                        onBackClick = onNavigateBack,
+                        onMoreClick = { showActionSheet = true }
+                    )
+                }
+                item {
+                    // Image Gallery
+                    val images = portal.aSections?.flatMap { it.aFiles } ?: emptyList()
+                    if (images.isNotEmpty()) {
+                        ImageGallery(
+                            images = images,
+                            onImageClick = { index ->
+                                fullscreenImageIndex = index
+                                showFullscreenImages = true
+                            }
                         )
                     }
                 }
-                PortalBottomBar(
-                    onAddClick = { showActionSheet = true },
-                    onMessageClick = {
-                        portal.aLeads?.firstOrNull()?.let { lead ->
-                            onNavigateToChat(
-                                lead.id,
-                                "${lead.firstName} ${lead.lastName}",
-                                lead.profileImageUrlCompat
-                            )
-                        }
-                    }
-                )
+                item {
+                    // Segmented Control and Content
+                    PortalContentSection(
+                        portal = portal,
+                        goals = uiState.portalGoals,
+                        selectedSection = uiState.selectedSection,
+                        onSectionChange = viewModel::selectSection,
+                        onGoalClick = onNavigateToGoalDetail
+                    )
+                }
             }
+            // Fixed bottom bar
+            PortalBottomBar(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .background(Color.White),
+                onAddClick = { showActionSheet = true },
+                onMessageClick = {
+                    portal.aLeads?.firstOrNull()?.let { lead ->
+                        onNavigateToChat(
+                            lead.id,
+                            "${lead.firstName} ${lead.lastName}",
+                            lead.profileImageUrlCompat
+                        )
+                    }
+                }
+            )
         }
 
         // Action Sheet
