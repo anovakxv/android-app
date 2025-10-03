@@ -27,6 +27,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -740,7 +745,7 @@ val User.profileImageUrlCompat: String?
 
 @Composable
 fun LinkableText(text: String) {
-    val urlRegex = "(https?://[\w\-._~:/?#\[\]@!$&'()*+,;=%]+)".toRegex()
+    val urlRegex = "(https?://[\\w\\-._~:/?#\\[\\]@!$&'()*+,;=%]+)".toRegex()
     val annotatedString = buildAnnotatedString {
         var lastIndex = 0
         for (match in urlRegex.findAll(text)) {
