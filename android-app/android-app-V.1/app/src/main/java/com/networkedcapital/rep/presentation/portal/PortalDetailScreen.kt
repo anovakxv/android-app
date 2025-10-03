@@ -701,6 +701,7 @@ fun GoalListItem(goal: Goal, onClick: () -> Unit) {
         }
     }
 
+// Move GoalBarChart to top-level
 @Composable
 fun GoalBarChart(data: List<BarChartData>) {
     val maxValue = data.maxOfOrNull { it.value } ?: 1.0
