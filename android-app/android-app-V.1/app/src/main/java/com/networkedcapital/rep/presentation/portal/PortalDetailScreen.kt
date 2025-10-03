@@ -66,46 +66,40 @@ fun PortalDetailScreen(
         } else if (uiState.portalDetail != null) {
             val portal = uiState.portalDetail!!
             
-            Box(modifier = Modifier.fillMaxSize()) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    // Custom Header
-                    PortalDetailHeader(
-                        portalName = portal.name,
-                        onBackClick = onNavigateBack,
-                        onMoreClick = { showActionSheet = true }
-                    )
-                    // Main Content
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth().fillMaxHeight(0.85f)
-                    ) {
-                        item {
-                            // Image Gallery
-                            val images = portal.aSections?.flatMap { it.aFiles } ?: emptyList()
-                            if (images.isNotEmpty()) {
-                                ImageGallery(
-                                    images = images,
-                                    onImageClick = { index ->
-                                        fullscreenImageIndex = index
-                                        showFullscreenImages = true
-                                    }
-                                )
-                            }
-                        }
-                        item {
-                            // Segmented Control and Content
-                            PortalContentSection(
-                                portal = portal,
-                                goals = uiState.portalGoals,
-                                selectedSection = uiState.selectedSection,
-                                onSectionChange = viewModel::selectSection,
-                                onGoalClick = onNavigateToGoalDetail
+            Column(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(modifier = Modifier.weight(1f)) {
+                    item {
+                        PortalDetailHeader(
+                            portalName = portal.name,
+                            onBackClick = onNavigateBack,
+                            onMoreClick = { showActionSheet = true }
+                        )
+                    }
+                    item {
+                        // Image Gallery
+                        val images = portal.aSections?.flatMap { it.aFiles } ?: emptyList()
+                        if (images.isNotEmpty()) {
+                            ImageGallery(
+                                images = images,
+                                onImageClick = { index ->
+                                    fullscreenImageIndex = index
+                                    showFullscreenImages = true
+                                }
                             )
                         }
                     }
+                    item {
+                        // Segmented Control and Content
+                        PortalContentSection(
+                            portal = portal,
+                            goals = uiState.portalGoals,
+                            selectedSection = uiState.selectedSection,
+                            onSectionChange = viewModel::selectSection,
+                            onGoalClick = onNavigateToGoalDetail
+                        )
+                    }
                 }
-                // Bottom Action Bar (overlay at bottom)
                 PortalBottomBar(
-                    modifier = Modifier.align(Alignment.BottomCenter),
                     onAddClick = { showActionSheet = true },
                     onMessageClick = {
                         portal.aLeads?.firstOrNull()?.let { lead ->
