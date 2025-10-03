@@ -73,6 +73,9 @@ fun PortalDetailScreen(
             }
         } else if (uiState.portalDetail != null) {
             val portal = uiState.portalDetail!!
+            val goals = uiState.portalGoals ?: portal.aGoals ?: emptyList()
+            var selectedSection by remember { mutableStateOf(0) }
+
             // DEBUG: Show portal name and ID at top
             Text(
                 text = "Portal: ${portal.name} (ID: ${portal.id})",
@@ -103,6 +106,33 @@ fun PortalDetailScreen(
                     overflow = TextOverflow.Ellipsis
                 )
             }
+
+            // Show image gallery if images exist
+            val images = portal.aSections?.flatMap { it.aFiles } ?: emptyList()
+            if (images.isNotEmpty()) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        ImageGallery(images = images, onImageClick = { index ->
+                            fullscreenImageIndex = index
+                            showFullscreenImages = true
+                        })
+                        Spacer(modifier = Modifier.height(12.dp))
+                        PortalContentSection(
+                            portal = portal,
+                            goals = goals,
+                            selectedSection = selectedSection,
+                            onSectionChange = { selectedSection = it },
+                            onGoalClick = onNavigateToGoalDetail
+                        )
+                    }
+                } else {
+                    PortalContentSection(
+                        portal = portal,
+                        goals = goals,
+                        selectedSection = selectedSection,
+                        onSectionChange = { selectedSection = it },
+                        onGoalClick = onNavigateToGoalDetail
+                    )
+                }
         } else {
             // Fallback: Show message if portal data is missing
             Box(
