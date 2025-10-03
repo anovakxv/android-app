@@ -761,16 +761,17 @@ fun LinkableText(text: String) {
             append(text.substring(lastIndex))
         }
     }
+    val context = androidx.compose.ui.platform.LocalContext.current
     ClickableText(
         text = annotatedString,
         style = LocalTextStyle.current.copy(fontSize = 16.sp),
-        onClick = { offset ->
+        onClick = { offset: Int ->
             annotatedString.getStringAnnotations(tag = "URL", start = offset, end = offset)
                 .firstOrNull()?.let { annotation ->
                     val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(annotation.item))
                     intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                     try {
-                        androidx.compose.ui.platform.LocalContext.current.startActivity(intent)
+                        context.startActivity(intent)
                     } catch (_: Exception) {}
                 }
         }
