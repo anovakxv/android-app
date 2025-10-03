@@ -445,41 +445,42 @@ fun StorySection(
 
 @Composable
 fun PortalBottomBar(
+    modifier: Modifier = Modifier,
     onAddClick: () -> Unit,
     onMessageClick: () -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shadowElevation = 8.dp
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+        Surface(
+            modifier = modifier.fillMaxWidth(),
+            shadowElevation = 8.dp
         ) {
-            Button(
-                onClick = onAddClick,
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF8CC55D)
-                )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Join Team", color = Color.White)
-            }
+                Button(
+                    onClick = onAddClick,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF8CC55D)
+                    )
+                ) {
+                    Text("Join Team", color = Color.White)
+                }
 
-            Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(16.dp))
 
-            IconButton(onClick = onMessageClick) {
-                Icon(
-                    imageVector = Icons.Default.ChatBubble,
-                    contentDescription = "Message",
-                    tint = Color(0xFF8CC55D)
-                )
+                IconButton(onClick = onMessageClick) {
+                    Icon(
+                        imageVector = Icons.Default.ChatBubble,
+                        contentDescription = "Message",
+                        tint = Color(0xFF8CC55D)
+                    )
+                }
             }
         }
-    }
 }
 
 @Composable
