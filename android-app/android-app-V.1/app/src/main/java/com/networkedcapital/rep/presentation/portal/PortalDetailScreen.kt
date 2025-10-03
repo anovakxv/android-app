@@ -78,61 +78,62 @@ fun PortalDetailScreen(
                     .fillMaxWidth()
                     .background(Color.Yellow)
                     .padding(8.dp),
-                color = Color.Black,
-                fontWeight = FontWeight.Bold
-            )
-            // Main scrollable content
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 80.dp)
-            ) {
-                item {
-                    PortalDetailHeader(
-                        portalName = portal.name,
-                        onBackClick = onNavigateBack,
-                        onMoreClick = { showActionSheet = true }
-                    )
-                }
-                item {
-                    // Image Gallery
-                    val images = portal.aSections?.flatMap { it.aFiles } ?: emptyList()
-                    if (images.isNotEmpty()) {
-                        ImageGallery(
-                            images = images,
-                            onImageClick = { index ->
-                                fullscreenImageIndex = index
-                                showFullscreenImages = true
-                            }
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onClick() }
+                        .padding(vertical = 4.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(
+                            text = when {
+                                goal.title != null && goal.title.isNotBlank() -> goal.title
+                                !goal.description.isNullOrBlank() -> goal.description
+                                else -> "Goal"
+                            },
+                            fontWeight = FontWeight.Bold
                         )
+                        if (!goal.description.isNullOrBlank() && (goal.title == null || goal.title != goal.description)) {
+                            Text(goal.description, fontSize = 14.sp, color = Color.Gray)
+                        }
+                        // Show bar chart if chartData exists
+                        if (goal.chartData != null && goal.chartData.isNotEmpty()) {
+                            GoalBarChart(goal.chartData)
+                        }
                     }
-                }
-                item {
-                    // Segmented Control and Content
-                    PortalContentSection(
-                        portal = portal,
-                        goals = uiState.portalGoals,
-                        selectedSection = uiState.selectedSection,
-                        onSectionChange = viewModel::selectSection,
-                        onGoalClick = onNavigateToGoalDetail
-                    )
                 }
             }
-            // Fixed bottom bar
-            PortalBottomBar(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .background(Color.White),
-                onAddClick = { showActionSheet = true },
-                onMessageClick = {
-                    portal.aLeads?.firstOrNull()?.let { lead ->
-                        onNavigateToChat(
-                            lead.id,
-                            "${lead.firstName} ${lead.lastName}",
-                            lead.profileImageUrlCompat
-                        )
+
+            @Composable
+            fun GoalBarChart(data: List<BarChartData>) {
+                val maxValue = data.maxOfOrNull { it.value } ?: 1.0
+                Column(modifier = Modifier.padding(top = 8.dp)) {
+                    Row(
+                        modifier = Modifier.height(40.dp),
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        data.forEach { bar ->
+                            Box(
+                                modifier = Modifier
+                                    .width(24.dp)
+                                    .height((bar.value / maxValue * 36).dp)
+                                    .background(Color(0xFF8CC55D), RoundedCornerShape(4.dp))
+                            )
+                        }
+                    }
+                    Row {
+                        data.forEach { bar ->
+                            Text(
+                                text = bar.bottomLabel,
+                                fontSize = 10.sp,
+                                modifier = Modifier.width(24.dp),
+                                maxLines = 1
+                            )
+                        }
                     }
                 }
-            )
+            }
         } else {
             // Fallback: Show message if portal data is missing
             Box(
