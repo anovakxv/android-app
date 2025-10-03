@@ -78,61 +78,31 @@ fun PortalDetailScreen(
                     .fillMaxWidth()
                     .background(Color.Yellow)
                     .padding(8.dp),
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onClick() }
-                        .padding(vertical = 4.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text(
-                            text = when {
-                                goal.title != null && goal.title.isNotBlank() -> goal.title
-                                !goal.description.isNullOrBlank() -> goal.description
-                                else -> "Goal"
-                            },
-                            fontWeight = FontWeight.Bold
-                        )
-                        if (!goal.description.isNullOrBlank() && (goal.title == null || goal.title != goal.description)) {
-                            Text(goal.description, fontSize = 14.sp, color = Color.Gray)
-                        }
-                        // Show bar chart if chartData exists
-                        if (goal.chartData != null && goal.chartData.isNotEmpty()) {
-                            GoalBarChart(goal.chartData)
-                        }
-                    }
+                color = Color.Black,
+                fontWeight = FontWeight.Bold
+            )
+            // DEBUG: Show raw portal data
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFE0E0E0))
+                    .padding(8.dp)
+            ) {
+                val portalJson = try {
+                    kotlinx.serialization.json.Json.encodeToString(
+                        com.networkedcapital.rep.domain.model.PortalDetail.serializer(),
+                        portal
+                    )
+                } catch (e: Exception) {
+                    portal.toString()
                 }
-            }
-
-            @Composable
-            fun GoalBarChart(data: List<BarChartData>) {
-                val maxValue = data.maxOfOrNull { it.value } ?: 1.0
-                Column(modifier = Modifier.padding(top = 8.dp)) {
-                    Row(
-                        modifier = Modifier.height(40.dp),
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        data.forEach { bar ->
-                            Box(
-                                modifier = Modifier
-                                    .width(24.dp)
-                                    .height((bar.value / maxValue * 36).dp)
-                                    .background(Color(0xFF8CC55D), RoundedCornerShape(4.dp))
-                            )
-                        }
-                    }
-                    Row {
-                        data.forEach { bar ->
-                            Text(
-                                text = bar.bottomLabel,
-                                fontSize = 10.sp,
-                                modifier = Modifier.width(24.dp),
-                                maxLines = 1
-                            )
-                        }
-                    }
-                }
+                Text(
+                    text = "RAW DATA: $portalJson",
+                    fontSize = 10.sp,
+                    color = Color.DarkGray,
+                    maxLines = 10,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         } else {
             // Fallback: Show message if portal data is missing
@@ -701,8 +671,8 @@ fun GoalListItem(goal: Goal, onClick: () -> Unit) {
             }
         }
     }
+}
 
-// Move GoalBarChart to top-level
 @Composable
 fun GoalBarChart(data: List<BarChartData>) {
     val maxValue = data.maxOfOrNull { it.value } ?: 1.0
@@ -731,7 +701,6 @@ fun GoalBarChart(data: List<BarChartData>) {
             }
         }
     }
-}
 }
 
 val User.profileImageUrlCompat: String?

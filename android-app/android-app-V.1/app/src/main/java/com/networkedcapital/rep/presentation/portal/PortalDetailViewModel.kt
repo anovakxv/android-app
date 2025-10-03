@@ -26,6 +26,7 @@ class PortalDetailViewModel @Inject constructor(
                 portalRepository.getPortalDetail(portalId, userId).collect { result ->
                     result.fold(
                         onSuccess = { portalDetail ->
+                            android.util.Log.d("PortalDetailViewModel", "Loaded portal detail: $portalDetail")
                             _uiState.update { 
                                 it.copy(
                                     portalDetail = portalDetail,
@@ -34,6 +35,7 @@ class PortalDetailViewModel @Inject constructor(
                             }
                         },
                         onFailure = { error ->
+                            android.util.Log.e("PortalDetailViewModel", "Error loading portal detail: ${error.message}", error)
                             _uiState.update { 
                                 it.copy(
                                     isLoading = false,
@@ -48,10 +50,11 @@ class PortalDetailViewModel @Inject constructor(
                 portalRepository.getPortalGoals(portalId).collect { result ->
                     result.fold(
                         onSuccess = { goals ->
+                            android.util.Log.d("PortalDetailViewModel", "Loaded portal goals: $goals")
                             _uiState.update { it.copy(portalGoals = goals) }
                         },
                         onFailure = { error ->
-                            // Handle error if needed
+                            android.util.Log.e("PortalDetailViewModel", "Error loading portal goals: ${error.message}", error)
                         }
                     )
                 }
@@ -61,16 +64,18 @@ class PortalDetailViewModel @Inject constructor(
                     portalRepository.getReportingIncrements().collect { result ->
                         result.fold(
                             onSuccess = { increments ->
+                                android.util.Log.d("PortalDetailViewModel", "Loaded reporting increments: $increments")
                                 _uiState.update { it.copy(reportingIncrements = increments) }
                             },
                             onFailure = { error ->
-                                // Handle error if needed
+                                android.util.Log.e("PortalDetailViewModel", "Error loading reporting increments: ${error.message}", error)
                             }
                         )
                     }
                 }
 
             } catch (e: Exception) {
+                android.util.Log.e("PortalDetailViewModel", "Exception in loadPortalDetail: ${e.message}", e)
                 _uiState.update { 
                     it.copy(
                         isLoading = false,
