@@ -65,6 +65,16 @@ fun PortalDetailScreen(
             }
         } else if (uiState.portalDetail != null) {
             val portal = uiState.portalDetail!!
+            // DEBUG: Show portal name and ID at top
+            Text(
+                text = "Portal: ${portal.name} (ID: ${portal.id})",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Yellow)
+                    .padding(8.dp),
+                color = Color.Black,
+                fontWeight = FontWeight.Bold
+            )
             // Main scrollable content
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -117,6 +127,18 @@ fun PortalDetailScreen(
                     }
                 }
             )
+        } else {
+            // Fallback: Show message if portal data is missing
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No portal data loaded.",
+                    color = Color.Red,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
 
         // Action Sheet
@@ -656,34 +678,161 @@ fun GoalListItem(goal: Goal, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            // FIX: Use goal.title or fallback to "Goal" if neither name nor goalName exist
             Text(
                 text = when {
-                    // If your Goal model has a 'title' property, use it
                     goal.title != null && goal.title.isNotBlank() -> goal.title
-                    // If your Goal model has a 'description' property, use it as a fallback
                     !goal.description.isNullOrBlank() -> goal.description
-                    // Otherwise, fallback to a generic label
                     else -> "Goal"
                 },
                 fontWeight = FontWeight.Bold
             )
-            // Show description only if it's not already used as the title
             if (!goal.description.isNullOrBlank() && (goal.title == null || goal.title != goal.description)) {
                 Text(goal.description, fontSize = 14.sp, color = Color.Gray)
             }
+            // Show bar chart if chartData exists
+            if (goal.chartData != null && goal.chartData.isNotEmpty()) {
+                GoalBarChart(data = goal.chartData)
+            }
         }
     }
+
+@Composable
+fun GoalBarChart(data: List<BarChartData>) {
+    // Simple horizontal bar chart
+    val maxValue = data.maxOfOrNull { it.value } ?: 1.0
+    Column(modifier = Modifier.padding(top = 8.dp)) {
+        Row(
+            modifier = Modifier.height(40.dp),
+            verticalAlignment = Alignment.Bottom
+        ) {
+            data.forEach { bar ->
+                Box(
+                    modifier = Modifier
+                        .width(24.dp)
+                        .height((bar.value / maxValue * 36).dp)
+                        .background(Color(0xFF8CC55D), RoundedCornerShape(4.dp))
+                )
+            }
+        }
+        Row {
+            data.forEach { bar ->
+                Text(
+                    text = bar.bottomLabel,
+                    fontSize = 10.sp,
+                    modifier = Modifier.width(24.dp),
+                    maxLines = 1
+                )
+            }
+        }
+    }
+}
 }
 
 val User.profileImageUrlCompat: String?
     get() = try {
         this::class.members.firstOrNull { it.name == "profileImageUrl" }
-            ?.call(this) as? String
-            ?: this::class.members.firstOrNull { it.name == "imageUrl" }
-                ?.call(this) as? String
-            ?: this::class.members.firstOrNull { it.name == "avatarUrl" }
-                ?.call(this) as? String
-    } catch (e: Exception) {
-        null
-    }
+            LazyColumn(
+                modifier = modifier,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item {
+                    Text(
+                        text = "Leads",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Row(
+                        modifier = Modifier
+                            .horizontalScroll(rememberScrollState())
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        (portal.aLeads ?: emptyList()).forEach { lead ->
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                if (!lead.profileImageUrlCompat.isNullOrEmpty()) {
+                                    AsyncImage(
+                                        model = lead.profileImageUrlCompat,
+                                        contentDescription = "${lead.firstName} ${lead.lastName}",
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .clip(CircleShape),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                } else {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .background(Color.Gray, CircleShape)
+                                    )
+                                }
+                                Text(
+                                    text = "${lead.firstName?.take(1) ?: ""}${lead.lastName?.take(1) ?: ""}",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+                }
+                item {
+                    Divider(color = Color(0xFFE4E4E4))
+                }
+                // Story text blocks
+                items(portal.aTexts?.filter { it.section == "story" } ?: emptyList()) { textBlock ->
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        textBlock.title?.takeIf { it.isNotBlank() }?.let { title ->
+                            Text(
+                                text = title,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                        textBlock.text?.takeIf { it.isNotBlank() }?.let { text ->
+                            LinkableText(text = text)
+                        }
+                    }
+                }
+            }
+
+        @Composable
+        fun LinkableText(text: String) {
+            // Simple clickable links in text using regex
+            val urlRegex = "(https?://[\w\-._~:/?#\[\]@!$&'()*+,;=%]+)".toRegex()
+            val annotatedString = buildAnnotatedString {
+                var lastIndex = 0
+                for (match in urlRegex.findAll(text)) {
+                    val url = match.value
+                    val start = match.range.first
+                    val end = match.range.last + 1
+                    append(text.substring(lastIndex, start))
+                    pushStringAnnotation(tag = "URL", annotation = url)
+                    withStyle(SpanStyle(color = Color.Blue, textDecoration = TextDecoration.Underline)) {
+                        append(url)
+                    }
+                    pop()
+                    lastIndex = end
+                }
+                if (lastIndex < text.length) {
+                    append(text.substring(lastIndex))
+                }
+            }
+            ClickableText(
+                text = annotatedString,
+                style = LocalTextStyle.current.copy(fontSize = 16.sp),
+                onClick = { offset ->
+                    annotatedString.getStringAnnotations(tag = "URL", start = offset, end = offset)
+                        .firstOrNull()?.let { annotation ->
+                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(annotation.item))
+                            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                            try {
+                                androidx.compose.ui.platform.LocalContext.current.startActivity(intent)
+                            } catch (_: Exception) {}
+                        }
+                }
+            )
+        }
