@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.networkedcapital.rep.domain.model.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,10 +91,7 @@ fun PortalDetailScreen(
                     .padding(8.dp)
             ) {
                 val portalJson = try {
-                    kotlinx.serialization.json.Json.encodeToString(
-                        com.networkedcapital.rep.domain.model.PortalDetail.serializer(),
-                        portal
-                    )
+                    Json.encodeToString(portal)
                 } catch (e: Exception) {
                     portal.toString()
                 }
