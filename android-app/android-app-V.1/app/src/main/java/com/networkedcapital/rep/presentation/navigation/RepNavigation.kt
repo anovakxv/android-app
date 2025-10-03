@@ -106,9 +106,10 @@ fun RepNavigation(
                 onNavigateToProfile = { userId ->
                     navController.navigate("${Screen.Profile.route}/$userId")
                 },
-                onNavigateToPortalDetail = { portalId ->
-                    // TODO: Implement navigation to portal detail screen
-                },
+                    onNavigateToPortalDetail = { portalId ->
+                        val userId = authState.userId
+                        navController.navigate("${Screen.PortalDetail.route}/$portalId/$userId")
+                    },
                 onNavigateToPersonDetail = { personId ->
                     // TODO: Implement navigation to person detail screen
                 },
@@ -133,6 +134,20 @@ fun RepNavigation(
             )
         }
         
+        composable("${Screen.PortalDetail.route}/{portalId}/{userId}") { backStackEntry ->
+            val portalId = backStackEntry.arguments?.getString("portalId")?.toIntOrNull() ?: 0
+            val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull() ?: 0
+            com.networkedcapital.rep.presentation.portal.PortalDetailScreen(
+                portalId = portalId,
+                userId = userId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToGoalDetail = { /* TODO */ },
+                onNavigateToEditPortal = { /* TODO */ },
+                onNavigateToChat = { _, _, _ -> /* TODO */ },
+                onNavigateToEditGoal = { _, _ -> /* TODO */ }
+            )
+        }
+
         composable(Screen.ApiTest.route) {
             ApiTestScreen(
                 authViewModel = authViewModel
@@ -149,5 +164,6 @@ sealed class Screen(val route: String) {
     object EditProfile : Screen("edit_profile")
     object Main : Screen("main")
     object Profile : Screen("profile")
+    object PortalDetail : Screen("portal_detail")
     object ApiTest : Screen("api_test")
 }
