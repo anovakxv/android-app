@@ -669,7 +669,6 @@ fun ZoomableImage(
 
 @Composable
 fun GoalListItem(goal: Goal, onClick: () -> Unit) {
-    // Minimal implementation for demonstration
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -698,7 +697,6 @@ fun GoalListItem(goal: Goal, onClick: () -> Unit) {
 
 @Composable
 fun GoalBarChart(data: List<BarChartData>) {
-    // Simple horizontal bar chart
     val maxValue = data.maxOfOrNull { it.value } ?: 1.0
     Column(modifier = Modifier.padding(top = 8.dp)) {
         Row(
@@ -731,108 +729,48 @@ fun GoalBarChart(data: List<BarChartData>) {
 val User.profileImageUrlCompat: String?
     get() = try {
         this::class.members.firstOrNull { it.name == "profileImageUrl" }
-            LazyColumn(
-                modifier = modifier,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                item {
-                    Text(
-                        text = "Leads",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Row(
-                        modifier = Modifier
-                            .horizontalScroll(rememberScrollState())
-                            .padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        (portal.aLeads ?: emptyList()).forEach { lead ->
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                if (!lead.profileImageUrlCompat.isNullOrEmpty()) {
-                                    AsyncImage(
-                                        model = lead.profileImageUrlCompat,
-                                        contentDescription = "${lead.firstName} ${lead.lastName}",
-                                        modifier = Modifier
-                                            .size(32.dp)
-                                            .clip(CircleShape),
-                                        contentScale = ContentScale.Crop
-                                    )
-                                } else {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(32.dp)
-                                            .background(Color.Gray, CircleShape)
-                                    )
-                                }
-                                Text(
-                                    text = "${lead.firstName?.take(1) ?: ""}${lead.lastName?.take(1) ?: ""}",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                        }
-                    }
-                }
-                item {
-                    Divider(color = Color(0xFFE4E4E4))
-                }
-                // Story text blocks
-                items(portal.aTexts?.filter { it.section == "story" } ?: emptyList()) { textBlock ->
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        textBlock.title?.takeIf { it.isNotBlank() }?.let { title ->
-                            Text(
-                                text = title,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                        textBlock.text?.takeIf { it.isNotBlank() }?.let { text ->
-                            LinkableText(text = text)
-                        }
-                    }
-                }
-            }
+            ?.call(this) as? String
+            ?: this::class.members.firstOrNull { it.name == "imageUrl" }
+                ?.call(this) as? String
+            ?: this::class.members.firstOrNull { it.name == "avatarUrl" }
+                ?.call(this) as? String
+    } catch (e: Exception) {
+        null
+    }
 
-        @Composable
-        fun LinkableText(text: String) {
-            // Simple clickable links in text using regex
-            val urlRegex = "(https?://[\w\-._~:/?#\[\]@!$&'()*+,;=%]+)".toRegex()
-            val annotatedString = buildAnnotatedString {
-                var lastIndex = 0
-                for (match in urlRegex.findAll(text)) {
-                    val url = match.value
-                    val start = match.range.first
-                    val end = match.range.last + 1
-                    append(text.substring(lastIndex, start))
-                    pushStringAnnotation(tag = "URL", annotation = url)
-                    withStyle(SpanStyle(color = Color.Blue, textDecoration = TextDecoration.Underline)) {
-                        append(url)
-                    }
-                    pop()
-                    lastIndex = end
-                }
-                if (lastIndex < text.length) {
-                    append(text.substring(lastIndex))
-                }
+@Composable
+fun LinkableText(text: String) {
+    val urlRegex = "(https?://[\w\-._~:/?#\[\]@!$&'()*+,;=%]+)".toRegex()
+    val annotatedString = buildAnnotatedString {
+        var lastIndex = 0
+        for (match in urlRegex.findAll(text)) {
+            val url = match.value
+            val start = match.range.first
+            val end = match.range.last + 1
+            append(text.substring(lastIndex, start))
+            pushStringAnnotation(tag = "URL", annotation = url)
+            withStyle(SpanStyle(color = Color.Blue, textDecoration = TextDecoration.Underline)) {
+                append(url)
             }
-            ClickableText(
-                text = annotatedString,
-                style = LocalTextStyle.current.copy(fontSize = 16.sp),
-                onClick = { offset ->
-                    annotatedString.getStringAnnotations(tag = "URL", start = offset, end = offset)
-                        .firstOrNull()?.let { annotation ->
-                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(annotation.item))
-                            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                            try {
-                                androidx.compose.ui.platform.LocalContext.current.startActivity(intent)
-                            } catch (_: Exception) {}
-                        }
-                }
-            )
+            pop()
+            lastIndex = end
         }
+        if (lastIndex < text.length) {
+            append(text.substring(lastIndex))
+        }
+    }
+    ClickableText(
+        text = annotatedString,
+        style = LocalTextStyle.current.copy(fontSize = 16.sp),
+        onClick = { offset ->
+            annotatedString.getStringAnnotations(tag = "URL", start = offset, end = offset)
+                .firstOrNull()?.let { annotation ->
+                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(annotation.item))
+                    intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    try {
+                        androidx.compose.ui.platform.LocalContext.current.startActivity(intent)
+                    } catch (_: Exception) {}
+                }
+        }
+    )
+}
