@@ -121,7 +121,7 @@ data class PortalUser(
 @Parcelize
 data class PortalText(
     val id: Int,
-    val portalId: Int,
+    val portalId: Int? = null,
     val title: String? = null,
     val text: String? = null,
     val section: String? = null,
