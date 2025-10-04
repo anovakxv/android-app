@@ -132,9 +132,13 @@ fun GoalsDetailScreen(
                     }
                 }
                 1 -> {
-                    if (goal?.chartData?.isEmpty() != false) {
+                    if (error != null) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("No chart data available.")
+                            Text("Error loading reporting data.", color = Color.Red)
+                        }
+                    } else if (goal?.chartData?.isEmpty() != false) {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("No reporting data available.", color = Color.Gray)
                         }
                     } else {
                         LargeBarChartView(goal!!.chartData, goal!!.quota)
