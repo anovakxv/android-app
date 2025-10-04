@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.networkedcapital.rep.domain.model.Goal
 import com.networkedcapital.rep.domain.model.BarChartData
 import com.networkedcapital.rep.domain.model.User
+import com.networkedcapital.rep.domain.model.FeedItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

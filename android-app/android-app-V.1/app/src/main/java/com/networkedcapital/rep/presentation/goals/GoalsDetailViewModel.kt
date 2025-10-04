@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.Serializable
 import com.networkedcapital.rep.data.remote.GoalsApiService
+import com.networkedcapital.rep.domain.model.FeedItem
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

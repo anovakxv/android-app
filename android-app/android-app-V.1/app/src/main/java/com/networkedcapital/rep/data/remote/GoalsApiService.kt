@@ -1,7 +1,7 @@
 package com.networkedcapital.rep.data.remote
 
 import com.networkedcapital.rep.domain.model.Goal
-import com.networkedcapital.rep.presentation.goals.FeedItem
+import com.networkedcapital.rep.domain.model.FeedItem
 import com.networkedcapital.rep.domain.model.User
 import retrofit2.http.GET
 import retrofit2.http.Query

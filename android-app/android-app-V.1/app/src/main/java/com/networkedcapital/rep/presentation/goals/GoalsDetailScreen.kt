@@ -22,7 +22,7 @@ import com.networkedcapital.rep.domain.model.User
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.collectAsState
 import com.networkedcapital.rep.presentation.goals.GoalsDetailViewModel
-import com.networkedcapital.rep.presentation.goals.FeedItem
+import com.networkedcapital.rep.domain.model.FeedItem
 
 @Composable
 fun GoalsDetailScreen(

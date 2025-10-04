@@ -27,9 +27,7 @@ fun GoalsNavHost(
             val uiState = goalsViewModel.uiState.collectAsState().value
             uiState.selectedGoal?.let { goal ->
                 GoalsDetailScreen(
-                    goal = goal,
-                    feed = uiState.feed,
-                    team = uiState.team,
+                    goalId = goal.id,
                     onBack = { navController.popBackStack() },
                     onMessage = { /* TODO: Implement message navigation */ },
                     onEditGoal = { /* TODO: Implement edit navigation */ },
