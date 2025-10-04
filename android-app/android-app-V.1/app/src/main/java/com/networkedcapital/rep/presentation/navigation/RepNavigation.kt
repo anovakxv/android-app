@@ -172,10 +172,7 @@ sealed class Screen(val route: String) {
         composable("${Screen.GoalDetail.route}/{goalId}") { backStackEntry ->
             val goalId = backStackEntry.arguments?.getString("goalId")?.toIntOrNull() ?: 0
             // TODO: Replace with your actual GoalDetailScreen implementation
-            // Example:
-            // com.networkedcapital.rep.presentation.goals.GoalsDetailScreen(
-            //     goalId = goalId,
-            //     ...
-            // )
+            // For now, show an empty Box to avoid syntax errors
+            Box(modifier = Modifier.fillMaxSize())
         }
 }
