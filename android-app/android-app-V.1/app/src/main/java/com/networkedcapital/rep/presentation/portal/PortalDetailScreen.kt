@@ -391,7 +391,10 @@ fun GoalTeamsSection(
         items(goals) { goal ->
             GoalListItem(
                 goal = goal,
-                onClick = { onGoalClick(goal.id) }
+                onClick = {
+                    // Navigate to the goal team page for the clicked goal
+                    onGoalClick(goal.id)
+                }
             )
             if (goal != goals.last()) {
                 Divider(color = Color(0xFFE4E4E4))
