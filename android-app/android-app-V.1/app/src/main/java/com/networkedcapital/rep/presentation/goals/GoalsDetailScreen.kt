@@ -19,18 +19,32 @@ import androidx.compose.ui.draw.clip
 import com.networkedcapital.rep.domain.model.Goal
 import com.networkedcapital.rep.domain.model.BarChartData
 import com.networkedcapital.rep.domain.model.User
+import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.flow.collectAsState
+import com.networkedcapital.rep.presentation.goals.GoalsDetailViewModel
+import com.networkedcapital.rep.presentation.goals.FeedItem
 
 @Composable
+@Composable
 fun GoalsDetailScreen(
-    goal: Goal,
-    feed: List<FeedItem>,
-    team: List<User>,
+    goalId: Int,
     onBack: () -> Unit,
     onMessage: (User) -> Unit,
     onEditGoal: () -> Unit,
     onUpdateGoal: () -> Unit
 ) {
+    val viewModel: GoalsDetailViewModel = viewModel()
+    val goal by viewModel.goal.collectAsState()
+    val feed by viewModel.feed.collectAsState()
+    val team by viewModel.team.collectAsState()
+    val loading by viewModel.loading.collectAsState()
+    val error by viewModel.error.collectAsState()
     var selectedTab by remember { mutableStateOf(0) }
+
+    LaunchedEffect(goalId) {
+        viewModel.loadGoal(goalId)
+    }
+
     Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
         // Top Bar
         Row(
@@ -44,37 +58,39 @@ fun GoalsDetailScreen(
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Back", tint = Color(0xFF8CC55D))
             }
             Spacer(modifier = Modifier.weight(1f))
-            Text(goal.title, style = MaterialTheme.typography.titleMedium)
+            Text(goal?.title ?: "Goal Detail", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.weight(1f))
             Box(modifier = Modifier.size(24.dp)) // Placeholder for right icon
         }
         // Progress Bar and Metrics
-        Column(modifier = Modifier.padding(16.dp)) {
-            LinearProgressIndicator(
-                progress = goal.progress.toFloat().coerceIn(0f, 1f),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(12.dp)
-                    .clip(RoundedCornerShape(6.dp)),
-                color = Color(0xFF8CC55D),
-                trackColor = Color(0xFFE0E0E0)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row {
-                Text("Metric: ${goal.metricName}", style = MaterialTheme.typography.bodySmall)
-                Spacer(modifier = Modifier.weight(1f))
-                Text("Goal Type: ${goal.typeName}", style = MaterialTheme.typography.bodySmall)
-            }
-            Row {
-                Text("Quota: ${goal.quota.toInt()}", style = MaterialTheme.typography.bodySmall)
-                Spacer(modifier = Modifier.weight(1f))
-                Text("Progress: ${goal.filledQuota.toInt()}", style = MaterialTheme.typography.bodySmall)
-            }
-            if (goal.subtitle.isNotBlank()) {
-                Text(goal.subtitle, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-            }
-            if (goal.description.isNotBlank()) {
-                Text(goal.description, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+        if (goal != null) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                LinearProgressIndicator(
+                    progress = goal!!.progress.toFloat().coerceIn(0f, 1f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(12.dp)
+                        .clip(RoundedCornerShape(6.dp)),
+                    color = Color(0xFF8CC55D),
+                    trackColor = Color(0xFFE0E0E0)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row {
+                    Text("Metric: ${goal!!.metricName}", style = MaterialTheme.typography.bodySmall)
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text("Goal Type: ${goal!!.typeName}", style = MaterialTheme.typography.bodySmall)
+                }
+                Row {
+                    Text("Quota: ${goal!!.quota.toInt()}", style = MaterialTheme.typography.bodySmall)
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text("Progress: ${goal!!.filledQuota.toInt()}", style = MaterialTheme.typography.bodySmall)
+                }
+                if (goal!!.subtitle.isNotBlank()) {
+                    Text(goal!!.subtitle, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                }
+                if (goal!!.description.isNotBlank()) {
+                    Text(goal!!.description, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                }
             }
         }
         // Segmented Control
@@ -99,27 +115,37 @@ fun GoalsDetailScreen(
             }
         }
         // Content
-        when (selectedTab) {
-            0 -> {
-                LazyColumn(modifier = Modifier.weight(1f)) {
-                    items(feed) { item ->
-                        FeedItemView(item)
+        if (loading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else if (error != null) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Error: $error")
+            }
+        } else {
+            when (selectedTab) {
+                0 -> {
+                    LazyColumn(modifier = Modifier.weight(1f)) {
+                        items(feed) { item ->
+                            FeedItemView(item)
+                        }
                     }
                 }
-            }
-            1 -> {
-                if (goal.chartData.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("No chart data available.")
+                1 -> {
+                    if (goal?.chartData?.isEmpty() != false) {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("No chart data available.")
+                        }
+                    } else {
+                        LargeBarChartView(goal!!.chartData, goal!!.quota)
                     }
-                } else {
-                    LargeBarChartView(goal.chartData, goal.quota)
                 }
-            }
-            2 -> {
-                LazyColumn(modifier = Modifier.weight(1f)) {
-                    items(team) { user ->
-                        TeamMemberItem(user, onMessage)
+                2 -> {
+                    LazyColumn(modifier = Modifier.weight(1f)) {
+                        items(team) { user ->
+                            TeamMemberItem(user, onMessage)
+                        }
                     }
                 }
             }
