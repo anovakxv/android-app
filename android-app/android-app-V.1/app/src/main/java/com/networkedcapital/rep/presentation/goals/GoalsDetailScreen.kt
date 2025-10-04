@@ -141,9 +141,15 @@ fun GoalsDetailScreen(
                     }
                 }
                 2 -> {
-                    LazyColumn(modifier = Modifier.weight(1f)) {
-                        items(team) { user ->
-                            TeamMemberItem(user, onMessage)
+                    if (team.isNullOrEmpty()) {
+                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                            Text("No team members found.", color = Color.Gray)
+                        }
+                    } else {
+                        LazyColumn(modifier = Modifier.weight(1f)) {
+                            items(team) { user ->
+                                TeamMemberItem(user, onMessage)
+                            }
                         }
                     }
                 }
