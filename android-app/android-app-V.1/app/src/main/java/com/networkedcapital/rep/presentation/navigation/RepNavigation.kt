@@ -141,7 +141,9 @@ fun RepNavigation(
                 portalId = portalId,
                 userId = userId,
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToGoalDetail = { /* TODO */ },
+                onNavigateToGoalDetail = { goalId ->
+                    navController.navigate("${Screen.GoalDetail.route}/$goalId")
+                },
                 onNavigateToEditPortal = { /* TODO */ },
                 onNavigateToChat = { _, _, _ -> /* TODO */ },
                 onNavigateToEditGoal = { _, _ -> /* TODO */ }
@@ -165,5 +167,15 @@ sealed class Screen(val route: String) {
     object Main : Screen("main")
     object Profile : Screen("profile")
     object PortalDetail : Screen("portal_detail")
+    object GoalDetail : Screen("goal_detail")
     object ApiTest : Screen("api_test")
+        composable("${Screen.GoalDetail.route}/{goalId}") { backStackEntry ->
+            val goalId = backStackEntry.arguments?.getString("goalId")?.toIntOrNull() ?: 0
+            // TODO: Replace with your actual GoalDetailScreen implementation
+            // Example:
+            // com.networkedcapital.rep.presentation.goals.GoalsDetailScreen(
+            //     goalId = goalId,
+            //     ...
+            // )
+        }
 }
