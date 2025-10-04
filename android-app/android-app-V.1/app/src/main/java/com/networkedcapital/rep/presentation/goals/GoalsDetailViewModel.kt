@@ -62,11 +62,4 @@ data class GoalDetailResponse(
     val team: List<User>
 )
 
-@Serializable
-data class FeedItem(
-    val id: Int,
-    val userName: String,
-    val date: String,
-    val value: String,
-    val note: String
-)
+// Remove duplicate FeedItem declaration (already defined elsewhere)

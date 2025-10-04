@@ -75,9 +75,4 @@ data class GoalDetailResult(
     val team: List<User>
 )
 
-data class FeedItem(
-    val userName: String,
-    val date: String,
-    val value: String,
-    val note: String
-)
+// Remove duplicate FeedItem declaration (already defined elsewhere)
