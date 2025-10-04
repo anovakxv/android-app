@@ -155,6 +155,13 @@ fun RepNavigation(
                 authViewModel = authViewModel
             )
         }
+
+        composable("${Screen.GoalDetail.route}/{goalId}") { backStackEntry ->
+            val goalId = backStackEntry.arguments?.getString("goalId")?.toIntOrNull() ?: 0
+            // TODO: Replace with your actual GoalDetailScreen implementation
+            // For now, show an empty Box to avoid syntax errors
+            Box(modifier = Modifier.fillMaxSize())
+        }
     }
 }
 
@@ -169,10 +176,5 @@ sealed class Screen(val route: String) {
     object PortalDetail : Screen("portal_detail")
     object GoalDetail : Screen("goal_detail")
     object ApiTest : Screen("api_test")
-        composable("${Screen.GoalDetail.route}/{goalId}") { backStackEntry ->
-            val goalId = backStackEntry.arguments?.getString("goalId")?.toIntOrNull() ?: 0
-            // TODO: Replace with your actual GoalDetailScreen implementation
-            // For now, show an empty Box to avoid syntax errors
-            Box(modifier = Modifier.fillMaxSize())
-        }
+        
 }
