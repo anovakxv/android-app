@@ -739,29 +739,32 @@ fun GoalListItem(goal: Goal, onClick: () -> Unit) {
 
 @Composable
 fun GoalBarChart(data: List<BarChartData>) {
-    val maxValue = data.maxOfOrNull { it.value } ?: 1.0
-    Column(modifier = Modifier.padding(top = 8.dp)) {
-        Row(
-            modifier = Modifier.height(40.dp),
-            verticalAlignment = Alignment.Bottom
-        ) {
-            data.forEach { bar ->
+    val quota = if (data.isNotEmpty()) data.maxOfOrNull { it.value }?.takeIf { it > 0 } ?: 1.0 else 1.0
+    val barsToShow = if (data.size > 4) data.takeLast(4) else data
+    Row(
+        modifier = Modifier
+            .height(81.dp)
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.Bottom
+    ) {
+        barsToShow.forEach { bar ->
+            val percent = (bar.value / quota).coerceIn(0.0, 1.0)
+            val barHeight = (percent * 77).dp
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .width(24.dp)
+                    .padding(horizontal = 3.dp)
+            ) {
+                Spacer(modifier = Modifier.height(81.dp - barHeight))
                 Box(
                     modifier = Modifier
+                        .height(barHeight)
                         .width(24.dp)
-                        .height((bar.value / maxValue * 36).dp)
-                        .background(Color(0xFF8CC55D), RoundedCornerShape(4.dp))
+                        .background(Color(0xFF8CC55D), RoundedCornerShape(3.dp))
                 )
-            }
-        }
-        Row {
-            data.forEach { bar ->
-                Text(
-                    text = bar.bottomLabel,
-                    fontSize = 10.sp,
-                    modifier = Modifier.width(24.dp),
-                    maxLines = 1
-                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(bar.bottomLabel, fontSize = 10.sp, color = Color.Black)
             }
         }
     }
