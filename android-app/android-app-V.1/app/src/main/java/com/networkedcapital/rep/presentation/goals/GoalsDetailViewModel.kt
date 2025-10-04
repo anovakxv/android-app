@@ -46,7 +46,17 @@ class GoalsDetailViewModel : ViewModel() {
                 val response = api.getGoalDetail(goalId)
                 _goal.value = response.goal
                 _feed.value = response.feed
-                _team.value = response.team
+                // Try to get team from details response, fallback to /users endpoint if empty
+                if (response.team.isNullOrEmpty()) {
+                    try {
+                        val teamResponse = api.getGoalUsers(goalId)
+                        _team.value = teamResponse.result
+                    } catch (te: Exception) {
+                        _team.value = emptyList()
+                    }
+                } else {
+                    _team.value = response.team
+                }
             } catch (e: Exception) {
                 _error.value = e.message
             } finally {

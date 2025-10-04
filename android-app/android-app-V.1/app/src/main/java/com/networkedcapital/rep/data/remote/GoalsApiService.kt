@@ -21,4 +21,16 @@ interface GoalsApiService {
         @Query("goals_id") goalId: Int,
         @Query("num_periods") numPeriods: Int = 7
     ): GoalDetailApiResponse
+
+    @GET("/api/goals/users")
+    suspend fun getGoalUsers(
+        @Query("goals_id") goalId: Int,
+        @Query("confirmed") confirmed: Int? = null,
+        @Query("offset") offset: Int = 0,
+        @Query("limit") limit: Int = 50
+    ): GoalUsersApiResponse
 }
+
+data class GoalUsersApiResponse(
+    val result: List<User>
+)
