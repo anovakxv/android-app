@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.networkedcapital.rep.domain.model.*
+import com.networkedcapital.rep.domain.model.User
 import com.networkedcapital.rep.presentation.main.MainViewModel.MainPage
 
 @OptIn(ExperimentalMaterial3Api::class)
