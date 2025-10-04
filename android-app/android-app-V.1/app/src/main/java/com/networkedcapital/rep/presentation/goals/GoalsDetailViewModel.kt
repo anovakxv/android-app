@@ -51,11 +51,14 @@ class GoalsDetailViewModel : ViewModel() {
                     try {
                         val teamResponse = api.getGoalUsers(goalId)
                         _team.value = teamResponse.result
+                        println("Loaded team members: ${teamResponse.result}")
                     } catch (te: Exception) {
                         _team.value = emptyList()
+                        println("Error loading team members: ${te.message}")
                     }
                 } else {
                     _team.value = response.team
+                    println("Loaded team members from details: ${response.team}")
                 }
             } catch (e: Exception) {
                 _error.value = e.message

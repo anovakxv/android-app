@@ -205,7 +205,11 @@ fun TeamMemberItem(user: User, onMessage: (User) -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         // ...profile image if available...
-        Text(user.fullName ?: "", fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+        Column {
+            Text("ID: ${user.id}", fontSize = 12.sp, color = Color.Gray)
+            Text("Username: ${user.username ?: "(none)"}", fontSize = 12.sp, color = Color.Gray)
+            Text("Full Name: ${user.fullName ?: user.fname ?: "(none)"}", fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+        }
         Spacer(modifier = Modifier.weight(1f))
         IconButton(onClick = { onMessage(user) }) {
             Icon(Icons.Filled.Message, contentDescription = "Message")
