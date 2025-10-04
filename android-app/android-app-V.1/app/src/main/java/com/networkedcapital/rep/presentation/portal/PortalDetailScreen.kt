@@ -696,7 +696,42 @@ fun GoalListItem(goal: Goal, onClick: () -> Unit) {
             }
             // Show bar chart if chartData exists
             if (goal.chartData != null && goal.chartData.isNotEmpty()) {
-                GoalBarChart(goal.chartData)
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(36.dp)
+                    .background(Color(0xFF8CC55D), RoundedCornerShape(4.dp))
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        goal.chartData.forEach { bar ->
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = bar.valueLabel,
+                                    fontSize = 10.sp,
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .height((bar.value / (goal.chartData.maxOfOrNull { it.value } ?: 1.0) * 24).dp)
+                                        .fillMaxWidth(0.7f)
+                                        .background(Color.White, RoundedCornerShape(2.dp))
+                                )
+                                Text(
+                                    text = bar.bottomLabel,
+                                    fontSize = 10.sp,
+                                    color = Color.White
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
