@@ -148,6 +148,8 @@ fun GoalsDetailScreen(
                     if (team.isNullOrEmpty()) {
                         Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                             Text("No team members found.", color = Color.Gray)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Raw team response: $team", fontSize = 10.sp, color = Color.LightGray)
                         }
                     } else {
                         LazyColumn(modifier = Modifier.weight(1f)) {
