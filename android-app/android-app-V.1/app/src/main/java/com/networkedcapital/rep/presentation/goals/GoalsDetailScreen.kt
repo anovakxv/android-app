@@ -20,11 +20,10 @@ import com.networkedcapital.rep.domain.model.Goal
 import com.networkedcapital.rep.domain.model.BarChartData
 import com.networkedcapital.rep.domain.model.User
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.flow.collectAsState
+import androidx.compose.runtime.collectAsState
 import com.networkedcapital.rep.presentation.goals.GoalsDetailViewModel
 import com.networkedcapital.rep.presentation.goals.FeedItem
 
-@Composable
 @Composable
 fun GoalsDetailScreen(
     goalId: Int,
