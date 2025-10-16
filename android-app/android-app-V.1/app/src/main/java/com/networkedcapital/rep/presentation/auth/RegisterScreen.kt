@@ -21,6 +21,8 @@ import com.networkedcapital.rep.presentation.theme.RepGreen
 import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.border
 import androidx.compose.ui.res.painterResource
+import com.networkedcapital.rep.R
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
