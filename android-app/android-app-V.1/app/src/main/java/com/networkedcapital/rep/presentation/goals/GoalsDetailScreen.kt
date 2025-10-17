@@ -385,6 +385,7 @@ fun GoalsDetailScreen(
             )
         }
     }
+}    
 
 @Composable
 private fun SheetActionButton(text: String, onClick: () -> Unit) {
