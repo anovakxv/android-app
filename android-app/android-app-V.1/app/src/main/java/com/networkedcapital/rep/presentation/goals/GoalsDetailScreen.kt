@@ -50,6 +50,7 @@ fun GoalsDetailScreen(
     LaunchedEffect(goalId) {
         viewModel.loadGoal(goalId)
     }
+}
 
     // State for modal bottom sheet
     val showActionSheet = remember { mutableStateOf(false) }
