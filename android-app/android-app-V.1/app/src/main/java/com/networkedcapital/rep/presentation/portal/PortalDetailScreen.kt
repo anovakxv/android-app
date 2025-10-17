@@ -20,184 +20,188 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
+import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.border
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalTextStyle
+import coil.compose.AsyncImage
+
+@Composable
+fun PortalDetailScreen(
+    uiState: PortalDetailUiState,
+    userId: Int,
+    portalId: Int,
+    onNavigateBack: () -> Unit,
+    onNavigateToGoal: (Int) -> Unit,
+    onNavigateToEditGoal: (Int?, Int) -> Unit,
+    onNavigateToEditPortal: (Int) -> Unit,
+    viewModel: PortalDetailViewModel
+) {
+    var showActionSheet by remember { mutableStateOf(false) }
+    var showFlagDialog by remember { mutableStateOf(false) }
+    var showFullscreenImages by remember { mutableStateOf(false) }
+    var fullscreenImageIndex by remember { mutableStateOf(0) }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // Add header with back button and portal name
-        if (uiState.portalDetail != null) {
+        Surface(shadowElevation = 4.dp) {
             PortalDetailHeader(
-                portalName = uiState.portalDetail.name,
+                portalName = uiState.portalDetail?.name ?: "Portal",
                 onBackClick = onNavigateBack,
-                onMoreClick = { showActionSheet = true }
-            )
-        } else {
-            // Show a placeholder header if portal is not loaded
-            PortalDetailHeader(
-                portalName = "Portal",
-                onBackClick = onNavigateBack,
-                onMoreClick = { }
+                onMoreClick = { if (uiState.portalDetail != null) showActionSheet = true }
             )
         }
 
         Box(modifier = Modifier.weight(1f)) {
-            if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
+            when {
+                uiState.isLoading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
-            } else if (uiState.portalDetail != null) {
-                val portal = uiState.portalDetail!!
-                val goals = uiState.portalGoals ?: portal.aGoals ?: emptyList()
-                var selectedSection by remember { mutableStateOf(0) }
+                uiState.error != null -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = uiState.error ?: "Could not load portal details.",
+                            color = Color.Gray
+                        )
+                    }
+                }
+                uiState.portalDetail != null -> {
+                    val portal = uiState.portalDetail!!
+                    val goals = uiState.portalGoals ?: portal.aGoals ?: emptyList()
+                    var selectedSection by remember { mutableStateOf(0) }
 
-                // DEBUG: Show portal name and ID at top (optional, can remove)
-                // Text(
-                //     text = "Portal: ${portal.name} (ID: ${portal.id})",
-                //     modifier = Modifier.padding(8.dp),
-                //     color = Color.Black,
-                //     fontWeight = FontWeight.Bold
-                // )
-                // DEBUG: Show raw portal data (optional, can remove)
-                // Box(
-                //     modifier = Modifier.padding(8.dp)
-                // ) {
-                //     val portalJson = try {
-                //         Json.encodeToString(portal)
-                //     } catch (e: Exception) { "" }
-                //     Text(
-                //         text = portalJson,
-                //         fontSize = 10.sp,
-                //         color = Color.Gray,
-                //         maxLines = 8,
-                //         overflow = TextOverflow.Ellipsis
-                //     )
-                // }
+                    // The main content of the screen
+                    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                        // Show image gallery if images exist
+                        val images = portal.aSections?.flatMap { it.aFiles } ?: emptyList()
+                        if (images.isNotEmpty()) {
+                            item {
+                                ImageGallery(images = images, onImageClick = { index ->
+                                    fullscreenImageIndex = index
+                                    showFullscreenImages = true
+                                })
+                            }
+                        }
 
-                // Show image gallery if images exist
-                val images = portal.aSections?.flatMap { it.aFiles } ?: emptyList()
-                if (images.isNotEmpty()) {
-                    Column(modifier = Modifier.fillMaxWidth()) {/* Lines 114-126 omitted */}
-                } else {/* Lines 128-135 omitted */}
-            } else {
-                // Fallback: Show message if portal data is missing
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        /* Lines 143-146 omitted */
-                    )
+                        // Segmented control and content sections
+                        item {
+                            PortalContentSection(
+                                portal = portal,
+                                goals = goals,
+                                selectedSection = selectedSection,
+                                onSectionChange = { selectedSection = it },
+                                onGoalClick = onNavigateToGoal
+                            )
+                        }
+                    }
+                }
+                else -> {
+                    // Fallback: Show message if portal data is missing
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Could not load portal details.",
+                            color = Color.Gray
+                        )
+                    }
                 }
             }
         }
-            val portal = uiState.portalDetail!!
-            val goals = uiState.portalGoals ?: portal.aGoals ?: emptyList()
-            var selectedSection by remember { mutableStateOf(0) }
-
-            // DEBUG: Show portal name and ID at top
-            Text(
-                text = "Portal: ${portal.name} (ID: ${portal.id})",
-                Column(modifier = Modifier.fillMaxSize()) {
-                    // Polished header: center title, balanced icons, no debug text
-                    Surface(shadowElevation = 4.dp) {
-                        if (uiState.portalDetail != null) {
-                            PortalDetailHeader(
-                                portalName = uiState.portalDetail.name,
-                                onBackClick = onNavigateBack,
-                                onMoreClick = { showActionSheet = true }
-                            )
-                        } else {
-                            PortalDetailHeader(
-                                portalName = "Portal",
-                                onBackClick = onNavigateBack,
-                                onMoreClick = { }
-                            )
-                        }
-                    }
-
-                    Box(modifier = Modifier.weight(1f)) {
-                        if (uiState.isLoading) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        } else if (uiState.portalDetail != null) {
-                            val portal = uiState.portalDetail!!
-                            val goals = uiState.portalGoals ?: portal.aGoals ?: emptyList()
-                            var selectedSection by remember { mutableStateOf(0) }
-
-                            // Show image gallery if images exist
-                            val images = portal.aSections?.flatMap { it.aFiles } ?: emptyList()
-                            if (images.isNotEmpty()) {
-                                Column(modifier = Modifier.fillMaxWidth()) {/* Lines 114-126 omitted */}
-                            } else {/* Lines 128-135 omitted */}
-                        } else {
-                            // Fallback: Show message if portal data is missing
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    /* Lines 143-146 omitted */
-                                )
-                            }
-                        }
-                    }
-            PortalActionSheet(
-                portal = uiState.portalDetail!!,
-                userId = userId,
-                onDismiss = { showActionSheet = false },
-                onAddGoal = {
-                    showActionSheet = false
-                    onNavigateToEditGoal(null, portalId)
-                },
-                onEditPortal = {
-                    showActionSheet = false
-                    onNavigateToEditPortal(portalId)
-                },
-                onFlag = {
-                    showActionSheet = false
-                    showFlagDialog = true
+        
+        // Bottom Bar
+        if (uiState.portalDetail != null) {
+            PortalBottomBar(
+                onAddClick = { /* TODO: Implement Join Team logic */ },
+                onMessageClick = {
+                    uiState.portalDetail?.chatId?.let { /* Navigate to chat */ }
                 }
             )
         }
+    }
 
-        // Flag Dialog
-        if (showFlagDialog) {
-            AlertDialog(
-                onDismissRequest = { showFlagDialog = false },
-                title = { Text("Flag Portal") },
-                text = { Text("Are you sure you want to flag this portal as inappropriate?") },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.flagPortal(portalId)
-                            showFlagDialog = false
-                        }
-                    ) {
-                        Text("Flag", color = MaterialTheme.colorScheme.error)
+    // Action Sheet (requires portal detail to be not null)
+    if (showActionSheet && uiState.portalDetail != null) {
+        PortalActionSheet(
+            portal = uiState.portalDetail!!,
+            userId = userId,
+            onDismiss = { showActionSheet = false },
+            onAddGoal = {
+                showActionSheet = false
+                onNavigateToEditGoal(null, portalId)
+            },
+            onEditPortal = {
+                showActionSheet = false
+                onNavigateToEditPortal(portalId)
+            },
+            onFlag = {
+                showActionSheet = false
+                showFlagDialog = true
+            }
+        )
+    }
+
+    // Flag Dialog
+    if (showFlagDialog) {
+        AlertDialog(
+            onDismissRequest = { showFlagDialog = false },
+            title = { Text("Flag Portal") },
+            text = { Text("Are you sure you want to flag this portal as inappropriate?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.flagPortal(portalId)
+                        showFlagDialog = false
                     }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showFlagDialog = false }) {
-                        Text("Cancel")
-                    }
+                ) {
+                    Text("Flag", color = MaterialTheme.colorScheme.error)
                 }
-            )
-        }
+            },
+            dismissButton = {
+                TextButton(onClick = { showFlagDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 
-        // Fullscreen Image Viewer
-        if (showFullscreenImages) {
-            val images = uiState.portalDetail?.aSections?.flatMap { it.aFiles } ?: emptyList()
-            FullscreenImageViewer(
-                images = images,
-                startIndex = fullscreenImageIndex,
-                onDismiss = { showFullscreenImages = false }
-            )
-        }
+    // Fullscreen Image Viewer
+    if (showFullscreenImages) {
+        val images = uiState.portalDetail?.aSections?.flatMap { it.aFiles } ?: emptyList()
+        FullscreenImageViewer(
+            images = images,
+            startIndex = fullscreenImageIndex,
+            onDismiss = { showFullscreenImages = false }
+        )
     }
 
     // Handle flag result
@@ -241,7 +245,7 @@ fun PortalDetailHeader(
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    textAlign = TextAlign.Center
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
@@ -930,7 +934,7 @@ fun LinkableText(text: String) {
             append(text.substring(lastIndex))
         }
     }
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
     ClickableText(
         text = annotatedString,
         style = LocalTextStyle.current.copy(fontSize = 16.sp),
