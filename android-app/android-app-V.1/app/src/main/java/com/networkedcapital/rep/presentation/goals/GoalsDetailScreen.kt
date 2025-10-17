@@ -29,6 +29,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun GoalsDetailScreen(
@@ -50,7 +52,6 @@ fun GoalsDetailScreen(
     LaunchedEffect(goalId) {
         viewModel.loadGoal(goalId)
     }
-}
 
     // State for modal bottom sheet
     val showActionSheet = remember { mutableStateOf(false) }
@@ -60,7 +61,7 @@ fun GoalsDetailScreen(
     var showSupportSheet by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
-    Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+        Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
             // Top Bar (iOS style)
             Box(
                 modifier = Modifier
