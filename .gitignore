@@ -49,12 +49,10 @@ out/
 # Misc
 *.orig
 Swift FrontEnd/
-Python_Backend/
 my-ios-app/
 *.xcworkspace
 *.xcodeproj
 *.swift
-*.py
 *.db
 *.plist
 *.storyboard
