@@ -37,7 +37,7 @@ class AuthRepository @Inject constructor(
             manual_city = city,
             about = about,
             other_skill = otherSkill,
-            skills = skills.mapIndexed { idx, title -> com.networkedcapital.rep.domain.model.Skill(idx, title) },
+            skills = skills,
             profile_picture_url = imageUrl
         )
         updateProfile(user).collect { emit(it) }

@@ -27,7 +27,7 @@ data class User(
     val created_at: String? = null,
     val updated_at: String? = null,
     val profile_picture_url: String? = null,
-    val skills: List<Skill>? = null,
+    val skills: List<String>? = null,
     val userType: UserType? = null,
     // Additional fields from iOS app
     val fullName: String? = null,

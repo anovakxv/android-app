@@ -20,58 +20,77 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
-import androidx.compose.foundation.text.ClickableText
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
-import com.networkedcapital.rep.domain.model.*
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PortalDetailScreen(
-    portalId: Int,
-    userId: Int,
-    onNavigateBack: () -> Unit,
-    onNavigateToGoalDetail: (Int) -> Unit,
-    onNavigateToEditPortal: (Int) -> Unit,
-    onNavigateToChat: (Int, String, String?) -> Unit,
-    onNavigateToEditGoal: (Int?, Int) -> Unit,
-    viewModel: PortalDetailViewModel = hiltViewModel()
-) {
-    val uiState by viewModel.uiState.collectAsState()
-    var showActionSheet by remember { mutableStateOf(false) }
-    var showFlagDialog by remember { mutableStateOf(false) }
-    var showFullscreenImages by remember { mutableStateOf(false) }
-    var fullscreenImageIndex by remember { mutableStateOf(0) }
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Add header with back button and portal name
+        if (uiState.portalDetail != null) {
+            PortalDetailHeader(
+                portalName = uiState.portalDetail.name,
+                onBackClick = onNavigateBack,
+                onMoreClick = { showActionSheet = true }
+            )
+        } else {
+            // Show a placeholder header if portal is not loaded
+            PortalDetailHeader(
+                portalName = "Portal",
+                onBackClick = onNavigateBack,
+                onMoreClick = { }
+            )
+        }
 
-    LaunchedEffect(portalId, userId) {
-        viewModel.loadPortalDetail(portalId, userId)
-    }
+        Box(modifier = Modifier.weight(1f)) {
+            if (uiState.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (uiState.portalDetail != null) {
+                val portal = uiState.portalDetail!!
+                val goals = uiState.portalGoals ?: portal.aGoals ?: emptyList()
+                var selectedSection by remember { mutableStateOf(0) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (uiState.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+                // DEBUG: Show portal name and ID at top (optional, can remove)
+                // Text(
+                //     text = "Portal: ${portal.name} (ID: ${portal.id})",
+                //     modifier = Modifier.padding(8.dp),
+                //     color = Color.Black,
+                //     fontWeight = FontWeight.Bold
+                // )
+                // DEBUG: Show raw portal data (optional, can remove)
+                // Box(
+                //     modifier = Modifier.padding(8.dp)
+                // ) {
+                //     val portalJson = try {
+                //         Json.encodeToString(portal)
+                //     } catch (e: Exception) { "" }
+                //     Text(
+                //         text = portalJson,
+                //         fontSize = 10.sp,
+                //         color = Color.Gray,
+                //         maxLines = 8,
+                //         overflow = TextOverflow.Ellipsis
+                //     )
+                // }
+
+                // Show image gallery if images exist
+                val images = portal.aSections?.flatMap { it.aFiles } ?: emptyList()
+                if (images.isNotEmpty()) {
+                    Column(modifier = Modifier.fillMaxWidth()) {/* Lines 114-126 omitted */}
+                } else {/* Lines 128-135 omitted */}
+            } else {
+                // Fallback: Show message if portal data is missing
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        /* Lines 143-146 omitted */
+                    )
+                }
             }
-        } else if (uiState.portalDetail != null) {
+        }
             val portal = uiState.portalDetail!!
             val goals = uiState.portalGoals ?: portal.aGoals ?: emptyList()
             var selectedSection by remember { mutableStateOf(0) }
@@ -79,76 +98,54 @@ fun PortalDetailScreen(
             // DEBUG: Show portal name and ID at top
             Text(
                 text = "Portal: ${portal.name} (ID: ${portal.id})",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.Yellow)
-                    .padding(8.dp),
-                color = Color.Black,
-                fontWeight = FontWeight.Bold
-            )
-            // DEBUG: Show raw portal data
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFE0E0E0))
-                    .padding(8.dp)
-            ) {
-                val portalJson = try {
-                    Json.encodeToString(portal)
-                } catch (e: Exception) {
-                    portal.toString()
-                }
-                Text(
-                    text = "RAW DATA: $portalJson",
-                    fontSize = 10.sp,
-                    color = Color.DarkGray,
-                    maxLines = 10,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            // Show image gallery if images exist
-            val images = portal.aSections?.flatMap { it.aFiles } ?: emptyList()
-            if (images.isNotEmpty()) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        ImageGallery(images = images, onImageClick = { index ->
-                            fullscreenImageIndex = index
-                            showFullscreenImages = true
-                        })
-                        Spacer(modifier = Modifier.height(12.dp))
-                        PortalContentSection(
-                            portal = portal,
-                            goals = goals,
-                            selectedSection = selectedSection,
-                            onSectionChange = { selectedSection = it },
-                            onGoalClick = onNavigateToGoalDetail
-                        )
+                Column(modifier = Modifier.fillMaxSize()) {
+                    // Polished header: center title, balanced icons, no debug text
+                    Surface(shadowElevation = 4.dp) {
+                        if (uiState.portalDetail != null) {
+                            PortalDetailHeader(
+                                portalName = uiState.portalDetail.name,
+                                onBackClick = onNavigateBack,
+                                onMoreClick = { showActionSheet = true }
+                            )
+                        } else {
+                            PortalDetailHeader(
+                                portalName = "Portal",
+                                onBackClick = onNavigateBack,
+                                onMoreClick = { }
+                            )
+                        }
                     }
-                } else {
-                    PortalContentSection(
-                        portal = portal,
-                        goals = goals,
-                        selectedSection = selectedSection,
-                        onSectionChange = { selectedSection = it },
-                        onGoalClick = onNavigateToGoalDetail
-                    )
-                }
-        } else {
-            // Fallback: Show message if portal data is missing
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "No portal data loaded.",
-                    color = Color.Red,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
 
-        // Action Sheet
-        if (showActionSheet) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        if (uiState.isLoading) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        } else if (uiState.portalDetail != null) {
+                            val portal = uiState.portalDetail!!
+                            val goals = uiState.portalGoals ?: portal.aGoals ?: emptyList()
+                            var selectedSection by remember { mutableStateOf(0) }
+
+                            // Show image gallery if images exist
+                            val images = portal.aSections?.flatMap { it.aFiles } ?: emptyList()
+                            if (images.isNotEmpty()) {
+                                Column(modifier = Modifier.fillMaxWidth()) {/* Lines 114-126 omitted */}
+                            } else {/* Lines 128-135 omitted */}
+                        } else {
+                            // Fallback: Show message if portal data is missing
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    /* Lines 143-146 omitted */
+                                )
+                            }
+                        }
+                    }
             PortalActionSheet(
                 portal = uiState.portalDetail!!,
                 userId = userId,
@@ -217,41 +214,49 @@ fun PortalDetailHeader(
     onBackClick: () -> Unit,
     onMoreClick: () -> Unit
 ) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
             .background(Color.White)
-            .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onBackClick) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Back",
-                tint = Color(0xFF8CC55D) // Rep green color
-            )
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color(0xFF8CC55D)
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                Text(
+                    text = portalName,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(onClick = onMoreClick) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "More options"
+                )
+            }
         }
-
-        Text(
-            text = portalName,
-            modifier = Modifier.weight(1f),
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        Divider(
+            color = Color(0xFFE4E4E4),
+            modifier = Modifier.align(Alignment.BottomCenter)
         )
-
-        IconButton(onClick = onMoreClick) {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "More options"
-            )
-        }
     }
-    
-    Divider(color = Color(0xFFE4E4E4))
 }
 
 @Composable
@@ -272,13 +277,14 @@ fun ImageGallery(
             state = pagerState,
             modifier = Modifier.fillMaxSize()
         ) { page ->
-            AsyncImage(
-                model = images[page].url,
-                contentDescription = "Portal image ${page + 1}",
+            ZoomableImage(
+                imageUrl = images[page].url,
+                onDismiss = { /* no-op for gallery */ }
+            )
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .clickable { onImageClick(page) },
-                contentScale = ContentScale.Crop
+                    .matchParentSize()
+                    .clickable { onImageClick(page) }
             )
         }
 
@@ -347,32 +353,54 @@ fun PortalSegmentedControl(
     onSelectionChanged: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    // iOS-style: black and white segmented control
+    val backgroundColor = Color.White
+    val selectedColor = Color.White
+    val unselectedTextColor = Color.Black
+    val selectedTextColor = Color.White
+    val borderColor = Color.Black
+    val indicatorColor = Color.Black
+
+    Box(
         modifier = modifier
-            .background(
-                Color(0xFFE4E4E4),
-                RoundedCornerShape(4.dp)
-            )
-            .padding(1.dp)
+            .background(backgroundColor, RoundedCornerShape(20.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(20.dp))
+            .padding(2.dp)
     ) {
-        sections.forEachIndexed { index, section ->
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .background(
-                        if (selectedIndex == index) Color.Black else Color.Transparent,
-                        RoundedCornerShape(3.dp)
+        Row(
+            modifier = Modifier.height(36.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            sections.forEachIndexed { index, section ->
+                val isSelected = selectedIndex == index
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            if (isSelected) indicatorColor else Color.Transparent
+                        )
+                        .border(
+                            width = if (isSelected) 0.dp else 0.dp,
+                            color = Color.Transparent,
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .clickable { onSelectionChanged(index) }
+                        .padding(vertical = 6.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = section,
+                        color = if (isSelected) selectedColor else unselectedTextColor,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        fontSize = 15.sp,
+                        letterSpacing = 0.2.sp
                     )
-                    .clickable { onSelectionChanged(index) }
-                    .padding(vertical = 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = section,
-                    color = if (selectedIndex == index) Color.White else Color.Black,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 14.sp
-                )
+                }
+                if (index < sections.lastIndex) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
             }
         }
     }
@@ -421,25 +449,46 @@ fun StorySection(
             )
 
             LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.padding(vertical = 4.dp)
             ) {
                 items(portal.aLeads ?: emptyList()) { lead ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.width(44.dp)
                     ) {
-                        AsyncImage(
-                            model = lead.profileImageUrlCompat,
-                            contentDescription = "${lead.firstName} ${lead.lastName}",
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(CircleShape),
-                            contentScale = ContentScale.Crop
-                        )
+                        if (!lead.profileImageUrlCompat.isNullOrBlank()) {
+                            AsyncImage(
+                                model = lead.profileImageUrlCompat,
+                                contentDescription = "${lead.firstName} ${lead.lastName}",
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.Gray.copy(alpha = 0.15f), CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.Gray.copy(alpha = 0.15f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "${lead.firstName?.take(1) ?: ""}${lead.lastName?.take(1) ?: ""}",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black
+                                )
+                            }
+                        }
                         Text(
                             text = "${lead.firstName?.take(1) ?: ""}${lead.lastName?.take(1) ?: ""}",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.Black
                         )
                     }
                 }
@@ -451,25 +500,29 @@ fun StorySection(
         }
 
         // Story text blocks
-        items(portal.aTexts?.filter { it.section == "story" } ?: emptyList()) { textBlock ->
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                textBlock.title?.takeIf { it.isNotBlank() }?.let { title ->
-                    Text(
-                        text = title,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-                textBlock.text?.takeIf { it.isNotBlank() }?.let { text ->
-                    Text(
-                        text = text,
-                        fontSize = 16.sp
-                    )
+            items(portal.aTexts?.filter { it.section == "story" } ?: emptyList()) { textBlock ->
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                ) {
+                    textBlock.title?.takeIf { it.isNotBlank() }?.let { title ->
+                        Text(
+                            text = title,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier.padding(bottom = 2.dp)
+                        )
+                    }
+                    textBlock.text?.takeIf { it.isNotBlank() }?.let { text ->
+                        LinkableText(
+                            text = text
+                        )
+                    }
                 }
             }
-        }
     }
 }
 
@@ -480,34 +533,57 @@ fun PortalBottomBar(
     onMessageClick: () -> Unit
     ) {
         Surface(
-            modifier = modifier.fillMaxWidth(),
-            shadowElevation = 8.dp
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp))
+                .shadow(10.dp, RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)),
+            color = Color.White,
+            tonalElevation = 0.dp
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(
-                    onClick = onAddClick,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF8CC55D)
-                    )
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Divider(
+                    color = Color(0xFFE4E4E4),
+                    thickness = 1.dp,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Join Team", color = Color.White)
-                }
+                    Button(
+                        onClick = onAddClick,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                    ) {
+                        Text("Join Team", color = Color.Black, fontWeight = FontWeight.SemiBold)
+                    }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(18.dp))
 
-                IconButton(onClick = onMessageClick) {
-                    Icon(
-                        imageVector = Icons.Default.ChatBubble,
-                        contentDescription = "Message",
-                        tint = Color(0xFF8CC55D)
-                    )
+                    IconButton(
+                        onClick = onMessageClick,
+                        modifier = Modifier
+                            .size(44.dp)
+                            .background(Color.White, CircleShape)
+                            .border(1.dp, Color(0xFFE4E4E4), CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ChatBubble,
+                            contentDescription = "Message",
+                            tint = Color.Black,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
         }
@@ -526,71 +602,103 @@ fun PortalActionSheet(
     val isPortalOwner = portal.usersId == userId
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp),
+        tonalElevation = 0.dp
     ) {
         Column(
-            modifier = Modifier.padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // iOS order: Add Goal, Select Goal Team, Edit Purpose, Flag, Cancel
             if (isCurrentUserLead) {
-                TextButton(
+                Button(
                     onClick = onAddGoal,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color(0xFF8CC55D)
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
                 ) {
                     Text(
                         text = "Add Goal",
-                        color = Color(0xFF8CC55D),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            TextButton(
+            Button(
                 onClick = onDismiss, // TODO: Implement join team logic
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color(0xFF8CC55D)
+                ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
             ) {
                 Text(
                     text = "Select Goal Team",
-                    color = Color(0xFF8CC55D),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
             if (isPortalOwner) {
-                TextButton(
+                Button(
                     onClick = onEditPortal,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color(0xFF8CC55D)
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
                 ) {
                     Text(
                         text = "Edit Purpose",
-                        color = Color(0xFF8CC55D),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            TextButton(
+            Button(
                 onClick = onFlag,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = MaterialTheme.colorScheme.error
+                ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
             ) {
                 Text(
                     text = "Flag as Inappropriate",
-                    color = MaterialTheme.colorScheme.error,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
                 )
             }
 
-            TextButton(
+            Button(
                 onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
             ) {
                 Text(
                     text = "Cancel",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
                 )
             }
         }
@@ -662,18 +770,38 @@ fun ZoomableImage(
     imageUrl: String?,
     onDismiss: () -> Unit
 ) {
-    var scale by remember { mutableFloatStateOf(1f) }
-    var offsetX by remember { mutableFloatStateOf(0f) }
-    var offsetY by remember { mutableFloatStateOf(0f) }
+    var scale by remember { mutableStateOf(1f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+    val state = rememberTransformableState { zoomChange, panChange, _ ->
+        scale = (scale * zoomChange).coerceIn(1f, 4f)
+        offset += panChange
+    }
 
-    AsyncImage(
-        model = imageUrl,
-        contentDescription = "Fullscreen image",
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .clickable { onDismiss() }, // Single tap to dismiss
-        contentScale = ContentScale.Fit
-    )
+            .background(Color.Black)
+            .transformable(state)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { onDismiss() }
+                )
+            }
+    ) {
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = "Fullscreen image",
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer(
+                    scaleX = scale,
+                    scaleY = scale,
+                    translationX = offset.x,
+                    translationY = offset.y
+                ),
+            contentScale = ContentScale.Fit
+        )
+    }
 }
 
 @Composable

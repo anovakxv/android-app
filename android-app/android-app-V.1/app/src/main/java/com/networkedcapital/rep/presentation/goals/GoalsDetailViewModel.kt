@@ -16,11 +16,48 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class GoalsDetailViewModel : ViewModel() {
+
+    // S3 base URL for profile images
+    private val s3BaseUrl = "https://rep-app-dbbucket.s3.us-west-2.amazonaws.com/"
+
+    // Helper to patch/construct full profile image URL
+    fun patchProfilePictureUrl(imageNameOrUrl: String?): String? {
+        if (imageNameOrUrl.isNullOrBlank()) return null
+        return if (imageNameOrUrl.startsWith("http")) imageNameOrUrl else s3BaseUrl + imageNameOrUrl
+    }
     // Replace with your backend base URL
-    private val BASE_URL = "https://rep-june2025.onrender.com" // TODO: update to your actual backend
+    private val BASE_URL = "https://rep-june2025.onrender.com" // Must match Swift/iOS
+
+    // JWT token retrieval (same as Login, MainScreen, PortalPage)
+    private fun getJwtToken(): String? {
+        // Use application context to access SharedPreferences
+        // This assumes you store the token under "jwtToken" key
+        return try {
+            val context = com.networkedcapital.rep.App.instance.applicationContext
+            val prefs = android.preference.PreferenceManager.getDefaultSharedPreferences(context)
+            prefs.getString("jwtToken", null)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    // OkHttp interceptor to inject JWT token
+    private val authInterceptor = okhttp3.Interceptor { chain ->
+        val requestBuilder = chain.request().newBuilder()
+        getJwtToken()?.let { token ->
+            requestBuilder.addHeader("Authorization", "Bearer $token")
+        }
+        chain.proceed(requestBuilder.build())
+    }
+
+    private val okHttpClient = okhttp3.OkHttpClient.Builder()
+        .addInterceptor(authInterceptor)
+        .build()
+
     private val api: GoalsApiService = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
+        .client(okHttpClient)
         .build()
         .create(GoalsApiService::class.java)
     private val _goal = MutableStateFlow<Goal?>(null)
@@ -43,25 +80,25 @@ class GoalsDetailViewModel : ViewModel() {
         _error.value = null
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val response = api.getGoalDetail(goalId)
+                // Use same endpoint and params as Swift/iOS
+                val response = api.getGoalDetail(goalId, numPeriods = 7)
                 _goal.value = response.goal
-                _feed.value = response.feed
-                // Try to get team from details response, fallback to /users endpoint if empty
-                if (response.team.isNullOrEmpty()) {
-                    println("Team is empty/null in details response, calling /api/goals/users for goalId=$goalId")
-                    try {
-                        val teamResponse = api.getGoalUsers(goalId)
-                        println("Raw /api/goals/users response: $teamResponse")
-                        _team.value = teamResponse.result
-                        println("Loaded team members: ${teamResponse.result}")
-                    } catch (te: Exception) {
-                        _team.value = emptyList()
-                        println("Error loading team members: ${te.message}")
-                    }
-                } else {
-                    _team.value = response.team
-                    println("Loaded team members from details: ${response.team}")
+
+                // Patch FeedItem with profile image URLs if possible
+                val patchedFeed = response.feed.map { feedItem ->
+                    val user = response.team.find { it.id == feedItem.userId } // assumes userId is present in FeedItem
+                    val imageUrl = patchProfilePictureUrl(user?.imageName ?: user?.profile_picture_url)
+                    feedItem.copy(profilePictureUrl = imageUrl)
                 }
+                _feed.value = patchedFeed
+
+                // Patch Team users with profile image URLs
+                val patchedTeam = response.team.map { user ->
+                    val imageUrl = patchProfilePictureUrl(user.imageName ?: user.profile_picture_url)
+                    user.copy(profile_picture_url = imageUrl)
+                }
+                _team.value = patchedTeam
+
             } catch (e: Exception) {
                 _error.value = e.message
             } finally {

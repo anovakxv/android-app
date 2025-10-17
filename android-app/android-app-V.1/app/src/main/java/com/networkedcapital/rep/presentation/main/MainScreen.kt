@@ -1,3 +1,169 @@
+import androidx.compose.ui.tooling.preview.Preview
+@Preview(showBackground = true)
+@Composable
+fun PreviewPortalItem() {
+    val portal = Portal(
+        id = 1,
+        name = "Sample Portal",
+        subtitle = "A subtitle for the portal",
+        description = "This is a sample portal used for previewing the PortalItem UI.",
+        imageUrl = null,
+        leads = listOf(
+            User(id = 1, firstName = "Alice", lastName = "Smith", profileImageUrl = null),
+            User(id = 2, firstName = "Bob", lastName = "Jones", profileImageUrl = null)
+        ),
+        isSafe = true
+    )
+    PortalItem(portal = portal, onClick = {})
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewPersonItem() {
+    val user = User(
+        id = 1,
+        firstName = "Jane",
+        lastName = "Doe",
+        about = "A passionate developer from NYC.",
+        city = "New York",
+        profileImageUrl = null
+    )
+    PersonItem(person = user, onClick = {})
+}
+@Composable
+fun ShimmerPortalItem(modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(60.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.LightGray.copy(alpha = 0.4f))
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Box(
+                    modifier = Modifier
+                        .height(18.dp)
+                        .fillMaxWidth(0.5f)
+                        .background(Color.LightGray.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .height(14.dp)
+                        .fillMaxWidth(0.8f)
+                        .background(Color.LightGray.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ShimmerPersonItem(modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(60.dp)
+                    .clip(CircleShape)
+                    .background(Color.LightGray.copy(alpha = 0.4f))
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Box(
+                    modifier = Modifier
+                        .height(18.dp)
+                        .fillMaxWidth(0.5f)
+                        .background(Color.LightGray.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .height(14.dp)
+                        .fillMaxWidth(0.8f)
+                        .background(Color.LightGray.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+                )
+            }
+        }
+    }
+}
+@Composable
+fun ErrorStateView(message: String, onRetry: (() -> Unit)? = null, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                imageVector = Icons.Default.ErrorOutline,
+                contentDescription = null,
+                tint = Color.Red.copy(alpha = 0.7f),
+                modifier = Modifier.size(64.dp)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.Red.copy(alpha = 0.8f)
+            )
+            if (onRetry != null) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = onRetry) {
+                    Text("Retry")
+                }
+            }
+        }
+    }
+}
+@Composable
+fun EmptyStateView(message: String, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                imageVector = Icons.Default.Inbox,
+                contentDescription = null,
+                tint = Color.LightGray,
+                modifier = Modifier.size(64.dp)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.Gray
+            )
+        }
+    }
+}
+// Helper to robustly patch/validate image URLs (S3/full URLs)
+fun patchPortalImageUrl(url: String?): String? {
+    if (url.isNullOrBlank()) return null
+    // If already a full URL, return as is
+    if (url.startsWith("http://") || url.startsWith("https://")) return url
+    // S3 or relative path handling (customize as needed)
+    val s3Base = "https://rep-portal-files.s3.amazonaws.com/"
+    return if (url.startsWith("/")) s3Base + url.removePrefix("/") else s3Base + url
+}
 package com.networkedcapital.rep.presentation.main
 
 import android.util.Log
@@ -46,8 +212,21 @@ fun MainScreen(
     onLogout: () -> Unit,
     viewModel: MainViewModel = hiltViewModel()
 ) {
+
     val uiState by viewModel.uiState.collectAsState()
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    // Debounce search input
+    var lastSearchQuery by remember { mutableStateOf("") }
+    LaunchedEffect(uiState.searchQuery) {
+        if (uiState.searchQuery != lastSearchQuery) {
+            lastSearchQuery = uiState.searchQuery
+            kotlinx.coroutines.delay(350) // 350ms debounce
+            if (uiState.searchQuery == lastSearchQuery && uiState.showSearch && uiState.searchQuery.isNotBlank()) {
+                viewModel.onSearchQueryChange(uiState.searchQuery)
+            }
+        }
+    }
 
     LaunchedEffect(uiState.currentUser?.id) {
         val userId = uiState.currentUser?.id ?: 0
@@ -142,35 +321,70 @@ fun MainScreen(
         // Main Content: Portals/People List
         Box(modifier = Modifier.weight(1f)) {
             if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
+                when (uiState.currentPage) {
+                    MainPage.PORTALS -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp, vertical = 24.dp),
+                            verticalArrangement = Arrangement.Top
+                        ) {
+                            repeat(4) { ShimmerPortalItem() }
+                        }
+                    }
+                    MainPage.PEOPLE -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp, vertical = 24.dp),
+                            verticalArrangement = Arrangement.Top
+                        ) {
+                            repeat(4) { ShimmerPersonItem() }
+                        }
+                    }
                 }
+            } else if (!uiState.errorMessage.isNullOrBlank()) {
+                ErrorStateView(
+                    message = uiState.errorMessage ?: "An error occurred.",
+                    onRetry = { viewModel.loadData(uiState.currentUser?.id ?: 0) }
+                )
             } else {
                 when (uiState.currentPage) {
                     MainPage.PORTALS -> {
-                        PortalsList(
-                            portals = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) {
-                                uiState.searchPortals
-                            } else {
-                                uiState.portals
-                            },
-                            onPortalClick = onNavigateToPortalDetail,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                        val portals = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) {
+                            uiState.searchPortals
+                        } else {
+                            uiState.portals
+                        }
+                        if (portals.isEmpty()) {
+                            EmptyStateView(
+                                message = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) "No portals match your search." else "No portals to display."
+                            )
+                        } else {
+                            PortalsList(
+                                portals = portals,
+                                onPortalClick = onNavigateToPortalDetail,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
                     }
                     MainPage.PEOPLE -> {
-                        PeopleList(
-                            people = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) {
-                                uiState.searchUsers
-                            } else {
-                                uiState.users
-                            },
-                            onPersonClick = onNavigateToPersonDetail,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                        val people = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) {
+                            uiState.searchUsers
+                        } else {
+                            uiState.users
+                        }
+                        if (people.isEmpty()) {
+                            EmptyStateView(
+                                message = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) "No people match your search." else "No people to display."
+                            )
+                        } else {
+                            PeopleList(
+                                people = people,
+                                onPersonClick = onNavigateToPersonDetail,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
                     }
                 }
             }
@@ -330,8 +544,9 @@ fun PortalImageCarousel(images: List<PortalFile>) {
             .horizontalScroll(rememberScrollState())
     ) {
         images.forEach { file ->
+            val patchedUrl = patchPortalImageUrl(file.url)
             AsyncImage(
-                model = file.url,
+                model = patchedUrl,
                 contentDescription = "Portal Image",
                 modifier = Modifier
                     .padding(8.dp)
@@ -503,9 +718,10 @@ fun PortalItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Portal Image using Coil
+            val patchedUrl = patchPortalImageUrl(portal.imageUrl)
             AsyncImage(
-                model = portal.imageUrl,
-                contentDescription = portal.name,
+                model = patchedUrl,
+                contentDescription = "Main image for portal: ${portal.name}",
                 modifier = Modifier
                     .size(60.dp)
                     .clip(RoundedCornerShape(8.dp)),
@@ -556,7 +772,7 @@ fun PortalItem(
                             val lastInitial = user.lastName?.firstOrNull()?.toString()
                                 ?: user.lname?.firstOrNull()?.toString()
                                 ?: ""
-                            val contentDescription = "$firstInitial$lastInitial"
+                            val contentDescription = "Profile image for $firstInitial $lastInitial"
                             if (!userProfileImageUrl.isNullOrEmpty()) {
                                 AsyncImage(
                                     model = userProfileImageUrl,
@@ -572,8 +788,17 @@ fun PortalItem(
                                     modifier = Modifier
                                         .size(20.dp)
                                         .background(Color.Gray, CircleShape)
-                                        .padding(end = 2.dp)
-                                )
+                                        .padding(end = 2.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "$firstInitial$lastInitial",
+                                        color = Color.White,
+                                        fontSize = 10.sp,
+                                        modifier = Modifier
+                                            .padding(2.dp)
+                                    )
+                                }
                             }
                         }
                         if (leads.size > 3) {
@@ -616,7 +841,7 @@ fun PersonItem(
             if (!profileImageUrl.isNullOrEmpty()) {
                 AsyncImage(
                     model = profileImageUrl,
-                    contentDescription = "${person.firstName} ${person.lastName}",
+                    contentDescription = "Profile image for ${person.firstName} ${person.lastName}",
                     modifier = Modifier
                         .size(60.dp)
                         .clip(CircleShape),
@@ -626,8 +851,17 @@ fun PersonItem(
                 Box(
                     modifier = Modifier
                         .size(60.dp)
-                        .background(Color.Gray, CircleShape)
-                )
+                        .background(Color.Gray, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "${person.firstName.firstOrNull() ?: ""}${person.lastName.firstOrNull() ?: ""}",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        modifier = Modifier
+                            .padding(2.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.width(16.dp))

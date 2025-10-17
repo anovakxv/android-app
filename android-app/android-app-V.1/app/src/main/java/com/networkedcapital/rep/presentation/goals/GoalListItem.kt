@@ -20,22 +20,21 @@ fun GoalListItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    Box(
         modifier = modifier
             .fillMaxWidth()
+            .padding(horizontal = 0.dp)
+            .background(Color.White, RoundedCornerShape(12.dp))
             .clickable { onClick() }
-            .padding(vertical = 4.dp, horizontal = 0.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(81.dp)
-                .padding(horizontal = 12.dp),
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Mini Bar Chart
+            // Bar Chart (matches iOS: 4 bars, 24dp width, 6dp spacing)
             MiniBarChart(
                 data = goal.chartData.takeLast(4),
                 quota = goal.quota,
@@ -47,19 +46,46 @@ fun GoalListItem(
             Spacer(modifier = Modifier.width(16.dp))
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalAlignment = Alignment.Start
             ) {
-                Text(goal.title, fontSize = 16.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                if (goal.subtitle.isNotBlank()) {
-                    Text(goal.subtitle, fontSize = 14.sp, color = Color.Gray)
-                }
                 Text(
-                    "${goal.progressPercent.toInt()}% [${goal.typeName}]",
-                    fontSize = 12.sp,
+                    text = goal.title,
+                    fontSize = 17.sp,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                     color = Color.Black
                 )
+                if (goal.subtitle.isNotBlank()) {
+                    Text(
+                        text = goal.subtitle,
+                        fontSize = 15.sp,
+                        color = Color.Gray,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Normal
+                    )
+                }
+                // Tag text logic (matches iOS)
+                val tagText = if (goal.typeName.lowercase() == "other") {
+                    val raw = goal.metricName.trim()
+                    if (raw.isNotEmpty()) raw.take(9) else goal.typeName
+                } else {
+                    goal.typeName
+                }
+                Text(
+                    text = "${goal.progressPercent.toInt()}% [${tagText}]",
+                    fontSize = 13.sp,
+                    color = Color.Black,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                )
             }
+            Spacer(modifier = Modifier.width(8.dp))
         }
+        // Card shadow and rounded corners
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Color.White, RoundedCornerShape(12.dp))
+                .shadow(2.dp, RoundedCornerShape(12.dp))
+        )
     }
 }
 
