@@ -576,25 +576,7 @@ fun TeamMemberItem(user: User, onMessage: (User) -> Unit, onProfileClick: (User)
         }
     }
 }
-    // Profile dialog placeholder
-    if (selectedProfileUser != null) {
-        AlertDialog(
-            onDismissRequest = { selectedProfileUser = null },
-            title = { Text("User Profile") },
-            text = {
-                Column {
-                    Text("ID: ${selectedProfileUser!!.id}")
-                    Text("Username: ${selectedProfileUser!!.username ?: "(none)"}")
-                    Text("Full Name: ${selectedProfileUser!!.fullName ?: selectedProfileUser!!.fname ?: "(none)"}")
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { selectedProfileUser = null }) {
-                    Text("Close")
-                }
-            }
-        )
-    }
+
 
 @Composable
 fun LargeBarChartView(data: List<BarChartData>, quota: Double) {
