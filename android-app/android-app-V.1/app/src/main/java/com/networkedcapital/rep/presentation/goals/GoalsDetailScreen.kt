@@ -362,8 +362,27 @@ fun GoalsDetailScreen(
                 }
             )
         }
+
+        // Profile dialog placeholder (must be inside composable)
+        if (selectedProfileUser != null) {
+            AlertDialog(
+                onDismissRequest = { selectedProfileUser = null },
+                title = { Text("User Profile") },
+                text = {
+                    Column {
+                        Text("ID: ${selectedProfileUser!!.id}")
+                        Text("Username: ${selectedProfileUser!!.username ?: "(none)"}")
+                        Text("Full Name: ${selectedProfileUser!!.fullName ?: selectedProfileUser!!.fname ?: "(none)"}")
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { selectedProfileUser = null }) {
+                        Text("Close")
+                    }
+                }
+            )
+        }
     }
-}
 
 @Composable
 private fun SheetActionButton(text: String, onClick: () -> Unit) {
