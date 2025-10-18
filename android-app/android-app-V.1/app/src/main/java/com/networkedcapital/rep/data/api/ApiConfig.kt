@@ -58,4 +58,20 @@ object ApiConfig {
     const val BLOCK_USER = "api/user/block"
     const val UNBLOCK_USER = "api/user/unblock"
     const val FLAG_USER = "api/user/flag_user"
+
+    // Payment & Stripe endpoints
+    const val SUBSCRIPTIONS = "api/subscriptions"
+    const val PAYMENT_HISTORY = "api/payment_history"
+    const val CANCEL_SUBSCRIPTION = "api/cancel_subscription"
+    const val CREATE_CUSTOMER_PORTAL = "api/create_customer_portal"
+    const val PORTAL_PAYMENT_STATUS = "api/portal/payment_status"
+    const val CREATE_CONNECT_ACCOUNT = "api/create_connect_account"
+    const val STRIPE_DASHBOARD_LINK = "api/stripe_dashboard_link"
+    const val CREATE_CHECKOUT_SESSION = "api/create_checkout_session"
+    const val CHECKOUT_SESSION_STATUS = "api/checkout_session_status"
+
+    // Team Invite endpoints
+    const val PENDING_INVITES = "api/goals/pending_invites"
+    const val GOAL_TEAM_RESPOND = "api/goals/{goalId}/team"
+    const val MARK_INVITES_READ = "api/goals/pending_invites/mark_read"
 }

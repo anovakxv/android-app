@@ -94,4 +94,16 @@ object NetworkModule {
     fun provideMessagingApiService(retrofit: Retrofit): MessagingApiService {
         return retrofit.create(MessagingApiService::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun providePaymentApiService(retrofit: Retrofit): PaymentApiService {
+        return retrofit.create(PaymentApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideInviteApiService(retrofit: Retrofit): InviteApiService {
+        return retrofit.create(InviteApiService::class.java)
+    }
 }

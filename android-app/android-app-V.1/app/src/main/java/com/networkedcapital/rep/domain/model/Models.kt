@@ -300,3 +300,205 @@ data class PortalDetailApiResponse(
 data class PortalGoalsApiResponse(
     val aGoals: List<Goal>
 )
+
+// ====================
+// Payment & Stripe Models
+// ====================
+
+@Parcelize
+data class ActiveSubscription(
+    val id: String,
+    val name: String,
+    val amount: Int, // Amount in cents
+    val nextBillingDate: Long // Unix timestamp
+) : Parcelable {
+    val formattedAmount: String
+        get() = String.format("$%.2f", amount / 100.0)
+
+    val formattedNextBillingDate: String
+        get() {
+            val date = java.util.Date(nextBillingDate * 1000)
+            val formatter = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault())
+            return formatter.format(date)
+        }
+}
+
+@Parcelize
+data class TransactionHistoryItem(
+    val id: String, // Stripe Payment Intent ID
+    val description: String,
+    val amount: Int, // Amount in cents
+    val date: Long // Unix timestamp
+) : Parcelable {
+    val formattedAmount: String
+        get() = String.format("$%.2f", amount / 100.0)
+
+    val formattedDate: String
+        get() {
+            val date = java.util.Date(date * 1000)
+            val formatter = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault())
+            return formatter.format(date)
+        }
+}
+
+data class SubscriptionsResponse(
+    val result: List<ActiveSubscription>
+)
+
+data class PaymentHistoryResponse(
+    val result: List<TransactionHistoryItem>
+)
+
+data class CancelSubscriptionRequest(
+    val subscriptionId: String
+)
+
+data class CustomerPortalRequest(
+    val return_url: String
+)
+
+data class CustomerPortalResponse(
+    val url: String
+)
+
+data class PortalPaymentStatusResponse(
+    val stripe_account_id: String?,
+    val account_status: Boolean?,
+    val stripe_connect_requested: Boolean?
+)
+
+data class CreateConnectAccountRequest(
+    val portal_id: Int,
+    val redirect_url: String
+)
+
+data class CreateConnectAccountResponse(
+    val status: String?,
+    val message: String?,
+    val url: String?,
+    val account_id: String?,
+    val error: String?
+)
+
+data class StripeDashboardLinkRequest(
+    val account_id: String
+)
+
+data class StripeDashboardLinkResponse(
+    val url: String?,
+    val error: String?
+)
+
+enum class TransactionType(val displayName: String, val apiValue: String) {
+    DONATION("Donate", "donation"),
+    PAYMENT("Pay", "payment"),
+    PURCHASE("Purchase", "purchase");
+
+    val subtitle: String
+        get() = when (this) {
+            DONATION -> "Your contribution helps this organization achieve its goals"
+            PAYMENT -> "Your payment helps fund this business initiative"
+            PURCHASE -> "Complete your purchase to support this business"
+        }
+
+    val amountLabel: String
+        get() = when (this) {
+            DONATION -> "Donation Amount"
+            PAYMENT -> "Payment Amount"
+            PURCHASE -> "Total Amount"
+        }
+
+    val messageLabel: String
+        get() = when (this) {
+            DONATION -> "Message (Optional)"
+            PAYMENT -> "Notes for Recipient (Optional)"
+            PURCHASE -> "Order Notes (Optional)"
+        }
+
+    val ctaText: String
+        get() = when (this) {
+            DONATION -> "Donate"
+            PAYMENT -> "Pay"
+            PURCHASE -> "Complete Purchase"
+        }
+
+    val receiptTitle: String
+        get() = when (this) {
+            DONATION -> "Thank You for Your Donation!"
+            PAYMENT -> "Payment Complete"
+            PURCHASE -> "Purchase Successful"
+        }
+
+    val receiptMessage: String
+        get() = when (this) {
+            DONATION -> "Your donation has been processed successfully."
+            PAYMENT -> "Your payment has been processed successfully."
+            PURCHASE -> "Your purchase has been completed successfully."
+        }
+}
+
+data class CreateCheckoutSessionRequest(
+    val portal_id: Int,
+    val goal_id: Int,
+    val amount: Int?, // Amount in cents (null if subscription)
+    val currency: String = "usd",
+    val message: String?,
+    val transaction_type: String,
+    val is_subscription: Boolean = false,
+    val price_id: String? = null // For subscriptions
+)
+
+data class CreateCheckoutSessionResponse(
+    val checkout_url: String?,
+    val session_id: String?,
+    val error: String?
+)
+
+data class CheckoutSessionStatusResponse(
+    val payment_status: String, // "paid", "unpaid", "no_payment_required"
+    val error: String?
+)
+
+// ====================
+// Team Invite Models
+// ====================
+
+@Parcelize
+data class GoalTeamInvite(
+    val id: Int,
+    val goals_id: Int,
+    val users_id1: Int,
+    val users_id2: Int,
+    val confirmed: Int,
+    val read1: Boolean,
+    val read2: Boolean,
+    val timestamp: String?,
+    val goalTitle: String?,
+    val inviterName: String?,
+    val inviterPhotoURL: String?
+) : Parcelable {
+    val inviterDisplayName: String
+        get() = inviterName ?: "Someone"
+
+    val patchedInviterProfilePictureURL: String?
+        get() {
+            val urlString = inviterPhotoURL ?: return null
+            if (urlString.isEmpty()) return null
+
+            return if (urlString.startsWith("http")) {
+                urlString
+            } else {
+                val s3BaseURL = "https://rep-app-dbbucket.s3.us-west-2.amazonaws.com/"
+                s3BaseURL + urlString
+            }
+        }
+}
+
+data class GoalTeamInvitesResponse(
+    val invites: List<GoalTeamInvite>
+)
+
+data class RespondToInviteRequest(
+    val action: String, // "accept" or "decline"
+    val users: List<Int>
+)

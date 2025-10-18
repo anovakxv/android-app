@@ -119,6 +119,12 @@ dependencies {
     // implementation 'com.sun.mail:android-activation:1.6.7'
 
     // No dependency is needed for basic email validation using android.util.Patterns
+
+    // Stripe Android SDK for payment processing
+    implementation 'com.stripe:stripe-android:20.37.2'
+
+    // Browser for Custom Tabs (required by Stripe for 3D Secure and redirects)
+    implementation 'androidx.browser:browser:1.7.0'
 }
 
 tasks.withType(KotlinCompile).configureEach {
