@@ -1,7 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "Bash(./gradlew assembleDebug:*)"
+      "Bash(./gradlew assembleDebug:*)",
+      "Bash(tee build.log)",
+      "Bash(java -version)",
+      "Bash(./gradlew --version)",
+      "Bash(echo $ANDROID_HOME)",
+      "Read(//c/Program Files/**)",
+      "Bash(cat gradle/wrapper/gradle-wrapper.properties)",
+      "Bash(./gradlew compileDebugKotlin --stacktrace)",
+      "Bash(bash gradlew --version)",
+      "Read(//c/Users/Stephanie/.gradle/**)"
     ],
     "deny": [],
     "ask": []
