@@ -258,4 +258,26 @@ class PayTransactionViewModel @Inject constructor(
             paymentStatus = PaymentStatus.Initial
         )
     }
+
+    /**
+     * Handle deep link return from Stripe payment
+     * Called when app receives rep://payment-return?status=success or rep://payment-return?status=canceled
+     */
+    fun handlePaymentReturn(status: String?, sessionId: String? = null) {
+        when (status) {
+            "success" -> {
+                handlePaymentCompleted(sessionId)
+            }
+            "canceled" -> {
+                handlePaymentCanceled()
+            }
+            else -> {
+                // Unknown status, close webview
+                _transactionState.value = _transactionState.value.copy(
+                    showWebView = false,
+                    isLoading = false
+                )
+            }
+        }
+    }
 }

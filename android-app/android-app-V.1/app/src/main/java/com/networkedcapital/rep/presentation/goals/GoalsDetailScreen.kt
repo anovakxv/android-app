@@ -1,6 +1,7 @@
 package com.networkedcapital.rep.presentation.goals
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -32,6 +33,7 @@ import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.text.font.FontWeight
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GoalsDetailScreen(
     goalId: Int,
@@ -103,11 +105,8 @@ fun GoalsDetailScreen(
         // Progress Bar and Richer Goal Metadata
         if (goal != null) {
             Column(modifier = Modifier.padding(16.dp)) {
-                // Title and Portal Name
+                // Title
                 Text(goal!!.title, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-                if (!goal!!.portalName.isNullOrBlank()) {
-                    Text(goal!!.portalName ?: "", fontSize = 14.sp, color = Color(0xFF8CC55D), fontWeight = FontWeight.Medium)
-                }
                 Spacer(modifier = Modifier.height(8.dp))
                 LinearProgressIndicator(
                     progress = goal!!.progress.toFloat().coerceIn(0f, 1f),
@@ -411,7 +410,7 @@ fun FeedItemView(item: FeedItem, onProfileClick: (User) -> Unit) {
         username = item.userName,
         fullName = item.userName,
         fname = null,
-        profilePictureUrl = item.profilePictureUrl
+        profile_picture_url = item.profilePictureUrl
     )
     val context = LocalContext.current
     Row(
@@ -422,27 +421,15 @@ fun FeedItemView(item: FeedItem, onProfileClick: (User) -> Unit) {
     ) {
         // Profile image with Coil, fallback to initials or icon on error
         Box(modifier = Modifier.size(40.dp)) {
-            if (!user.profilePictureUrl.isNullOrBlank()) {
+            if (!user.profile_picture_url.isNullOrBlank()) {
                 AsyncImage(
-                    model = user.profilePictureUrl,
+                    model = user.profile_picture_url,
                     contentDescription = "Profile picture",
                     modifier = Modifier
                         .size(40.dp)
                         .clip(RoundedCornerShape(20.dp))
                         .background(Color(0xFFE0E0E0))
-                        .clickable { onProfileClick(user) },
-                    onError = { _ -> },
-                    fallback = {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .background(Color(0xFFE0E0E0), RoundedCornerShape(20.dp))
-                                .clickable { onProfileClick(user) },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(item.userName.take(1), fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, color = Color.Black)
-                        }
-                    }
+                        .clickable { onProfileClick(user) }
                 )
             } else {
                 Box(
@@ -479,15 +466,7 @@ fun FeedItemView(item: FeedItem, onProfileClick: (User) -> Unit) {
                                     .size(80.dp)
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(Color(0xFFE0E0E0))
-                                    .padding(bottom = 4.dp),
-                                onError = { _ ->
-                                    // Show fallback icon if image fails
-                                    Image(
-                                        painter = painterResource(id = android.R.drawable.ic_menu_report_image),
-                                        contentDescription = "Image error",
-                                        modifier = Modifier.size(40.dp)
-                                    )
-                                }
+                                    .padding(bottom = 4.dp)
                             )
                         } else if (!attachment.url.isNullOrBlank()) {
                             // Document or non-image attachment
@@ -531,27 +510,15 @@ fun TeamMemberItem(user: User, onMessage: (User) -> Unit, onProfileClick: (User)
     ) {
         // Profile image with Coil, fallback to initials or icon on error
         Box(modifier = Modifier.size(40.dp)) {
-            if (!user.profilePictureUrl.isNullOrBlank()) {
+            if (!user.profile_picture_url.isNullOrBlank()) {
                 AsyncImage(
-                    model = user.profilePictureUrl,
+                    model = user.profile_picture_url,
                     contentDescription = "Profile picture",
                     modifier = Modifier
                         .size(40.dp)
                         .clip(RoundedCornerShape(20.dp))
                         .background(Color(0xFFE0E0E0))
-                        .clickable { onProfileClick(user) },
-                    onError = { _ -> },
-                    fallback = {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .background(Color(0xFFE0E0E0), RoundedCornerShape(20.dp))
-                                .clickable { onProfileClick(user) },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text((user.fullName ?: user.username ?: "").take(1), fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, color = Color.Black)
-                        }
-                    }
+                        .clickable { onProfileClick(user) }
                 )
             } else {
                 Box(

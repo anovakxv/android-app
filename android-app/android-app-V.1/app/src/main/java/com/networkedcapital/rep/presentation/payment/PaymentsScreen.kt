@@ -31,9 +31,10 @@ fun PaymentsScreen(
     var subscriptionToCancel by remember { mutableStateOf<ActiveSubscription?>(null) }
 
     // Show WebView for Stripe pages
-    if (paymentState.showWebView && paymentState.webViewUrl != null) {
+    val webViewUrl = paymentState.webViewUrl
+    if (paymentState.showWebView && webViewUrl != null) {
         WebViewScreen(
-            url = paymentState.webViewUrl,
+            url = webViewUrl,
             title = paymentState.webViewTitle,
             onDismiss = { viewModel.closeWebView() }
         )

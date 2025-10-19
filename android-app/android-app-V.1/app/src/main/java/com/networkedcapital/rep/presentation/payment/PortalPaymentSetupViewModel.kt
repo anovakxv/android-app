@@ -199,4 +199,18 @@ class PortalPaymentSetupViewModel @Inject constructor(
     fun clearError() {
         _setupState.value = _setupState.value.copy(errorMessage = null)
     }
+
+    /**
+     * Handle deep link return from Stripe Connect onboarding
+     * Called when app receives rep://stripe-connect-return
+     */
+    fun handleStripeConnectReturn() {
+        // Close webview and refresh connection status
+        _setupState.value = _setupState.value.copy(
+            showWebView = false,
+            webViewUrl = null
+        )
+        // Refresh to get updated connection status
+        checkConnectionStatus()
+    }
 }

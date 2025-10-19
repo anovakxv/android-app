@@ -5,7 +5,6 @@ apply plugin: 'kotlin-parcelize'
 apply plugin: 'dagger.hilt.android.plugin'
 apply plugin: 'com.google.gms.google-services'
 
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 android {
     namespace 'com.networkedcapital.rep'
@@ -127,7 +126,7 @@ dependencies {
     implementation 'androidx.browser:browser:1.7.0'
 }
 
-tasks.withType(KotlinCompile).configureEach {
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions {
         jvmTarget = "17"
     }

@@ -41,9 +41,10 @@ fun PayTransactionScreen(
     }
 
     // Show WebView for Stripe Checkout
-    if (transactionState.showWebView && transactionState.webViewUrl != null) {
+    val webViewUrl = transactionState.webViewUrl
+    if (transactionState.showWebView && webViewUrl != null) {
         WebViewScreen(
-            url = transactionState.webViewUrl,
+            url = webViewUrl,
             title = "Stripe's Secure Website:",
             onDismiss = {
                 viewModel.closeWebView()

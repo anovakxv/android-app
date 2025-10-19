@@ -28,17 +28,11 @@ class GoalsDetailViewModel : ViewModel() {
     // Replace with your backend base URL
     private val BASE_URL = "https://rep-june2025.onrender.com" // Must match Swift/iOS
 
-    // JWT token retrieval (same as Login, MainScreen, PortalPage)
+    // TODO: JWT token retrieval needs proper Hilt integration with Application context
+    // For now, returning null - this ViewModel needs to be refactored to use Hilt @Inject
     private fun getJwtToken(): String? {
-        // Use application context to access SharedPreferences
-        // This assumes you store the token under "jwtToken" key
-        return try {
-            val context = com.networkedcapital.rep.App.instance.applicationContext
-            val prefs = android.preference.PreferenceManager.getDefaultSharedPreferences(context)
-            prefs.getString("jwtToken", null)
-        } catch (e: Exception) {
-            null
-        }
+        // TODO: Inject SharedPreferences or TokenManager via Hilt
+        return null
     }
 
     // OkHttp interceptor to inject JWT token

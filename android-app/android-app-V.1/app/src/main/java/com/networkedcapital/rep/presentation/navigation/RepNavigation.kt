@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -18,8 +19,14 @@ import com.networkedcapital.rep.presentation.onboarding.AboutRepScreen
 import com.networkedcapital.rep.presentation.onboarding.EditProfileScreen
 import com.networkedcapital.rep.presentation.main.MainScreen
 import com.networkedcapital.rep.presentation.profile.ProfileScreen
-
+import com.networkedcapital.rep.presentation.payment.PaymentsScreen
+import com.networkedcapital.rep.presentation.payment.PayTransactionScreen
+import com.networkedcapital.rep.presentation.payment.PortalPaymentSetupScreen
+import com.networkedcapital.rep.presentation.invites.InvitesScreen
+import com.networkedcapital.rep.domain.model.TransactionType
 import com.networkedcapital.rep.presentation.test.ApiTestScreen
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -136,19 +143,24 @@ fun RepNavigation(
             )
         }
         
-        composable("${Screen.PortalDetail.route}/{portalId}/{userId}") { backStackEntry ->
+        composable("${Screen.PortalDetail.route}/{portalId}/{portalName}") { backStackEntry ->
             val portalId = backStackEntry.arguments?.getString("portalId")?.toIntOrNull() ?: 0
-            val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull() ?: 0
+            val portalName = backStackEntry.arguments?.getString("portalName") ?: "Portal"
+
             com.networkedcapital.rep.presentation.portal.PortalDetailScreen(
                 portalId = portalId,
-                userId = userId,
+                portalName = portalName,
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToGoalDetail = { goalId ->
+                onNavigateToGoal = { goalId ->
                     navController.navigate("${Screen.GoalDetail.route}/$goalId")
                 },
-                onNavigateToEditPortal = { /* TODO */ },
-                onNavigateToChat = { _, _, _ -> /* TODO */ },
-                onNavigateToEditGoal = { _, _ -> /* TODO */ }
+                onNavigateToPayment = { portalId, portalName, goalId, goalName, transactionType ->
+                    navController.navigate(
+                        Screen.PayTransaction.createRoute(
+                            portalId, portalName, goalId, goalName, transactionType
+                        )
+                    )
+                }
             )
         }
 
@@ -164,6 +176,92 @@ fun RepNavigation(
             // For now, show an empty Box to avoid syntax errors
             Box(modifier = Modifier.fillMaxSize())
         }
+
+        // Payments Screen
+        composable(Screen.Payments.route) {
+            PaymentsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Pay Transaction Screen
+        composable(
+            route = Screen.PayTransaction.route,
+            arguments = listOf(
+                navArgument("portalId") { type = NavType.IntType },
+                navArgument("portalName") { type = NavType.StringType },
+                navArgument("goalId") { type = NavType.IntType },
+                navArgument("goalName") { type = NavType.StringType },
+                navArgument("transactionType") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val portalId = backStackEntry.arguments?.getInt("portalId") ?: 0
+            val portalName = backStackEntry.arguments?.getString("portalName") ?: ""
+            val goalId = backStackEntry.arguments?.getInt("goalId") ?: 0
+            val goalName = backStackEntry.arguments?.getString("goalName") ?: ""
+            val transactionTypeStr = backStackEntry.arguments?.getString("transactionType") ?: "DONATION"
+            val transactionType = when (transactionTypeStr.uppercase()) {
+                "PAYMENT" -> TransactionType.PAYMENT
+                "PURCHASE" -> TransactionType.PURCHASE
+                else -> TransactionType.DONATION
+            }
+
+            PayTransactionScreen(
+                portalId = portalId,
+                portalName = portalName,
+                goalId = goalId,
+                goalName = goalName,
+                transactionType = transactionType,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onTransactionComplete = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Portal Payment Setup Screen
+        composable(
+            route = Screen.PortalPaymentSetup.route,
+            arguments = listOf(
+                navArgument("portalId") { type = NavType.IntType },
+                navArgument("portalName") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val portalId = backStackEntry.arguments?.getInt("portalId") ?: 0
+            val portalName = backStackEntry.arguments?.getString("portalName") ?: ""
+
+            PortalPaymentSetupScreen(
+                portalId = portalId,
+                portalName = portalName,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Team Invites Screen
+        composable(
+            route = Screen.Invites.route,
+            arguments = listOf(
+                navArgument("userId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getInt("userId") ?: 0
+
+            InvitesScreen(
+                userId = userId,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onViewGoal = { goalId ->
+                    navController.navigate("${Screen.GoalDetail.route}/$goalId")
+                }
+            )
+        }
     }
 }
 
@@ -175,8 +273,24 @@ sealed class Screen(val route: String) {
     object EditProfile : Screen("edit_profile")
     object Main : Screen("main")
     object Profile : Screen("profile")
-    object PortalDetail : Screen("portal_detail")
+    object PortalDetail : Screen("portal_detail/{portalId}/{portalName}") {
+        fun createRoute(portalId: Int, portalName: String) = "portal_detail/$portalId/$portalName"
+    }
     object GoalDetail : Screen("goal_detail")
     object ApiTest : Screen("api_test")
-        
+
+    // Payment & Subscription screens
+    object Payments : Screen("payments")
+    object PayTransaction : Screen("pay_transaction/{portalId}/{portalName}/{goalId}/{goalName}/{transactionType}") {
+        fun createRoute(portalId: Int, portalName: String, goalId: Int, goalName: String, transactionType: String) =
+            "pay_transaction/$portalId/$portalName/$goalId/$goalName/$transactionType"
+    }
+    object PortalPaymentSetup : Screen("portal_payment_setup/{portalId}/{portalName}") {
+        fun createRoute(portalId: Int, portalName: String) = "portal_payment_setup/$portalId/$portalName"
+    }
+
+    // Team Invites screen
+    object Invites : Screen("invites/{userId}") {
+        fun createRoute(userId: Int) = "invites/$userId"
+    }
 }

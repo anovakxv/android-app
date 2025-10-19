@@ -2,11 +2,14 @@ package com.networkedcapital.rep.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
-val RepGreen = Color(0xFF7BC54A)
-val RepGreenDark = Color(0xFF5A8F35)
-val RepBackground = Color(0xFFF9F9F9)
-val RepGray = Color(0xFF6C6C6C)
-val RepLightGray = Color(0xFFE4E4E4)
+// Rep Brand Colors - matching iOS Swift implementation
+// iOS uses: Color(red: 0.549, green: 0.78, blue: 0.365) = #8CC55D
+val RepGreen = Color(0xFF8CC55D)  // Primary brand green
+val RepGreenDark = Color(0xFF5A8F35)  // Darker variant for pressed states
+val RepGreenLight = Color(0xFFAAD97A)  // Lighter variant for backgrounds
+val RepBackground = Color(0xFFF9F9F9)  // Light background
+val RepGray = Color(0xFF6C6C6C)  // Secondary text
+val RepLightGray = Color(0xFFE4E4E4)  // Dividers and borders
 
 // Material 3 Color Scheme
 val Purple80 = Color(0xFFD0BCFF)

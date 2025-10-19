@@ -72,7 +72,7 @@ fun InvitesScreen(
                             .fillMaxSize()
                             .padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalArrangement = Arrangement.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
@@ -110,7 +110,8 @@ fun InvitesScreen(
     }
 
     // Alert dialog
-    if (inviteState.showAlert && inviteState.alertMessage != null) {
+    val alertMessage = inviteState.alertMessage
+    if (inviteState.showAlert && alertMessage != null) {
         AlertDialog(
             onDismissRequest = {
                 viewModel.dismissAlert()
@@ -120,7 +121,7 @@ fun InvitesScreen(
                 }
             },
             title = { Text("Team Invite") },
-            text = { Text(inviteState.alertMessage) },
+            text = { Text(alertMessage) },
             confirmButton = {
                 TextButton(
                     onClick = {

@@ -30,9 +30,10 @@ fun PortalPaymentSetupScreen(
     }
 
     // Show WebView for Stripe pages
-    if (setupState.showWebView && setupState.webViewUrl != null) {
+    val webViewUrl = setupState.webViewUrl
+    if (setupState.showWebView && webViewUrl != null) {
         WebViewScreen(
-            url = setupState.webViewUrl,
+            url = webViewUrl,
             title = setupState.webViewTitle,
             onDismiss = { viewModel.closeWebView() }
         )
