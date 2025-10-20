@@ -16,7 +16,8 @@
       "Bash(tee build_output_v3.txt)",
       "Bash(tee final_build_output.txt)",
       "Read(//c/**)",
-      "Bash(adb logcat -d)"
+      "Bash(adb logcat -d)",
+      "Bash(tee compile_output.txt)"
     ],
     "deny": [],
     "ask": []

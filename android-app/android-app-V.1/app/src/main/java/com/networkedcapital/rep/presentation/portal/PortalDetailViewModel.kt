@@ -38,17 +38,20 @@ class PortalDetailViewModel @Inject constructor(
     private fun patchPortalDetailImages(portalDetail: PortalDetail): PortalDetail {
         return portalDetail.copy(
             mainImageUrl = patchImageUrl(portalDetail.mainImageUrl),
-            iconImageUrl = patchImageUrl(portalDetail.iconImageUrl),
-            leadProfilePictureUrl = patchImageUrl(portalDetail.leadProfilePictureUrl ?: portalDetail.leadImageName)
+            aLeads = portalDetail.aLeads?.map { patchUserImages(it) },
+            aUsers = portalDetail.aUsers?.map { patchUserImages(it) }
         )
     }
 
     /**
-     * Patch profile picture URL in Goal
+     * Patch user profile picture URLs
      */
-    private fun patchGoalImages(goal: Goal): Goal {
-        return goal.copy(
-            creatorProfilePictureUrl = patchImageUrl(goal.creatorProfilePictureUrl)
+    private fun patchUserImages(user: User): User {
+        val patchedUrl = patchImageUrl(user.profile_picture_url ?: user.imageName)
+        return user.copy(
+            profile_picture_url = patchedUrl,
+            imageUrl = patchedUrl,
+            avatarUrl = patchedUrl
         )
     }
 
@@ -83,9 +86,8 @@ class PortalDetailViewModel @Inject constructor(
                 // Load portal goals
                 portalRepository.getPortalGoals(portalId).firstOrNull()?.fold(
                     onSuccess = { goals ->
-                        val patchedGoals = goals.map { patchGoalImages(it) }
-                        android.util.Log.d("PortalDetailViewModel", "Loaded portal goals: $patchedGoals")
-                        _uiState.update { it.copy(portalGoals = patchedGoals) }
+                        android.util.Log.d("PortalDetailViewModel", "Loaded portal goals: $goals")
+                        _uiState.update { it.copy(portalGoals = goals) }
                     },
                     onFailure = { error ->
                         android.util.Log.e("PortalDetailViewModel", "Error loading portal goals: ${error.message}", error)

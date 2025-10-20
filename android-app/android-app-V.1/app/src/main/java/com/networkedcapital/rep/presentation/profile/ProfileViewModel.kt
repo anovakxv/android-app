@@ -77,15 +77,6 @@ class ProfileViewModel @Inject constructor(
         )
     }
 
-    /**
-     * Patch creator profile picture URL in Goal
-     */
-    private fun patchGoalImages(goal: Goal): Goal {
-        return goal.copy(
-            creatorProfilePictureUrl = patchImageUrl(goal.creatorProfilePictureUrl)
-        )
-    }
-
     fun initialize(viewedUserId: Int) {
         viewModelScope.launch {
             // Get current logged-in user ID
@@ -171,8 +162,7 @@ class ProfileViewModel @Inject constructor(
                 .catch { /* Handle silently */ }
                 .firstOrNull()?.fold(
                         onSuccess = { goals ->
-                            val patchedGoals = goals.map { patchGoalImages(it) }
-                            _uiState.value = _uiState.value.copy(goals = patchedGoals)
+                            _uiState.value = _uiState.value.copy(goals = goals)
                         },
                         onFailure = { /* Handle silently */ }
                     )
