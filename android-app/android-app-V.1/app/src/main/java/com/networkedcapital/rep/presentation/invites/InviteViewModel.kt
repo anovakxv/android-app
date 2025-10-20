@@ -28,6 +28,30 @@ class InviteViewModel @Inject constructor(
 
     private var currentUserId: Int = 0
 
+    // S3 base URL for image patching (same as backend and iOS)
+    private val s3BaseUrl = "https://rep-app-dbbucket.s3.us-west-2.amazonaws.com/"
+
+    /**
+     * Patch image URL - convert filename to full S3 URL if needed
+     */
+    private fun patchImageUrl(imageNameOrUrl: String?): String? {
+        if (imageNameOrUrl.isNullOrBlank()) return null
+        return if (imageNameOrUrl.startsWith("http")) {
+            imageNameOrUrl
+        } else {
+            s3BaseUrl + imageNameOrUrl
+        }
+    }
+
+    /**
+     * Patch inviter photo URL in GoalTeamInvite
+     */
+    private fun patchInviteImages(invite: GoalTeamInvite): GoalTeamInvite {
+        return invite.copy(
+            inviterPhotoURL = patchImageUrl(invite.inviterPhotoURL)
+        )
+    }
+
     fun initialize(userId: Int) {
         this.currentUserId = userId
         loadPendingInvites()
@@ -52,8 +76,9 @@ class InviteViewModel @Inject constructor(
                 }
                 .firstOrNull()?.fold(
                         onSuccess = { invites ->
+                            val patchedInvites = invites.map { patchInviteImages(it) }
                             _inviteState.value = _inviteState.value.copy(
-                                invites = invites,
+                                invites = patchedInvites,
                                 isLoading = false
                             )
                         },

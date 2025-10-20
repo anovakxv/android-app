@@ -41,6 +41,51 @@ class ProfileViewModel @Inject constructor(
     val isCurrentUser: Boolean
         get() = _uiState.value.currentUserId == _uiState.value.viewedUserId && _uiState.value.currentUserId > 0
 
+    // S3 base URL for image patching (same as backend and iOS)
+    private val s3BaseUrl = "https://rep-app-dbbucket.s3.us-west-2.amazonaws.com/"
+
+    /**
+     * Patch image URL - convert filename to full S3 URL if needed
+     */
+    private fun patchImageUrl(imageNameOrUrl: String?): String? {
+        if (imageNameOrUrl.isNullOrBlank()) return null
+        return if (imageNameOrUrl.startsWith("http")) {
+            imageNameOrUrl
+        } else {
+            s3BaseUrl + imageNameOrUrl
+        }
+    }
+
+    /**
+     * Patch all image URLs in User profile
+     */
+    private fun patchUserImages(user: User): User {
+        val patchedUrl = patchImageUrl(user.profile_picture_url ?: user.imageName)
+        return user.copy(
+            profile_picture_url = patchedUrl,
+            imageUrl = patchedUrl,
+            avatarUrl = patchedUrl
+        )
+    }
+
+    /**
+     * Patch main image URL in Portal
+     */
+    private fun patchPortalImages(portal: Portal): Portal {
+        return portal.copy(
+            mainImageUrl = patchImageUrl(portal.mainImageUrl)
+        )
+    }
+
+    /**
+     * Patch creator profile picture URL in Goal
+     */
+    private fun patchGoalImages(goal: Goal): Goal {
+        return goal.copy(
+            creatorProfilePictureUrl = patchImageUrl(goal.creatorProfilePictureUrl)
+        )
+    }
+
     fun initialize(viewedUserId: Int) {
         viewModelScope.launch {
             // Get current logged-in user ID
@@ -88,8 +133,9 @@ class ProfileViewModel @Inject constructor(
                 }
                 .firstOrNull()?.fold(
                         onSuccess = { user ->
+                            val patchedUser = patchUserImages(user)
                             _uiState.value = _uiState.value.copy(
-                                user = user,
+                                user = patchedUser,
                                 isLoaded = true,
                                 isLoading = false
                             )
@@ -111,7 +157,8 @@ class ProfileViewModel @Inject constructor(
                 .catch { /* Handle silently */ }
                 .firstOrNull()?.fold(
                         onSuccess = { portals ->
-                            _uiState.value = _uiState.value.copy(portals = portals)
+                            val patchedPortals = portals.map { patchPortalImages(it) }
+                            _uiState.value = _uiState.value.copy(portals = patchedPortals)
                         },
                         onFailure = { /* Handle silently */ }
                     )
@@ -124,7 +171,8 @@ class ProfileViewModel @Inject constructor(
                 .catch { /* Handle silently */ }
                 .firstOrNull()?.fold(
                         onSuccess = { goals ->
-                            _uiState.value = _uiState.value.copy(goals = goals)
+                            val patchedGoals = goals.map { patchGoalImages(it) }
+                            _uiState.value = _uiState.value.copy(goals = patchedGoals)
                         },
                         onFailure = { /* Handle silently */ }
                     )

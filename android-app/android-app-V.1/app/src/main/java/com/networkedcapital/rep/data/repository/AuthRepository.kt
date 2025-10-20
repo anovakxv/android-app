@@ -4,6 +4,7 @@ import com.networkedcapital.rep.data.api.*
 import com.networkedcapital.rep.domain.model.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.emitAll
 import okhttp3.MultipartBody
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -40,7 +41,7 @@ class AuthRepository @Inject constructor(
             skills = skills,
             profile_picture_url = imageUrl
         )
-        updateProfile(user).collect { emit(it) }
+        emitAll(updateProfile(user))
     }
 
     suspend fun uploadProfileImage(profileImageUri: String): Flow<Result<String>> = flow {

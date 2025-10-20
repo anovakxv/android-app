@@ -45,6 +45,9 @@ class MainViewModel @Inject constructor(
 
     enum class MainPage { PORTALS, PEOPLE }
 
+    // S3 base URL for image patching (same as backend and iOS)
+    private val s3BaseUrl = "https://rep-app-dbbucket.s3.us-west-2.amazonaws.com/"
+
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
@@ -71,6 +74,40 @@ class MainViewModel @Inject constructor(
     private val backgroundUsersTab2 = MutableStateFlow<List<User>>(emptyList())
 
     private var searchJob: Job? = null
+
+    /**
+     * Patches image URLs to use full S3 URLs if they're just file names.
+     * Matches iOS patchProfilePictureURL() and backend patch functions.
+     */
+    private fun patchImageUrl(imageNameOrUrl: String?): String? {
+        if (imageNameOrUrl.isNullOrBlank()) return null
+        return if (imageNameOrUrl.startsWith("http")) {
+            imageNameOrUrl
+        } else {
+            s3BaseUrl + imageNameOrUrl
+        }
+    }
+
+    /**
+     * Patches a portal's mainImageUrl.
+     */
+    private fun patchPortalImage(portal: Portal): Portal {
+        return portal.copy(
+            mainImageUrl = patchImageUrl(portal.mainImageUrl)
+        )
+    }
+
+    /**
+     * Patches a user's profile picture URL.
+     */
+    private fun patchUserImage(user: User): User {
+        val patchedUrl = patchImageUrl(user.profile_picture_url ?: user.imageName)
+        return user.copy(
+            profile_picture_url = patchedUrl,
+            imageUrl = patchedUrl,
+            avatarUrl = patchedUrl
+        )
+    }
 
     init {
         // Debounced search
@@ -189,10 +226,11 @@ class MainViewModel @Inject constructor(
                         }
                         val safeOnly = _uiState.value.showOnlySafePortals
                         val portals = portalRepository.getFilteredPortals(userId, tab, safeOnly)
+                        val patchedPortals = portals.map { patchPortalImage(it) }
                         when (to) {
-                            0 -> backgroundPortalsTab0.value = portals
-                            1 -> backgroundPortalsTab1.value = portals
-                            2 -> backgroundPortalsTab2.value = portals
+                            0 -> backgroundPortalsTab0.value = patchedPortals
+                            1 -> backgroundPortalsTab1.value = patchedPortals
+                            2 -> backgroundPortalsTab2.value = patchedPortals
                         }
                     } catch (e: Exception) {
                         // Silently fail for background loads
@@ -207,8 +245,9 @@ class MainViewModel @Inject constructor(
                         } else {
                             val tab = if (to == 1) "ntwk" else "all"
                             val users = portalRepository.getFilteredPeople(userId, tab)
-                            if (to == 1) backgroundUsersTab1.value = users
-                            else backgroundUsersTab2.value = users
+                            val patchedUsers = users.map { patchUserImage(it) }
+                            if (to == 1) backgroundUsersTab1.value = patchedUsers
+                            else backgroundUsersTab2.value = patchedUsers
                         }
                     } catch (e: Exception) {
                         // Silently fail for background loads
@@ -399,19 +438,20 @@ class MainViewModel @Inject constructor(
                 else -> "open"
             }
             val portals = portalRepository.getFilteredPortals(userId, tab, safeOnly)
+            val patchedPortals = portals.map { patchPortalImage(it) }
             _uiState.update { state ->
                 state.copy(
                     isLoading = false,
-                    portals = portals,
+                    portals = patchedPortals,
                     errorMessage = null
                 )
             }
             
             // Update background cache
             when (section) {
-                0 -> backgroundPortalsTab0.value = portals
-                1 -> backgroundPortalsTab1.value = portals
-                2 -> backgroundPortalsTab2.value = portals
+                0 -> backgroundPortalsTab0.value = patchedPortals
+                1 -> backgroundPortalsTab1.value = patchedPortals
+                2 -> backgroundPortalsTab2.value = patchedPortals
             }
         } catch (e: Exception) {
             _uiState.update { state ->
@@ -458,10 +498,11 @@ class MainViewModel @Inject constructor(
                 // Fetch users
                 val tab = if (section == 1) "ntwk" else "all"
                 val users = portalRepository.getFilteredPeople(userId, tab)
+                val patchedUsers = users.map { patchUserImage(it) }
                 _uiState.update { state ->
                     state.copy(
                         isLoading = false,
-                        users = users,
+                        users = patchedUsers,
                         activeChats = emptyList(),
                         errorMessage = null
                     )
@@ -469,9 +510,9 @@ class MainViewModel @Inject constructor(
                 
                 // Update cache
                 if (section == 1) {
-                    backgroundUsersTab1.value = users
+                    backgroundUsersTab1.value = patchedUsers
                 } else {
-                    backgroundUsersTab2.value = users
+                    backgroundUsersTab2.value = patchedUsers
                 }
             }
         } catch (e: Exception) {

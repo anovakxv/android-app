@@ -17,6 +17,41 @@ class PortalDetailViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PortalDetailUiState())
     val uiState: StateFlow<PortalDetailUiState> = _uiState.asStateFlow()
 
+    // S3 base URL for image patching (same as backend and iOS)
+    private val s3BaseUrl = "https://rep-app-dbbucket.s3.us-west-2.amazonaws.com/"
+
+    /**
+     * Patch image URL - convert filename to full S3 URL if needed
+     */
+    private fun patchImageUrl(imageNameOrUrl: String?): String? {
+        if (imageNameOrUrl.isNullOrBlank()) return null
+        return if (imageNameOrUrl.startsWith("http")) {
+            imageNameOrUrl
+        } else {
+            s3BaseUrl + imageNameOrUrl
+        }
+    }
+
+    /**
+     * Patch all image URLs in PortalDetail
+     */
+    private fun patchPortalDetailImages(portalDetail: PortalDetail): PortalDetail {
+        return portalDetail.copy(
+            mainImageUrl = patchImageUrl(portalDetail.mainImageUrl),
+            iconImageUrl = patchImageUrl(portalDetail.iconImageUrl),
+            leadProfilePictureUrl = patchImageUrl(portalDetail.leadProfilePictureUrl ?: portalDetail.leadImageName)
+        )
+    }
+
+    /**
+     * Patch profile picture URL in Goal
+     */
+    private fun patchGoalImages(goal: Goal): Goal {
+        return goal.copy(
+            creatorProfilePictureUrl = patchImageUrl(goal.creatorProfilePictureUrl)
+        )
+    }
+
     fun loadPortalDetail(portalId: Int, userId: Int) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
@@ -25,10 +60,11 @@ class PortalDetailViewModel @Inject constructor(
                 // Load portal detail
                 portalRepository.getPortalDetail(portalId, userId).firstOrNull()?.fold(
                     onSuccess = { portalDetail ->
-                        android.util.Log.d("PortalDetailViewModel", "Loaded portal detail: $portalDetail")
+                        val patchedPortalDetail = patchPortalDetailImages(portalDetail)
+                        android.util.Log.d("PortalDetailViewModel", "Loaded portal detail: $patchedPortalDetail")
                         _uiState.update {
                             it.copy(
-                                portalDetail = portalDetail,
+                                portalDetail = patchedPortalDetail,
                                 isLoading = false
                             )
                         }
@@ -47,8 +83,9 @@ class PortalDetailViewModel @Inject constructor(
                 // Load portal goals
                 portalRepository.getPortalGoals(portalId).firstOrNull()?.fold(
                     onSuccess = { goals ->
-                        android.util.Log.d("PortalDetailViewModel", "Loaded portal goals: $goals")
-                        _uiState.update { it.copy(portalGoals = goals) }
+                        val patchedGoals = goals.map { patchGoalImages(it) }
+                        android.util.Log.d("PortalDetailViewModel", "Loaded portal goals: $patchedGoals")
+                        _uiState.update { it.copy(portalGoals = patchedGoals) }
                     },
                     onFailure = { error ->
                         android.util.Log.e("PortalDetailViewModel", "Error loading portal goals: ${error.message}", error)

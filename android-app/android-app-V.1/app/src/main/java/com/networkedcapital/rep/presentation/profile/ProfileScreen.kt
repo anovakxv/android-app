@@ -51,7 +51,12 @@ fun ProfileScreen(
     val backgroundColor = Color.White
 
     LaunchedEffect(userId) {
-        viewModel.initialize(userId)
+        android.util.Log.d("ProfileScreen", "Initializing with userId: $userId")
+        if (userId > 0) {
+            viewModel.initialize(userId)
+        } else {
+            android.util.Log.e("ProfileScreen", "Invalid userId: $userId")
+        }
     }
 
     LaunchedEffect(uiState.actionResultMessage) {
@@ -79,6 +84,28 @@ fun ProfileScreen(
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(color = repGreen)
+            }
+        } else if (uiState.errorMessage != null) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Error loading profile",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Red
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = uiState.errorMessage!!,
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                }
             }
         } else if (uiState.user != null) {
             LazyColumn(
