@@ -1,37 +1,45 @@
 package com.networkedcapital.rep.presentation.goals
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Message
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.AttachMoney
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.draw.clip
-import coil.compose.AsyncImage
-import com.networkedcapital.rep.domain.model.Goal
-import com.networkedcapital.rep.domain.model.BarChartData
-import com.networkedcapital.rep.domain.model.User
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.runtime.collectAsState
-import com.networkedcapital.rep.presentation.goals.GoalsDetailViewModel
+import coil.compose.AsyncImage
+import com.networkedcapital.rep.domain.model.BarChartData
 import com.networkedcapital.rep.domain.model.FeedItem
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.platform.LocalContext
-import android.content.Intent
-import android.net.Uri
-import androidx.compose.foundation.clickable
-import androidx.compose.ui.text.font.FontWeight
+import com.networkedcapital.rep.domain.model.Goal
+import com.networkedcapital.rep.domain.model.User
+import kotlin.math.max
+import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,7 +48,8 @@ fun GoalsDetailScreen(
     onBack: () -> Unit,
     onMessage: (User) -> Unit,
     onEditGoal: () -> Unit,
-    onUpdateGoal: () -> Unit
+    onUpdateGoal: () -> Unit,
+    onNavigateToPortal: (Int) -> Unit = {} // Added portal navigation
 ) {
     val viewModel: GoalsDetailViewModel = viewModel()
     val goal by viewModel.goal.collectAsState()
@@ -55,16 +64,51 @@ fun GoalsDetailScreen(
         viewModel.loadGoal(goalId)
     }
 
-    // State for modal bottom sheet
+    // State for modal sheets
     val showActionSheet = remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     var showSheet by remember { mutableStateOf(false) }
     var showChatSheet by remember { mutableStateOf(false) }
     var showSupportSheet by remember { mutableStateOf(false) }
+    
+    // Payment sheet state
+    var paymentAmount by remember { mutableStateOf("") }
+    var paymentMessage by remember { mutableStateOf("") }
+    
+    // Team Chat state
+    var isCreatingTeamChat by remember { mutableStateOf(false) }
+    var teamChatId by remember { mutableStateOf<Int?>(null) }
+    var chatCreationError by remember { mutableStateOf<String?>(null) }
+    
+    // Function to open or create team chat
+    fun openGoalTeamChat() {
+        if (isCreatingTeamChat) return
+        
+        if (teamChatId != null) {
+            // Show existing chat
+            showChatSheet = true
+            return
+        }
+        
+        // Create new chat logic
+        isCreatingTeamChat = true
+        viewModel.createTeamChat(
+            goalId = goal?.id ?: 0,
+            title = "Goal Team: ${goal?.title}"
+        ) { chatId, error ->
+            isCreatingTeamChat = false
+            if (error != null) {
+                chatCreationError = error
+            } else if (chatId != null) {
+                teamChatId = chatId
+                showChatSheet = true
+            }
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
-            // Top Bar (iOS style)
+            // Enhanced Top Bar with Portal Navigation
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -77,228 +121,314 @@ fun GoalsDetailScreen(
                         .padding(horizontal = 15.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color(0xFF8CC55D)
-                    )
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color(0xFF8CC55D)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Text(
+                                text = goal?.title ?: "Goal Detail",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                color = Color.Black
+                            )
+                            
+                            // Portal navigation link
+                            goal?.portalId?.let { portalId ->
+                                goal?.portalName?.let { portalName ->
+                                    Row(
+                                        modifier = Modifier.clickable { onNavigateToPortal(portalId) },
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = portalName,
+                                            fontSize = 12.sp,
+                                            color = Color(0xFF006400)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Icon(
+                                            imageVector = Icons.Default.ArrowForward,
+                                            contentDescription = "Go to Portal",
+                                            tint = Color(0xFF006400),
+                                            modifier = Modifier.size(10.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Box(modifier = Modifier.size(24.dp)) // Placeholder for right icon
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = goal?.title ?: "Goal Detail",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        color = Color.Black
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Box(modifier = Modifier.size(24.dp)) // Placeholder for right icon
-            }
-            Divider(
-                color = Color(0xFFE4E4E4),
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
-        }
-        // Progress Bar and Richer Goal Metadata
-        if (goal != null) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                // Title
-                Text(goal!!.title, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-                Spacer(modifier = Modifier.height(8.dp))
-                LinearProgressIndicator(
-                    progress = goal!!.progress.toFloat().coerceIn(0f, 1f),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(12.dp)
-                        .clip(RoundedCornerShape(6.dp)),
-                    color = Color(0xFF8CC55D),
-                    trackColor = Color(0xFFE0E0E0)
+                Divider(
+                    color = Color(0xFFE4E4E4),
+                    modifier = Modifier.align(Alignment.BottomCenter)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row {
-                    Text("Metric: ${goal!!.metricName}", style = MaterialTheme.typography.bodySmall)
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text("Goal Type: ${goal!!.typeName}", style = MaterialTheme.typography.bodySmall)
-                }
-                Row {
-                    Text("Quota: ${goal!!.quotaString}", style = MaterialTheme.typography.bodySmall)
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text("Progress: ${goal!!.valueString}", style = MaterialTheme.typography.bodySmall)
-                }
-                if (!goal!!.reportingName.isNullOrBlank()) {
-                    Text("Reporting: ${goal!!.reportingName}", style = MaterialTheme.typography.bodySmall, color = Color.DarkGray)
-                }
-                if (goal!!.subtitle.isNotBlank()) {
-                    Text(goal!!.subtitle, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                }
-                if (goal!!.description.isNotBlank()) {
-                    Text(goal!!.description, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                }
             }
-        }
-        // Black & White Segmented Control (PortalPage style)
-        val segmentLabels = listOf("Feed", "Report", "Team")
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .background(Color(0xFFF2F2F2), RoundedCornerShape(12.dp))
-                    .height(40.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                segmentLabels.forEachIndexed { idx, label ->
-                    val isSelected = selectedTab == idx
-                    val bgColor = if (isSelected) Color.Black else Color.White
-                    val textColor = if (isSelected) Color.White else Color.Black
+            
+            // Content area
+            Box(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    // Enhanced Progress Bar (iOS Style)
+                    if (goal != null) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            // Title
+                            Text(goal!!.title, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                            Spacer(modifier = Modifier.height(12.dp))
+                            
+                            // iOS-style progress bar
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(34.dp)
+                                        .background(Color(0xFFE0E0E0), RoundedCornerShape(4.dp))
+                                )
+                                val configuration = LocalConfiguration.current
+                                Box(
+                                    modifier = Modifier
+                                        .width(
+                                            (max(0f, min(1f, goal!!.progress.toFloat())) * 
+                                            configuration.screenWidthDp * 0.92f).dp
+                                        )
+                                        .height(34.dp)
+                                        .background(Color(0xFF8CC55D), RoundedCornerShape(4.dp))
+                                )
+                            }
+                            
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row {
+                                Text("Metric: ${goal!!.metricName}", style = MaterialTheme.typography.bodySmall)
+                                Spacer(modifier = Modifier.weight(1f))
+                                Text("Goal Type: ${goal!!.typeName}", style = MaterialTheme.typography.bodySmall)
+                            }
+                            Row {
+                                Text("Quota: ${goal!!.quotaString}", style = MaterialTheme.typography.bodySmall)
+                                Spacer(modifier = Modifier.weight(1f))
+                                Text("Progress: ${goal!!.valueString}", style = MaterialTheme.typography.bodySmall)
+                            }
+                            if (!goal!!.reportingName.isNullOrBlank()) {
+                                Text("Reporting: ${goal!!.reportingName}", style = MaterialTheme.typography.bodySmall, color = Color.DarkGray)
+                            }
+                            if (goal!!.subtitle.isNotBlank()) {
+                                Text(goal!!.subtitle, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            }
+                            if (goal!!.description.isNotBlank()) {
+                                Text(goal!!.description, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            }
+                        }
+                    }
+                    
+                    // iOS-Style Black Segmented Control
+                    val segmentLabels = listOf("Feed", "Report", "Team")
                     Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(bgColor)
-                            .clickable { selectedTab = idx },
-                        contentAlignment = Alignment.Center
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
                     ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(40.dp)
+                                .border(1.dp, Color.Black, RoundedCornerShape(4.dp))
+                                .padding(2.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            segmentLabels.forEachIndexed { idx, label ->
+                                val isSelected = selectedTab == idx
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxHeight()
+                                        .clip(RoundedCornerShape(2.dp))
+                                        .background(if (isSelected) Color.Black else Color.Transparent)
+                                        .clickable { selectedTab = idx },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = label,
+                                        color = if (isSelected) Color.White else Color.Black,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                }
+                                if (idx < segmentLabels.lastIndex) {
+                                    Spacer(modifier = Modifier.width(2.dp))
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Content
+                    if (loading) {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                        }
+                    } else if (error != null) {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("Error: $error")
+                        }
+                    } else {
+                        when (selectedTab) {
+                            0 -> {
+                                if (feed.isEmpty()) {
+                                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Icon(Icons.Filled.Message, contentDescription = null, tint = Color.LightGray, modifier = Modifier.size(48.dp))
+                                            Spacer(modifier = Modifier.height(12.dp))
+                                            Text("No feed activity yet.", color = Color.Gray, fontSize = 16.sp)
+                                            Text("Updates and progress will appear here.", color = Color.LightGray, fontSize = 13.sp)
+                                        }
+                                    }
+                                } else {
+                                    LazyColumn(modifier = Modifier.weight(1f)) {
+                                        items(feed) { item ->
+                                            EnhancedFeedItemView(item, onProfileClick = { user -> selectedProfileUser = user })
+                                        }
+                                    }
+                                }
+                            }
+                            1 -> {
+                                if (error != null) {
+                                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Icon(Icons.Filled.Message, contentDescription = null, tint = Color.Red, modifier = Modifier.size(48.dp))
+                                            Spacer(modifier = Modifier.height(12.dp))
+                                            Text("Oops! Couldn't load reporting data.", color = Color.Red, fontSize = 16.sp)
+                                            Text(error ?: "Unknown error.", color = Color.LightGray, fontSize = 13.sp)
+                                        }
+                                    }
+                                } else if (goal?.chartData?.isEmpty() != false) {
+                                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Icon(Icons.Filled.Message, contentDescription = null, tint = Color.LightGray, modifier = Modifier.size(48.dp))
+                                            Spacer(modifier = Modifier.height(12.dp))
+                                            Text("No reporting data available.", color = Color.Gray, fontSize = 16.sp)
+                                            Text("Charts and stats will appear here.", color = Color.LightGray, fontSize = 13.sp)
+                                        }
+                                    }
+                                } else {
+                                    EnhancedBarChartView(goal!!.chartData, goal!!.quota)
+                                }
+                            }
+                            2 -> {
+                                if (team.isNullOrEmpty()) {
+                                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Icon(Icons.Filled.Message, contentDescription = null, tint = Color.LightGray, modifier = Modifier.size(48.dp))
+                                            Spacer(modifier = Modifier.height(12.dp))
+                                            Text("No team members yet.", color = Color.Gray, fontSize = 16.sp)
+                                            Text("Invite teammates to join this goal.", color = Color.LightGray, fontSize = 13.sp)
+                                        }
+                                    }
+                                } else {
+                                    LazyColumn(modifier = Modifier.weight(1f)) {
+                                        items(team) { user ->
+                                            EnhancedTeamMemberItem(user, onMessage, onProfileClick = { selectedProfileUser = user })
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // iOS-Style Bottom Bar
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .background(Color.White)
+                    .padding(horizontal = 16.dp)
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFFE4E4E4),
+                        shape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp)
+                    ),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Button(
+                    onClick = { showSheet = true },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(40.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF8CC55D),
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(6.dp)
+                ) {
+                    Text("Actions", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                }
+                
+                IconButton(
+                    onClick = { openGoalTeamChat() },
+                    modifier = Modifier
+                        .size(44.dp)
+                        .border(1.dp, Color(0xFFE4E4E4), CircleShape),
+                    enabled = !isCreatingTeamChat
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Chat,
+                        contentDescription = "Team Chat",
+                        tint = Color.Black,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
+
+        // Enhanced Support Button for Fund/Sales Goals
+        if (goal?.typeName == "Fund" || goal?.typeName == "Sales") {
+            Box(
+                modifier = Modifier
+                    .padding(bottom = 70.dp)
+                    .padding(end = 20.dp)
+                    .align(Alignment.BottomEnd)
+            ) {
+                Button(
+                    onClick = { showSupportSheet = true },
+                    modifier = Modifier
+                        .shadow(
+                            elevation = 4.dp,
+                            shape = RoundedCornerShape(8.dp),
+                            spotColor = Color(0x4D000000)
+                        ),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color(0xFF006400)
+                    ),
+                    border = BorderStroke(2.dp, Color(0xFF006400))
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Outlined.AttachMoney,
+                            contentDescription = null,
+                            tint = Color(0xFF006400),
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            label,
-                            color = textColor,
-                            fontSize = 16.sp,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            text = "Support",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 16.sp
                         )
                     }
                 }
             }
         }
-        // Content
-        if (loading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else if (error != null) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Error: $error")
-            }
-        } else {
-            when (selectedTab) {
-                0 -> {
-                    if (feed.isEmpty()) {
-                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(Icons.Filled.Message, contentDescription = null, tint = Color.LightGray, modifier = Modifier.size(48.dp))
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text("No feed activity yet.", color = Color.Gray, fontSize = 16.sp)
-                                Text("Updates and progress will appear here.", color = Color.LightGray, fontSize = 13.sp)
-                            }
-                        }
-                    } else {
-                        LazyColumn(modifier = Modifier.weight(1f)) {
-                            items(feed) { item ->
-                                FeedItemView(item, onProfileClick = { user -> selectedProfileUser = user })
-                            }
-                        }
-                    }
-                }
-                1 -> {
-                    if (error != null) {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(Icons.Filled.Message, contentDescription = null, tint = Color.Red, modifier = Modifier.size(48.dp))
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text("Oops! Couldn't load reporting data.", color = Color.Red, fontSize = 16.sp)
-                                Text(error ?: "Unknown error.", color = Color.LightGray, fontSize = 13.sp)
-                            }
-                        }
-                    } else if (goal?.chartData?.isEmpty() != false) {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(Icons.Filled.Message, contentDescription = null, tint = Color.LightGray, modifier = Modifier.size(48.dp))
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text("No reporting data available.", color = Color.Gray, fontSize = 16.sp)
-                                Text("Charts and stats will appear here.", color = Color.LightGray, fontSize = 13.sp)
-                            }
-                        }
-                    } else {
-                        LargeBarChartView(goal!!.chartData, goal!!.quota)
-                    }
-                }
-                2 -> {
-                    if (team.isNullOrEmpty()) {
-                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(Icons.Filled.Message, contentDescription = null, tint = Color.LightGray, modifier = Modifier.size(48.dp))
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text("No team members yet.", color = Color.Gray, fontSize = 16.sp)
-                                Text("Invite teammates to join this goal.", color = Color.LightGray, fontSize = 13.sp)
-                            }
-                        }
-                    } else {
-                        LazyColumn(modifier = Modifier.weight(1f)) {
-                            items(team) { user ->
-                                TeamMemberItem(user, onMessage, onProfileClick = { selectedProfileUser = user })
-                            }
-                        }
-                    }
-                }
-            }
-        }
-            // Bottom Bar (iOS parity: Action + Message)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .background(Color.White)
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(
-                    onClick = { showSheet = true },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8CC55D), contentColor = Color.White),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("Actions", fontSize = 18.sp)
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Button(
-                    onClick = { showChatSheet = true },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A90E2), contentColor = Color.White),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Icon(Icons.Filled.Message, contentDescription = "Message Team", modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Message", fontSize = 18.sp)
-                }
-            }
-        }
 
-        // Floating Support FAB (Fund/Sales only)
-        if (goal?.typeName == "Fund" || goal?.typeName == "Sales") {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.BottomEnd
-            ) {
-                FloatingActionButton(
-                    onClick = { showSupportSheet = true },
-                    containerColor = Color(0xFFFCB900),
-                    contentColor = Color.Black
-                ) {
-                    Text("Support", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                }
-            }
-        }
-
-        // Modal Bottom Sheet for actions
+        // Enhanced Role-Based Action Sheet
         if (showSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showSheet = false },
@@ -311,72 +441,271 @@ fun GoalsDetailScreen(
                         .fillMaxWidth()
                         .padding(vertical = 16.dp, horizontal = 24.dp)
                 ) {
-                    Text("Actions", fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 12.dp))
-                    Divider()
-                    SheetActionButton("Edit Goal") {
-                        showSheet = false
-                        onEditGoal()
+                    // Check if user is already on the team
+                    val isOnTeam = team.any { it.id == viewModel.getCurrentUserId() }
+                    val isCreator = goal?.creatorId == viewModel.getCurrentUserId()
+                    
+                    // Show "Join Team" only if user is not already on the team
+                    if (!isOnTeam && !isCreator && goal?.typeName == "Recruiting") {
+                        ActionButton(
+                            text = "Join Team",
+                            onClick = {
+                                viewModel.joinRecruitingGoal(goal?.id ?: 0) { success ->
+                                    showSheet = false
+                                    if (success) {
+                                        viewModel.loadGoal(goal?.id ?: 0)
+                                    }
+                                }
+                            }
+                        )
                     }
-                    SheetActionButton("Update Progress") {
-                        showSheet = false
-                        onUpdateGoal()
+                    
+                    // Show "Invite to Team" only if user is on the team or is creator
+                    if (isOnTeam || isCreator) {
+                        ActionButton(
+                            text = "Invite to Team",
+                            onClick = {
+                                showSheet = false
+                                // Show invite team sheet
+                            }
+                        )
                     }
-                    SheetActionButton("Invite Team") {
-                        showSheet = false
-                        /* TODO: Implement Invite Team action */
+                    
+                    // Update Progress for non-Recruiting goals
+                    if (goal?.typeName != "Recruiting") {
+                        ActionButton(
+                            text = "Update Progress", 
+                            onClick = {
+                                showSheet = false
+                                onUpdateGoal()
+                            }
+                        )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    TextButton(
-                        onClick = { showSheet = false },
+                    
+                    ActionButton(
+                        text = "Edit Goal",
+                        onClick = {
+                            showSheet = false
+                            onEditGoal()
+                        }
+                    )
+                    
+                    Button(
+                        onClick = {
+                            showSheet = false
+                            // Show delete confirmation
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Red
+                        ),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Cancel", color = Color.Gray)
+                        Text(
+                            "Delete Goal", 
+                            fontSize = 16.sp, 
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                    
+                    Button(
+                        onClick = { showSheet = false },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Gray
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            "Cancel", 
+                            fontSize = 16.sp
+                        )
                     }
                 }
             }
         }
 
-        // Placeholder for Team Chat modal
+        // Enhanced Team Chat Sheet
         if (showChatSheet) {
-            AlertDialog(
+            ModalBottomSheet(
                 onDismissRequest = { showChatSheet = false },
-                title = { Text("Team Chat") },
-                text = { Text("Team chat modal will be implemented here.") },
-                confirmButton = {
-                    TextButton(onClick = { showChatSheet = false }) {
+                sheetState = sheetState
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = "Team Chat",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    
+                    if (teamChatId != null) {
+                        Text("Chat ID: $teamChatId")
+                        // Here you would implement the actual chat UI
+                        Text("Chat implementation would go here")
+                    } else if (chatCreationError != null) {
+                        Text("Error: $chatCreationError", color = MaterialTheme.colorScheme.error)
+                    } else {
+                        Text("Creating team chat...")
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    }
+                    
+                    TextButton(
+                        onClick = { showChatSheet = false },
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) {
                         Text("Close")
                     }
                 }
-            )
+            }
         }
 
-        // Placeholder for Support/payment modal
+        // Enhanced Payment/Support Sheet
         if (showSupportSheet) {
-            AlertDialog(
+            ModalBottomSheet(
                 onDismissRequest = { showSupportSheet = false },
-                title = { Text("Support Goal") },
-                text = { Text("Payment processing modal will be implemented here.") },
-                confirmButton = {
-                    TextButton(onClick = { showSupportSheet = false }) {
-                        Text("Close")
+                sheetState = rememberModalBottomSheetState()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = "Support ${goal?.title ?: "Goal"}",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    
+                    Text("Your support helps this goal succeed")
+                    
+                    // Payment Amount
+                    OutlinedTextField(
+                        value = paymentAmount,
+                        onValueChange = { paymentAmount = it },
+                        label = { Text("Amount") },
+                        leadingIcon = {
+                            Text(
+                                "$",
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(start = 12.dp)
+                            )
+                        },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    
+                    // Message field
+                    OutlinedTextField(
+                        value = paymentMessage,
+                        onValueChange = { paymentMessage = it },
+                        label = { Text("Message (Optional)") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    
+                    // Submit payment button
+                    Button(
+                        onClick = {
+                            // Process payment
+                            viewModel.processPayment(
+                                goalId = goal?.id ?: 0,
+                                portalId = goal?.portalId ?: 0,
+                                amount = paymentAmount.toDoubleOrNull() ?: 0.0,
+                                message = paymentMessage
+                            )
+                            showSupportSheet = false
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF006400)
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "Submit Payment",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                    
+                    TextButton(
+                        onClick = { showSupportSheet = false },
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) {
+                        Text("Cancel")
                     }
                 }
-            )
+            }
         }
 
-        // Profile dialog placeholder (must be inside composable)
+        // Enhanced Profile Dialog
         if (selectedProfileUser != null) {
             AlertDialog(
                 onDismissRequest = { selectedProfileUser = null },
-                title = { Text("User Profile") },
+                title = { 
+                    Text(
+                        "${selectedProfileUser!!.fullName ?: selectedProfileUser!!.username ?: "User"} Profile",
+                        fontWeight = FontWeight.Bold
+                    ) 
+                },
                 text = {
-                    Column {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        // Profile image
+                        Box(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                            if (!selectedProfileUser!!.profile_picture_url.isNullOrBlank()) {
+                                AsyncImage(
+                                    model = selectedProfileUser!!.profile_picture_url,
+                                    contentDescription = "Profile picture",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(80.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFFE0E0E0))
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(80.dp)
+                                        .background(Color(0xFFE0E0E0), CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        (selectedProfileUser!!.fullName ?: selectedProfileUser!!.username ?: "").take(1), 
+                                        fontWeight = FontWeight.Bold, 
+                                        fontSize = 32.sp,
+                                        color = Color.Black
+                                    )
+                                }
+                            }
+                        }
+                        
+                        Divider(modifier = Modifier.padding(vertical = 8.dp))
+                        
                         Text("ID: ${selectedProfileUser!!.id}")
                         Text("Username: ${selectedProfileUser!!.username ?: "(none)"}")
                         Text("Full Name: ${selectedProfileUser!!.fullName ?: selectedProfileUser!!.fname ?: "(none)"}")
                     }
                 },
                 confirmButton = {
+                    Button(
+                        onClick = { 
+                            onMessage(selectedProfileUser!!)
+                            selectedProfileUser = null 
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF8CC55D)
+                        )
+                    ) {
+                        Text("Message")
+                    }
+                },
+                dismissButton = {
                     TextButton(onClick = { selectedProfileUser = null }) {
                         Text("Close")
                     }
@@ -387,24 +716,25 @@ fun GoalsDetailScreen(
 }    
 
 @Composable
-private fun SheetActionButton(text: String, onClick: () -> Unit) {
+private fun ActionButton(text: String, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF8CC55D),
-            contentColor = Color.White
+            containerColor = Color.White,
+            contentColor = Color(0xFF8CC55D)
         ),
+        border = BorderStroke(1.dp, Color(0xFF8CC55D)),
         shape = RoundedCornerShape(8.dp)
     ) {
-        Text(text)
+        Text(text, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
 @Composable
-fun FeedItemView(item: FeedItem, onProfileClick: (User) -> Unit) {
+fun EnhancedFeedItemView(item: FeedItem, onProfileClick: (User) -> Unit) {
     val user = User(
         id = item.userId ?: 0,
         username = item.userName,
@@ -413,175 +743,306 @@ fun FeedItemView(item: FeedItem, onProfileClick: (User) -> Unit) {
         profile_picture_url = item.profilePictureUrl
     )
     val context = LocalContext.current
-    Row(
+    
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(12.dp),
-        verticalAlignment = Alignment.Top
+            .padding(16.dp)
     ) {
-        // Profile image with Coil, fallback to initials or icon on error
-        Box(modifier = Modifier.size(40.dp)) {
-            if (!user.profile_picture_url.isNullOrBlank()) {
-                AsyncImage(
-                    model = user.profile_picture_url,
-                    contentDescription = "Profile picture",
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0xFFE0E0E0))
-                        .clickable { onProfileClick(user) }
+        Row(verticalAlignment = Alignment.Top) {
+            // Profile image with Coil, fallback to initials or icon on error
+            Box(modifier = Modifier.size(60.dp)) {
+                if (!user.profile_picture_url.isNullOrBlank()) {
+                    AsyncImage(
+                        model = user.profile_picture_url,
+                        contentDescription = "Profile picture",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFE0E0E0))
+                            .clickable { onProfileClick(user) }
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(60.dp)
+                            .background(Color(0xFFE0E0E0), CircleShape)
+                            .clickable { onProfileClick(user) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            item.userName.take(1), 
+                            fontWeight = FontWeight.Bold, 
+                            color = Color.Black,
+                            fontSize = 24.sp
+                        )
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.width(12.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    item.userName, 
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
                 )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(Color(0xFFE0E0E0), RoundedCornerShape(20.dp))
-                        .clickable { onProfileClick(user) },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(item.userName.take(1), fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, color = Color.Black)
+                
+                Text(
+                    item.date, 
+                    fontSize = 12.sp, 
+                    color = Color.Gray
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                Text(
+                    item.value, 
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                
+                if (item.note.isNotBlank()) {
+                    Text(
+                        item.note, 
+                        fontSize = 14.sp, 
+                        color = Color.DarkGray,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
             }
         }
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(
-            modifier = Modifier.weight(1f).clickable { onProfileClick(user) }
-        ) {
-            Text(item.userName, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-            Text(item.date, fontSize = 12.sp, color = Color.Gray)
-            Text(item.value, fontSize = 14.sp)
-            if (item.note.isNotBlank()) {
-                Text("Note: ${item.note}", fontSize = 12.sp, color = Color.Gray)
-            }
-            // Attachments section
-            if (!item.attachments.isNullOrEmpty()) {
-                Column(modifier = Modifier.padding(top = 8.dp)) {
-                    item.attachments.forEach { attachment ->
+        
+        // Attachments section - iOS style
+        if (!item.attachments.isNullOrEmpty()) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp)
+            ) {
+                items(item.attachments) { attachment ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
                         if (attachment.isImage == true && !attachment.url.isNullOrBlank()) {
                             // Image attachment
                             AsyncImage(
                                 model = attachment.url,
                                 contentDescription = attachment.fileName ?: "Attachment image",
+                                contentScale = ContentScale.Crop,
                                 modifier = Modifier
-                                    .size(80.dp)
+                                    .size(100.dp)
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(Color(0xFFE0E0E0))
-                                    .padding(bottom = 4.dp)
-                            )
-                        } else if (!attachment.url.isNullOrBlank()) {
-                            // Document or non-image attachment
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .padding(vertical = 2.dp)
                                     .clickable {
-                                        // Open document in browser or viewer
                                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(attachment.url))
                                         context.startActivity(intent)
                                     }
+                            )
+                        } else if (!attachment.url.isNullOrBlank()) {
+                            // Document or non-image attachment
+                            Box(
+                                modifier = Modifier
+                                    .size(100.dp, 80.dp)
+                                    .background(Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
+                                    .clickable {
+                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(attachment.url))
+                                        context.startActivity(intent)
+                                    },
+                                contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    painter = painterResource(id = android.R.drawable.ic_menu_save),
-                                    contentDescription = "Document",
-                                    tint = Color(0xFF4A90E2),
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(attachment.fileName ?: "Document", color = Color(0xFF4A90E2), fontSize = 13.sp)
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Icon(
+                                        imageVector = Icons.Default.Description,
+                                        contentDescription = "Document",
+                                        tint = Color(0xFF4A90E2),
+                                        modifier = Modifier.size(30.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = attachment.fileName?.take(10) ?: "Document", 
+                                        fontSize = 10.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
                             }
                         }
+                        
                         if (!attachment.note.isNullOrBlank()) {
-                            Text("Attachment note: ${attachment.note}", fontSize = 12.sp, color = Color.Gray)
+                            Text(
+                                attachment.note,
+                                fontSize = 12.sp,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.width(100.dp),
+                                color = Color.Gray
+                            )
                         }
                     }
                 }
             }
         }
+        
+        Divider(modifier = Modifier.padding(top = 12.dp))
     }
 }
 
 @Composable
-fun TeamMemberItem(user: User, onMessage: (User) -> Unit, onProfileClick: (User) -> Unit) {
+fun EnhancedTeamMemberItem(user: User, onMessage: (User) -> Unit, onProfileClick: (User) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(12.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Profile image with Coil, fallback to initials or icon on error
-        Box(modifier = Modifier.size(40.dp)) {
+        Box(modifier = Modifier.size(50.dp)) {
             if (!user.profile_picture_url.isNullOrBlank()) {
                 AsyncImage(
                     model = user.profile_picture_url,
                     contentDescription = "Profile picture",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(20.dp))
+                        .size(50.dp)
+                        .clip(CircleShape)
                         .background(Color(0xFFE0E0E0))
                         .clickable { onProfileClick(user) }
                 )
             } else {
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
-                        .background(Color(0xFFE0E0E0), RoundedCornerShape(20.dp))
+                        .size(50.dp)
+                        .background(Color(0xFFE0E0E0), CircleShape)
                         .clickable { onProfileClick(user) },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text((user.fullName ?: user.username ?: "").take(1), fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, color = Color.Black)
+                    Text(
+                        (user.fullName ?: user.username ?: "").take(1), 
+                        fontWeight = FontWeight.Bold, 
+                        color = Color.Black,
+                        fontSize = 18.sp
+                    )
                 }
             }
         }
-        Spacer(modifier = Modifier.width(12.dp))
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
         Column(
-            modifier = Modifier.clickable { onProfileClick(user) }
+            modifier = Modifier
+                .weight(1f)
+                .clickable { onProfileClick(user) }
         ) {
-            Text("ID: ${user.id}", fontSize = 12.sp, color = Color.Gray)
-            Text("Username: ${user.username ?: "(none)"}", fontSize = 12.sp, color = Color.Gray)
-            Text("Full Name: ${user.fullName ?: user.fname ?: "(none)"}", fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+            Text(
+                text = user.fullName ?: user.fname ?: user.username ?: "User",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
+            
+            if (user.username != null) {
+                Text(
+                    text = "@${user.username}",
+                    fontSize = 12.sp,
+                    color = Color.Gray
+                )
+            }
+            
+            // Optional role or join date
+            user.role?.let {
+                Text(
+                    text = it,
+                    fontSize = 12.sp,
+                    color = Color(0xFF8CC55D)
+                )
+            }
         }
-        Spacer(modifier = Modifier.weight(1f))
-        IconButton(onClick = { onMessage(user) }) {
-            Icon(Icons.Filled.Message, contentDescription = "Message")
+        
+        IconButton(
+            onClick = { onMessage(user) },
+            modifier = Modifier
+                .size(44.dp)
+                .border(1.dp, Color(0xFFE4E4E4), CircleShape)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Chat,
+                contentDescription = "Message",
+                tint = Color.Black,
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }
 
-
 @Composable
-fun LargeBarChartView(data: List<BarChartData>, quota: Double) {
-    Row(
+fun EnhancedBarChartView(data: List<BarChartData>, quota: Double) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(260.dp)
-            .padding(16.dp),
-        verticalAlignment = Alignment.Bottom
+            .padding(16.dp)
     ) {
-        data.forEach { item ->
-            val quotaValue = if (quota > 0) quota else 1.0
-            val percent = (item.value / quotaValue).coerceIn(0.0, 1.0)
-            val barHeight = percent * 200f
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            ) {
-                // Value label above bar
-                Text(item.valueLabel, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-                Box(
-                    modifier = Modifier
-                        .width(36.dp)
-                        .height(barHeight.dp)
-                        .background(
-                            brush = androidx.compose.ui.graphics.Brush.verticalGradient(
-                                colors = listOf(Color(0xFF8CC55D), Color(0xFFB6E388))
-                            ),
-                            shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomEnd = 4.dp, bottomStart = 4.dp)
-                        )
-                )
-                // Bottom label
-                Text(item.bottomLabel, fontSize = 12.sp, color = Color.DarkGray)
+        Text(
+            text = "Progress", 
+            fontWeight = FontWeight.Medium, 
+            fontSize = 16.sp,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(260.dp)
+                .padding(vertical = 16.dp),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            data.forEach { item ->
+                val quotaValue = if (quota > 0) quota else 1.0
+                val percent = (item.value / quotaValue).coerceIn(0.0, 1.0)
+                val barHeight = percent * 200f
+                
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                ) {
+                    // Value label above bar
+                    Text(
+                        item.valueLabel, 
+                        fontSize = 12.sp, 
+                        fontWeight = FontWeight.Bold, 
+                        color = Color.Black
+                    )
+                    
+                    Spacer(modifier = Modifier.height(4.dp))
+                    
+                    Box(
+                        modifier = Modifier
+                            .width(36.dp)
+                            .height(barHeight.dp)
+                            .background(
+                                color = Color(0xFF8CC55D),
+                                shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+                            )
+                    )
+                    
+                    // Bottom label
+                    Text(
+                        item.bottomLabel, 
+                        fontSize = 12.sp, 
+                        color = Color.DarkGray,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
             }
         }
     }
 }
 
+// Extension properties to make code cleaner
+val User.role: String?
+    get() = this::class.members.firstOrNull { it.name == "role" }?.call(this) as? String

@@ -19,7 +19,7 @@ class PortalDetailViewModel @Inject constructor(
 
     fun loadPortalDetail(portalId: Int, userId: Int) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            _uiState.update { it.copy(isLoading = true, error = null) }
 
             try {
                 // Load portal detail
@@ -36,10 +36,10 @@ class PortalDetailViewModel @Inject constructor(
                         },
                         onFailure = { error ->
                             android.util.Log.e("PortalDetailViewModel", "Error loading portal detail: ${error.message}", error)
-                            _uiState.update { 
+                            _uiState.update {
                                 it.copy(
                                     isLoading = false,
-                                    errorMessage = error.message
+                                    error = error.message
                                 )
                             }
                         }
@@ -76,10 +76,10 @@ class PortalDetailViewModel @Inject constructor(
 
             } catch (e: Exception) {
                 android.util.Log.e("PortalDetailViewModel", "Exception in loadPortalDetail: ${e.message}", e)
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = e.message
+                        error = e.message
                     )
                 }
             }
@@ -132,6 +132,6 @@ data class PortalDetailUiState(
     val portalGoals: List<Goal> = emptyList(),
     val reportingIncrements: List<ReportingIncrement> = emptyList(),
     val selectedSection: Int = 0, // 0 = Goal Teams, 1 = Story
-    val errorMessage: String? = null,
+    val error: String? = null,
     val flagResult: String? = null
 )

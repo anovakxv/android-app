@@ -124,6 +124,11 @@ dependencies {
 
     // Browser for Custom Tabs (required by Stripe for 3D Secure and redirects)
     implementation 'androidx.browser:browser:1.7.0'
+    
+    // Socket.IO client for real-time messaging
+    implementation ('io.socket:socket.io-client:2.1.0') {
+        exclude group: 'org.json', module: 'json'
+    }
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {

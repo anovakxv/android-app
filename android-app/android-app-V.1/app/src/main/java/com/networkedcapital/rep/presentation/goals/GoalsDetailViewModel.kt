@@ -5,13 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.networkedcapital.rep.domain.model.Goal
 import com.networkedcapital.rep.domain.model.BarChartData
 import com.networkedcapital.rep.domain.model.User
+import com.networkedcapital.rep.domain.model.FeedItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.Serializable
 import com.networkedcapital.rep.data.remote.GoalsApiService
-import com.networkedcapital.rep.domain.model.FeedItem
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -25,6 +25,7 @@ class GoalsDetailViewModel : ViewModel() {
         if (imageNameOrUrl.isNullOrBlank()) return null
         return if (imageNameOrUrl.startsWith("http")) imageNameOrUrl else s3BaseUrl + imageNameOrUrl
     }
+
     // Replace with your backend base URL
     private val BASE_URL = "https://rep-june2025.onrender.com" // Must match Swift/iOS
 
@@ -54,6 +55,7 @@ class GoalsDetailViewModel : ViewModel() {
         .client(okHttpClient)
         .build()
         .create(GoalsApiService::class.java)
+
     private val _goal = MutableStateFlow<Goal?>(null)
     val goal: StateFlow<Goal?> = _goal
 
@@ -80,7 +82,7 @@ class GoalsDetailViewModel : ViewModel() {
 
                 // Patch FeedItem with profile image URLs if possible
                 val patchedFeed = response.feed.map { feedItem ->
-                    val user = response.team.find { it.id == feedItem.userId } // assumes userId is present in FeedItem
+                    val user = response.team.find { it.id == feedItem.userId }
                     val imageUrl = patchProfilePictureUrl(user?.imageName ?: user?.profile_picture_url)
                     feedItem.copy(profilePictureUrl = imageUrl)
                 }
@@ -100,6 +102,47 @@ class GoalsDetailViewModel : ViewModel() {
             }
         }
     }
+
+    // Process payment
+    fun processPayment(goalId: Int, portalId: Int, amount: Double, message: String) {
+        viewModelScope.launch {
+            // TODO: Implement payment processing API call
+            // Example:
+            // val result = api.processPayment(goalId, portalId, amount, message)
+            // Handle result and update state as needed
+        }
+    }
+
+    // Join team
+    fun joinRecruitingGoal(goalId: Int, onComplete: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            // TODO: Implement team joining API call
+            // Example:
+            // val success = api.joinTeam(goalId)
+            // onComplete(success)
+            onComplete(true) // or false on failure
+        }
+    }
+
+    // Create team chat
+    fun createTeamChat(goalId: Int, title: String, onComplete: (Int?, String?) -> Unit) {
+        viewModelScope.launch {
+            try {
+                // TODO: Implement chat creation API call
+                // val chatId = api.createTeamChat(goalId, title)
+                val chatId = 123 // Replace with actual API response
+                onComplete(chatId, null)
+            } catch (e: Exception) {
+                onComplete(null, e.message)
+            }
+        }
+    }
+
+    // Helper to get current user ID (stub, replace with real logic)
+    fun getCurrentUserId(): Int {
+        // TODO: Implement user ID retrieval
+        return 0
+    }
 }
 
 @Serializable
@@ -108,5 +151,3 @@ data class GoalDetailResponse(
     val feed: List<FeedItem>,
     val team: List<User>
 )
-
-// Remove duplicate FeedItem declaration (already defined elsewhere)

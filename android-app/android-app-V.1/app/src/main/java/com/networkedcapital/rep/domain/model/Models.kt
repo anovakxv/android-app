@@ -165,8 +165,9 @@ data class Goal(
     val quotaString: String = "",
     val valueString: String = "",
     val chartData: List<BarChartData> = emptyList(),
-    val creatorId: Int = 0,
-    val portalId: Int? = null
+    val portalName: String? = null,
+    val portalId: Int? = null,
+    val creatorId: Int = 0
 ) : Parcelable
 
 @Parcelize
@@ -230,8 +231,16 @@ data class Team(
 // Chat models for main screen
 @Parcelize
 data class ActiveChat(
-    val id: @RawValue Any, // Accept Int or String for compatibility with MainScreen
-    val type: String, // "direct" or "group"
+    val id: Int,
+    val usersId: Int? = null,
+    val chatsId: Int? = null,
+    val name: String,
+    val type: String, // "DM" or "GROUP"
+    val unreadCount: Int = 0,
+    val lastMessage: String? = null,
+    val timestamp: String? = null,
+    val profilePictureUrl: String? = null,
+    // Legacy compatibility fields
     val user: User? = null,
     val chat: ChatModel? = null,
     val last_message: MessageModel? = null,
@@ -247,8 +256,11 @@ data class ChatModel(
 @Parcelize
 data class MessageModel(
     val id: Int,
-    val text: String? = null,
-    val created_at: String? = null,
+    val senderId: Int,
+    val senderName: String? = null,
+    val recipientId: Int? = null,
+    val text: String,
+    val timestamp: String,
     val read: String? = null
 ) : Parcelable
 
@@ -502,3 +514,31 @@ data class RespondToInviteRequest(
     val action: String, // "accept" or "decline"
     val users: List<Int>
 )
+
+// MARK: - Messaging Models (Group chat specific)
+
+@Parcelize
+data class GroupMessageModel(
+    val id: Int,
+    val senderId: Int,
+    val senderName: String,
+    val senderPhotoUrl: String? = null,
+    val text: String,
+    val timestamp: String,
+    val chatId: Int? = null
+) : Parcelable
+
+@Parcelize
+data class GroupMemberModel(
+    val id: Int,
+    val fullName: String,
+    val profilePictureUrl: String? = null
+) : Parcelable
+
+@Parcelize
+data class ChatInfo(
+    val id: Int,
+    val name: String,
+    val description: String? = null,
+    val createdBy: Int
+) : Parcelable

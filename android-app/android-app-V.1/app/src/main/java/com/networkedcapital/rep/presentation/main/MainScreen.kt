@@ -3,6 +3,7 @@ package com.networkedcapital.rep.presentation.main
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -15,21 +16,26 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.networkedcapital.rep.R
@@ -37,6 +43,7 @@ import com.networkedcapital.rep.domain.model.*
 import com.networkedcapital.rep.domain.model.User
 import com.networkedcapital.rep.presentation.main.MainViewModel.MainPage
 import kotlinx.coroutines.delay
+
 @Composable
 fun ShimmerPortalItem(modifier: Modifier = Modifier) {
     Card(
@@ -112,6 +119,7 @@ fun ShimmerPersonItem(modifier: Modifier = Modifier) {
         }
     }
 }
+
 @Composable
 fun ErrorStateView(message: String, onRetry: (() -> Unit)? = null, modifier: Modifier = Modifier) {
     Box(
@@ -140,6 +148,7 @@ fun ErrorStateView(message: String, onRetry: (() -> Unit)? = null, modifier: Mod
         }
     }
 }
+
 @Composable
 fun EmptyStateView(message: String, modifier: Modifier = Modifier) {
     Box(
@@ -162,6 +171,7 @@ fun EmptyStateView(message: String, modifier: Modifier = Modifier) {
         }
     }
 }
+
 // Helper to robustly patch/validate image URLs (S3/full URLs)
 fun patchPortalImageUrl(url: String?): String? {
     if (url.isNullOrBlank()) return null
@@ -172,6 +182,233 @@ fun patchPortalImageUrl(url: String?): String? {
     return if (url.startsWith("/")) s3Base + url.removePrefix("/") else s3Base + url
 }
 
+// NEW: iOS-Style Black Segmented Control
+@Composable
+fun MainSegmentedPicker(
+    segments: List<String>,
+    selectedIndex: Int,
+    onSelect: (Int) -> Unit,
+    attentionDotIndices: Set<Int> = emptySet(),
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .width(240.dp)
+            .height(32.dp)
+            .background(Color(0xFAF9F9F9))
+            .border(1.dp, Color.Black, RoundedCornerShape(4.dp))
+            .padding(2.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        segments.forEachIndexed { index, segment ->
+            val isSelected = selectedIndex == index
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(if (isSelected) Color.Black else Color.Transparent)
+                    .clickable { onSelect(index) },
+                contentAlignment = Alignment.Center
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = segment,
+                        color = if (isSelected) Color.White else Color.Black,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        fontSize = 15.sp,
+                        textAlign = TextAlign.Center
+                    )
+                    
+                    if (index in attentionDotIndices) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .offset(x = 24.dp, y = (-8).dp)
+                                .background(Color(0xFF8CC55D), CircleShape)
+                                .zIndex(2f)
+                        )
+                    }
+                }
+            }
+            if (index < segments.lastIndex) {
+                Box(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .fillMaxHeight()
+                        .background(Color(0xFFE4E4E4))
+                )
+            }
+        }
+    }
+}
+
+// NEW: Enhanced Action Sheet with More Options
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainActionSheet(
+    showOnlySafePortals: Boolean,
+    onToggleSafe: () -> Unit,
+    onAddPurpose: () -> Unit,
+    onTeamChat: () -> Unit,
+    onSearch: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(),
+        containerColor = Color.White
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp, horizontal = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            // Show option (Safe/All)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    "Show:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+                Spacer(modifier = Modifier.width(24.dp))
+                
+                // All button
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { if (showOnlySafePortals) onToggleSafe() }
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(20.dp)
+                            .border(2.dp, Color.Gray, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (!showOnlySafePortals) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                tint = Color.Blue,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        "All",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = if (!showOnlySafePortals) FontWeight.Bold else FontWeight.Normal,
+                        color = Color.Gray
+                    )
+                }
+                
+                Spacer(modifier = Modifier.width(24.dp))
+                
+                // Safe button
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { if (!showOnlySafePortals) onToggleSafe() }
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(20.dp)
+                            .border(2.dp, Color.Gray, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (showOnlySafePortals) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                tint = Color.Blue,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        "Safe",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = if (showOnlySafePortals) FontWeight.Bold else FontWeight.Normal,
+                        color = Color.Gray
+                    )
+                }
+            }
+            
+            // Add Purpose button
+            Button(
+                onClick = { 
+                    onAddPurpose()
+                    onDismiss()
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color(0xFF8CC55D)
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    "Add Purpose",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            // Team Chat button
+            Button(
+                onClick = { 
+                    onTeamChat()
+                    onDismiss() 
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color(0xFF8CC55D)
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    "Team Chat",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            // Search button
+            Button(
+                onClick = { 
+                    onSearch()
+                    onDismiss()
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color(0xFF8CC55D)
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    "Search",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            // Cancel button
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color.Gray
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Cancel", fontSize = 16.sp)
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -183,9 +420,22 @@ fun MainScreen(
     onLogout: () -> Unit,
     viewModel: MainViewModel = hiltViewModel()
 ) {
-
     val uiState by viewModel.uiState.collectAsState()
     val keyboardController = LocalSoftwareKeyboardController.current
+    
+    // NEW: Track action sheet visibility
+    var showActionSheet by remember { mutableStateOf(false) }
+    
+    // NEW: Attention state for sections
+    val hasUnreadMessages by viewModel.hasUnreadDirectMessages.collectAsState()
+    val hasUnreadGroupMessages by viewModel.hasUnreadGroupMessages.collectAsState()
+    val openNeedsAttention by viewModel.openNeedsAttention.collectAsState()
+    val attentionDotIndices = remember(hasUnreadMessages, hasUnreadGroupMessages, openNeedsAttention) {
+        buildSet {
+            if (openNeedsAttention) add(0)
+            if (hasUnreadMessages || hasUnreadGroupMessages) add(1) 
+        }
+    }
 
     // Debounce search input
     var lastSearchQuery by remember { mutableStateOf("") }
@@ -202,6 +452,12 @@ fun MainScreen(
     LaunchedEffect(uiState.currentUser?.id) {
         val userId = uiState.currentUser?.id ?: 0
         viewModel.loadData(userId)
+        
+        // NEW: Setup socket notifications for real-time updates
+        viewModel.setupSocketNotifications(userId)
+        
+        // NEW: Check for unread messages
+        viewModel.checkForUnreadMessages()
     }
 
     Column(
@@ -209,7 +465,7 @@ fun MainScreen(
             .fillMaxSize()
             .background(Color(0xFFF9F9F9))
     ) {
-        // Top Bar: Profile, Segmented Picker, Search
+        // Top Bar with profile, segmented control, and actions
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -240,23 +496,30 @@ fun MainScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
-
-            // Search icon (center)
-            IconButton(onClick = viewModel::toggleSearch) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search"
-                )
+            Spacer(modifier = Modifier.weight(1f))
+            
+            // NEW: iOS-Style Black Segmented Control in center
+            val segments = when (uiState.currentPage) {
+                MainPage.PORTALS -> listOf("Open", "Network", "All")
+                MainPage.PEOPLE -> listOf("Chats", "Network", "All")
             }
+            MainSegmentedPicker(
+                segments = segments,
+                selectedIndex = uiState.selectedSection,
+                onSelect = { section -> 
+                    val userId = uiState.currentUser?.id ?: 0
+                    viewModel.onSectionChanged(section, userId)
+                },
+                attentionDotIndices = attentionDotIndices
+            )
+            
+            Spacer(modifier = Modifier.weight(1f))
 
-            Spacer(modifier = Modifier.width(12.dp))
-
-            // Add button (right)
-            IconButton(onClick = { /* TODO: Add new portal/person */ }) {
+            // NEW: Action button (right)
+            IconButton(onClick = { showActionSheet = true }) {
                 Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add"
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "More Options"
                 )
             }
         }
@@ -340,28 +603,49 @@ fun MainScreen(
                         }
                     }
                     MainPage.PEOPLE -> {
-                        val people = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) {
-                            uiState.searchUsers
-                        } else {
-                            uiState.users
-                        }
-                        if (people.isEmpty()) {
-                            EmptyStateView(
-                                message = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) "No people match your search." else "No people to display."
-                            )
-                        } else {
-                            PeopleList(
-                                people = people,
-                                onPersonClick = onNavigateToPersonDetail,
+                        if (uiState.selectedSection == 0 && uiState.activeChats.isNotEmpty()) {
+                            // Show active chats for first tab
+                            ActiveChatsList(
+                                chats = uiState.activeChats,
+                                onChatClick = { chatId ->
+                                    val intId = when (chatId) {
+                                        is Int -> chatId
+                                        is String -> chatId.toIntOrNull()
+                                        else -> null
+                                    }
+                                    if (intId != null) {
+                                        onNavigateToChat(intId)
+                                    } else {
+                                        Log.e("MainScreen", "Invalid chat ID: $chatId")
+                                    }
+                                },
                                 modifier = Modifier.fillMaxSize()
                             )
+                        } else {
+                            // Show people list for other tabs
+                            val people = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) {
+                                uiState.searchUsers
+                            } else {
+                                uiState.users
+                            }
+                            if (people.isEmpty()) {
+                                EmptyStateView(
+                                    message = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) "No people match your search." else "No people to display."
+                                )
+                            } else {
+                                PeopleList(
+                                    people = people,
+                                    onPersonClick = onNavigateToPersonDetail,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
                         }
                     }
                 }
             }
         }
 
-        // Bottom Bar: Chat and Safe Toggle only (no page switch)
+        // Bottom Bar: Chat and Safe Toggle with FAB
         Box(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
@@ -391,18 +675,19 @@ fun MainScreen(
                         Icon(
                             imageVector = Icons.Default.ChatBubble,
                             contentDescription = "Messages",
-                            tint = if (uiState.activeChats.isNotEmpty()) {
-                                MaterialTheme.colorScheme.primary
+                            tint = if (hasUnreadMessages || hasUnreadGroupMessages) {
+                                Color(0xFF8CC55D)  // Green to match iOS
                             } else {
-                                MaterialTheme.colorScheme.onSurface
+                                Color.Gray
                             }
                         )
                     }
-                    if (uiState.activeChats.isNotEmpty()) {
+                    if (hasUnreadMessages || hasUnreadGroupMessages) {
                         Badge(
-                            modifier = Modifier.offset(x = 20.dp, y = (-4).dp)
+                            modifier = Modifier.offset(x = 20.dp, y = (-4).dp),
+                            containerColor = Color(0xFF8CC55D)
                         ) {
-                            Text(text = "${uiState.activeChats.size}", fontSize = 10.sp)
+                            Text(text = "", fontSize = 8.sp)
                         }
                     }
                 }
@@ -418,7 +703,8 @@ fun MainScreen(
                 ) {
                     Icon(
                         imageVector = if (uiState.showOnlySafePortals) Icons.Default.Shield else Icons.Default.Public,
-                        contentDescription = if (uiState.showOnlySafePortals) "Show All Portals" else "Show Safe Portals Only"
+                        contentDescription = if (uiState.showOnlySafePortals) "Show All Portals" else "Show Safe Portals Only",
+                        tint = if (uiState.showOnlySafePortals) Color(0xFF8CC55D) else Color.Gray
                     )
                 }
             }
@@ -434,7 +720,7 @@ fun MainScreen(
                         val userId = uiState.currentUser?.id ?: 0
                         viewModel.togglePage(userId)
                     },
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = Color(0xFF8CC55D)
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.replogo),
@@ -444,6 +730,304 @@ fun MainScreen(
                 }
             }
         }
+    }
+    
+    // NEW: Display action sheet when shown
+    if (showActionSheet) {
+        MainActionSheet(
+            showOnlySafePortals = uiState.showOnlySafePortals,
+            onToggleSafe = { 
+                val userId = uiState.currentUser?.id ?: 0
+                viewModel.toggleSafePortals(userId) 
+            },
+            onAddPurpose = { /* TODO: Navigate to add purpose */ },
+            onTeamChat = { /* TODO: Navigate to team chat */ },
+            onSearch = { viewModel.toggleSearch() },
+            onDismiss = { showActionSheet = false }
+        )
+    }
+}
+
+// NEW: Enhanced Portal Item with iOS styling
+@Composable
+fun EnhancedPortalItem(
+    portal: Portal,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Portal Image with proper error handling
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFFE0E0E0))
+            ) {
+                val patchedUrl = patchPortalImageUrl(portal.imageUrl)
+                if (!patchedUrl.isNullOrEmpty()) {
+                    AsyncImage(
+                        model = patchedUrl,
+                        contentDescription = portal.name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = portal.name.take(1),
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Portal Info
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = portal.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                
+                if (!portal.subtitle.isNullOrBlank()) {
+                    Text(
+                        text = portal.subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                
+                if (portal.description.isNotBlank()) {
+                    Text(
+                        text = portal.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.DarkGray,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                
+                // Show leads with profile pictures/initials
+                if (!portal.leads.isNullOrEmpty()) {
+                    Row(
+                        modifier = Modifier.padding(top = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        portal.leads.take(3).forEach { user ->
+                            UserProfileImageThumbnail(user = user, size = 24.dp)
+                            Spacer(modifier = Modifier.width(4.dp))
+                        }
+                        
+                        if ((portal.leads.size > 3)) {
+                            Text(
+                                text = "+${portal.leads.size - 3}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Safety indicator
+            if (portal.isSafe) {
+                Box(
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Shield,
+                        contentDescription = "Safe",
+                        tint = Color(0xFF8CC55D),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+// NEW: User Profile Thumbnail helper
+@Composable
+fun UserProfileImageThumbnail(user: User, size: Dp = 40.dp) {
+    Box(
+        modifier = Modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(Color(0xFFE0E0E0)),
+        contentAlignment = Alignment.Center
+    ) {
+        val profileImageUrl = user.profileImageUrlCompat
+        if (!profileImageUrl.isNullOrEmpty()) {
+            AsyncImage(
+                model = profileImageUrl,
+                contentDescription = "${user.firstName} ${user.lastName}",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            val initials = buildString {
+                user.firstName?.firstOrNull()?.let { append(it) }
+                user.lastName?.firstOrNull()?.let { append(it) }
+                if (isEmpty() && !user.username.isNullOrEmpty()) {
+                    append(user.username.first())
+                }
+            }
+            Text(
+                text = initials.take(2).uppercase(),
+                fontSize = (size.value * 0.4).sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.DarkGray
+            )
+        }
+    }
+}
+
+// NEW: Enhanced ActiveChat Item with iOS styling
+@Composable
+fun EnhancedActiveChatItem(
+    chat: ActiveChat,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (chat.type == "direct" && chat.user != null) {
+            UserProfileImageThumbnail(user = chat.user, size = 64.dp)
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = chat.user.displayName,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 17.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    
+                    if (chat.last_message_time != null) {
+                        Text(
+                            text = formatTimeAgo(chat.last_message_time),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+                }
+                
+                val isUnread = chat.last_message?.read == "0" && chat.last_message.sender_id != chat.user.id
+                Text(
+                    text = chat.last_message?.text ?: "",
+                    fontWeight = if (isUnread) FontWeight.Bold else FontWeight.Normal,
+                    color = if (isUnread) Color(0xFF8CC55D) else Color.Gray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        } else if (chat.type == "group" && chat.chat != null) {
+            // Group chat avatar (circle with first 2 letters)
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFE0E0E0)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = (chat.chat.name?.take(2) ?: "GC").uppercase(),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = chat.chat.name ?: "Group Chat",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 17.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    
+                    if (chat.last_message_time != null) {
+                        Text(
+                            text = formatTimeAgo(chat.last_message_time),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+                }
+                
+                val isUnread = chat.last_message?.read == "0" // For group chats we don't compare IDs
+                Text(
+                    text = chat.last_message?.text ?: "",
+                    fontWeight = if (isUnread) FontWeight.Bold else FontWeight.Normal,
+                    color = if (isUnread) Color(0xFF8CC55D) else Color.Gray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+// Helper function for time formatting
+fun formatTimeAgo(isoDateString: String): String {
+    try {
+        val formatter = java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME
+        val dateTime = java.time.OffsetDateTime.parse(isoDateString, formatter)
+        val now = java.time.OffsetDateTime.now()
+        val duration = java.time.Duration.between(dateTime, now)
+        
+        return when {
+            duration.toMinutes() < 1 -> "just now"
+            duration.toHours() < 1 -> "${duration.toMinutes()}m ago"
+            duration.toDays() < 1 -> "${duration.toHours()}h ago"
+            duration.toDays() < 7 -> "${duration.toDays()}d ago"
+            else -> {
+                val formatter = java.time.format.DateTimeFormatter.ofPattern("MMM d")
+                dateTime.format(formatter)
+            }
+        }
+    } catch (e: Exception) {
+        return ""
     }
 }
 
@@ -587,6 +1171,7 @@ private fun String?.firstOrNull(): String {
     }
 }
 
+// Replace SegmentedControl with our iOS-style one
 @Composable
 fun SegmentedControl(
     sections: List<String>,
@@ -594,40 +1179,12 @@ fun SegmentedControl(
     onSectionSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    MainSegmentedPicker(
+        segments = sections,
+        selectedIndex = selectedIndex,
+        onSelect = onSectionSelected,
         modifier = modifier
-            .background(
-                MaterialTheme.colorScheme.surfaceVariant,
-                RoundedCornerShape(8.dp)
-            )
-            .padding(4.dp)
-    ) {
-        sections.forEachIndexed { idx, section ->
-            val isSelected = idx == selectedIndex
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .background(
-                        if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                        RoundedCornerShape(6.dp)
-                    )
-                    .clickable { onSectionSelected(idx) }
-                    .padding(vertical = 8.dp, horizontal = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = section,
-                    color = if (isSelected) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    },
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    fontSize = 14.sp
-                )
-            }
-        }
-    }
+    )
 }
 
 @Composable
@@ -642,10 +1199,37 @@ fun PortalsList(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(portals) { portal ->
-            PortalItem(
+            // Use our enhanced portal item
+            EnhancedPortalItem(
                 portal = portal,
-                // FIX: Only pass Int to onPortalClick, portal.id is Int in your model
                 onClick = { onPortalClick(portal.id) }
+            )
+        }
+    }
+}
+
+// NEW: Active chats list
+@Composable
+fun ActiveChatsList(
+    chats: List<ActiveChat>,
+    onChatClick: (Any) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(0.dp) // iOS style: no gaps between items
+    ) {
+        items(chats) { chat ->
+            EnhancedActiveChatItem(
+                chat = chat,
+                onClick = { chat.id?.let { onChatClick(it) } }
+            )
+            // Add divider between items
+            Divider(
+                modifier = Modifier.padding(start = 80.dp),
+                color = Color(0xFFE0E0E0),
+                thickness = 0.5.dp
             )
         }
     }
@@ -671,127 +1255,7 @@ fun PeopleList(
     }
 }
 
-// Update PortalItem to show leads and subtitle, similar to Swift
-@Composable
-fun PortalItem(
-    portal: Portal,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Portal Image using Coil
-            val patchedUrl = patchPortalImageUrl(portal.imageUrl)
-            AsyncImage(
-                model = patchedUrl,
-                contentDescription = "Main image for portal: ${portal.name}",
-                modifier = Modifier
-                    .size(60.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Portal Info
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = portal.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                if (portal.subtitle?.isNotBlank() == true) {
-                    Text(
-                        text = portal.subtitle,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                if (portal.description.isNotBlank()) {
-                    Text(
-                        text = portal.description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                val leads: List<User> = portal.leads ?: emptyList()
-                if (leads.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier.padding(top = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        leads.take(3).forEach { user: User ->
-                            val userProfileImageUrl = user.profileImageUrlCompat
-                            // FIX: Only safe or non-null asserted calls allowed on nullable receiver
-                            val firstInitial = user.firstName?.firstOrNull()?.toString()
-                                ?: user.fname?.firstOrNull()?.toString()
-                                ?: ""
-                            val lastInitial = user.lastName?.firstOrNull()?.toString()
-                                ?: user.lname?.firstOrNull()?.toString()
-                                ?: ""
-                            val contentDescription = "Profile image for $firstInitial $lastInitial"
-                            if (!userProfileImageUrl.isNullOrEmpty()) {
-                                AsyncImage(
-                                    model = userProfileImageUrl,
-                                    contentDescription = contentDescription,
-                                    modifier = Modifier
-                                        .size(20.dp)
-                                        .clip(CircleShape)
-                                        .padding(end = 2.dp),
-                                    contentScale = ContentScale.Crop
-                                )
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .size(20.dp)
-                                        .background(Color.Gray, CircleShape)
-                                        .padding(end = 2.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "$firstInitial$lastInitial",
-                                        color = Color.White,
-                                        fontSize = 10.sp,
-                                        modifier = Modifier
-                                            .padding(2.dp)
-                                    )
-                                }
-                            }
-                        }
-                        if (leads.size > 3) {
-                            Text("+${leads.size - 3}", fontSize = 12.sp)
-                        }
-                    }
-                }
-            }
-
-            // Safe indicator
-            if (portal.isSafe) {
-                Icon(
-                    imageVector = Icons.Default.Shield,
-                    contentDescription = "Safe Portal",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-    }
-}
-
+// Enhance PersonItem to match iOS style
 @Composable
 fun PersonItem(
     person: User,
@@ -802,38 +1266,15 @@ fun PersonItem(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val profileImageUrl = person.profileImageUrlCompat
-            if (!profileImageUrl.isNullOrEmpty()) {
-                AsyncImage(
-                    model = profileImageUrl,
-                    contentDescription = "Profile image for ${person.firstName} ${person.lastName}",
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .background(Color.Gray, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "${person.firstName.firstOrNull() ?: ""}${person.lastName.firstOrNull() ?: ""}",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        modifier = Modifier
-                            .padding(2.dp)
-                    )
-                }
-            }
+            // Use our thumbnail helper
+            UserProfileImageThumbnail(user = person, size = 60.dp)
 
             Spacer(modifier = Modifier.width(16.dp))
 
@@ -851,7 +1292,7 @@ fun PersonItem(
                     Text(
                         text = person.about,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = Color.DarkGray,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -861,7 +1302,7 @@ fun PersonItem(
                     Text(
                         text = person.city,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = Color(0xFF8CC55D), // iOS green color
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -876,23 +1317,7 @@ fun UserProfileImage(
     user: User,
     modifier: Modifier = Modifier
 ) {
-    val profileImageUrl = user.profileImageUrlCompat
-    if (!profileImageUrl.isNullOrEmpty()) {
-        AsyncImage(
-            model = profileImageUrl,
-            contentDescription = "${user.firstName} ${user.lastName}",
-            modifier = modifier
-                .size(60.dp)
-                .clip(CircleShape),
-            contentScale = ContentScale.Crop
-        )
-    } else {
-        Box(
-            modifier = modifier
-                .size(60.dp)
-                .background(Color.Gray, CircleShape)
-        )
-    }
+    UserProfileImageThumbnail(user = user, size = 60.dp)
 }
 
 // Add this extension property at the end of the file (only once, not duplicated)
@@ -906,4 +1331,16 @@ val User.profileImageUrlCompat: String?
                 ?.call(this) as? String
     } catch (e: Exception) {
         null
+    }
+
+// Add extension property for display name
+val User.displayName: String
+    get() {
+        val firstName = this.firstName ?: this.fname ?: ""
+        val lastName = this.lastName ?: this.lname ?: ""
+        return if (firstName.isNotEmpty() || lastName.isNotEmpty()) {
+            "$firstName $lastName".trim()
+        } else {
+            this.username ?: "User"
+        }
     }

@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(./gradlew compileDebugKotlin)",
-      "Bash(./gradlew clean assembleDebug --stacktrace)"
+      "Bash(./gradlew clean assembleDebug --stacktrace)",
+      "Bash(cat \"C:\\Users\\Stephanie\\Desktop\\my-android-app\\android-app\\android-app-V.1\\app\\build.gradle.kts\")",
+      "Bash(cat \"C:\\Users\\Stephanie\\Desktop\\my-android-app\\android-app\\android-app-V.1\\app\\build.gradle\")"
     ],
     "deny": [],
     "ask": []
