@@ -8,6 +8,7 @@ import com.networkedcapital.rep.utils.SocketManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -20,8 +21,14 @@ data class IndividualChatUiState(
     val isLoadingOlder: Boolean = false,
     val canLoadOlder: Boolean = true,
     val isInitialized: Boolean = false,
-    val error: String? = null
-)
+    val error: String? = null,
+    // New properties
+    val otherUserName: String = "",
+    val otherUserPhotoUrl: String? = null
+) {
+    // Helper property for empty state
+    val isEmpty: Boolean get() = messages.isEmpty() && !isLoading && isInitialized
+}
 
 /**
  * IndividualChatViewModel - Direct message chat
@@ -35,6 +42,14 @@ class IndividualChatViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(IndividualChatUiState())
     val uiState: StateFlow<IndividualChatUiState> = _uiState
 
+    // Scroll position management
+    private val _shouldScrollToBottom = MutableStateFlow(false)
+    val shouldScrollToBottom: StateFlow<Boolean> = _shouldScrollToBottom.asStateFlow()
+    
+    // Socket connection status
+    private val _isConnected = MutableStateFlow(false)
+    val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
+
     private var socketObserverId: UUID? = null
     private var isFetchingMessages = false
     private var isSettingUpSocket = false
@@ -44,11 +59,79 @@ class IndividualChatViewModel @Inject constructor(
     var otherUserId: Int = 0
         private set
 
-    fun initialize(currentUserId: Int, otherUserId: Int) {
+    // Helper function for image URL patching
+    private fun patchProfilePictureUrl(imageUrl: String?): String? {
+        if (imageUrl.isNullOrBlank()) return null
+        return if (imageUrl.startsWith("http")) {
+            imageUrl
+        } else {
+            "https://rep-app-dbbucket.s3.us-west-2.amazonaws.com/$imageUrl"
+        }
+    }
+    
+    // Timestamp formatting
+    fun formatTimestamp(timestamp: String): String {
+        try {
+            val formatter = java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME
+            val dateTime = java.time.OffsetDateTime.parse(timestamp, formatter)
+            val now = java.time.OffsetDateTime.now()
+            val today = now.toLocalDate()
+            val messageDate = dateTime.toLocalDate()
+            
+            return when {
+                messageDate == today -> {
+                    // Today: show time
+                    val timeFormatter = java.time.format.DateTimeFormatter.ofPattern("h:mm a")
+                    dateTime.format(timeFormatter)
+                }
+                messageDate == today.minusDays(1) -> {
+                    // Yesterday
+                    "Yesterday"
+                }
+                messageDate.isAfter(today.minusDays(7)) -> {
+                    // This week: show day name
+                    val dayFormatter = java.time.format.DateTimeFormatter.ofPattern("EEEE")
+                    dateTime.format(dayFormatter)
+                }
+                messageDate.year == today.year -> {
+                    // This year: show month and day
+                    val monthDayFormatter = java.time.format.DateTimeFormatter.ofPattern("MMM d")
+                    dateTime.format(monthDayFormatter)
+                }
+                else -> {
+                    // Different year: show month, day, year
+                    val fullFormatter = java.time.format.DateTimeFormatter.ofPattern("MMM d, yyyy")
+                    dateTime.format(fullFormatter)
+                }
+            }
+        } catch (e: Exception) {
+            return ""
+        }
+    }
+
+    fun initialize(currentUserId: Int, otherUserId: Int, otherUserName: String = "", otherUserPhotoUrl: String? = null) {
         this.currentUserId = currentUserId
         this.otherUserId = otherUserId
 
-        android.util.Log.d("IndividualChatVM", "✅ INIT for otherUserId: $otherUserId")
+        // Update UI state with other user info
+        _uiState.update { it.copy(
+            otherUserName = otherUserName,
+            otherUserPhotoUrl = patchProfilePictureUrl(otherUserPhotoUrl)
+        )}
+
+        // Socket connection awareness
+        _isConnected.value = SocketManager.isConnected()
+        
+        // Add connection observer
+        SocketManager.onConnectionStatusChange { connected ->
+            _isConnected.value = connected
+            if (connected && _uiState.value.isInitialized) {
+                // Re-setup socket on reconnection
+                setupSocketListener()
+            }
+        }
+
+        android.util.Log.d("IndividualChatVM", "✨ INIT for otherUserId: $otherUserId")
 
         // Start initial fetch
         fetchMessages()
@@ -118,6 +201,16 @@ class IndividualChatViewModel @Inject constructor(
             if (!state.messages.any { it.id == message.id }) {
                 android.util.Log.d("IndividualChatVM", "   Appending new message ID: ${message.id}")
                 val newMessages = (state.messages + message).sortedBy { it.timestamp }
+                
+                // Trigger scroll to bottom for new messages
+                if (message.senderId != currentUserId) {
+                    _shouldScrollToBottom.value = true
+                    viewModelScope.launch {
+                        kotlinx.coroutines.delay(100)
+                        _shouldScrollToBottom.value = false
+                    }
+                }
+                
                 state.copy(messages = newMessages)
             } else {
                 android.util.Log.d("IndividualChatVM", "   Ignoring duplicate message ID: ${message.id}")
@@ -179,6 +272,15 @@ class IndividualChatViewModel @Inject constructor(
                                 state.copy(messages = filtered + state.messages)
                             }
                         } else {
+                            // Initial load - trigger scroll to bottom
+                            if (sortedMsgs.isNotEmpty()) {
+                                _shouldScrollToBottom.value = true
+                                viewModelScope.launch {
+                                    kotlinx.coroutines.delay(100)
+                                    _shouldScrollToBottom.value = false
+                                }
+                            }
+                            
                             state.copy(
                                 messages = sortedMsgs,
                                 isInitialized = true
@@ -224,6 +326,34 @@ class IndividualChatViewModel @Inject constructor(
         if (trimmed.isEmpty()) return
 
         android.util.Log.d("IndividualChatVM", "⬆️ Sending message...")
+        
+        // Create optimistic message
+        val tempId = -System.currentTimeMillis().toInt() // Temporary negative ID
+        val optimisticMessage = MessageModel(
+            id = tempId,
+            senderId = currentUserId,
+            senderName = "You", // Will be replaced by server response
+            recipientId = otherUserId,
+            text = trimmed,
+            timestamp = java.time.Instant.now().toString(),
+            read = null
+        )
+        
+        // Add optimistic message immediately
+        _uiState.update { state ->
+            val newMessages = state.messages + optimisticMessage
+            state.copy(
+                messages = newMessages.sortedBy { it.timestamp },
+                inputText = "" // Clear input immediately for better UX
+            )
+        }
+        
+        // Trigger scroll to bottom
+        _shouldScrollToBottom.value = true
+        viewModelScope.launch {
+            kotlinx.coroutines.delay(100)
+            _shouldScrollToBottom.value = false
+        }
 
         viewModelScope.launch {
             messageRepository.sendDirectMessage(
@@ -232,14 +362,43 @@ class IndividualChatViewModel @Inject constructor(
             ).collect { result ->
                 result.onSuccess { sentMessage ->
                     android.util.Log.d("IndividualChatVM", "✅ Send message successful")
-                    appendIfNeeded(sentMessage)
-                    _uiState.update { it.copy(inputText = "") }
+                    
+                    // Replace optimistic message with real one
+                    _uiState.update { state ->
+                        val updatedMessages = state.messages.toMutableList()
+                        val optimisticIndex = updatedMessages.indexOfFirst { it.id == tempId }
+                        
+                        if (optimisticIndex >= 0) {
+                            updatedMessages[optimisticIndex] = sentMessage
+                        } else if (!updatedMessages.any { it.id == sentMessage.id }) {
+                            updatedMessages.add(sentMessage)
+                        }
+                        
+                        state.copy(messages = updatedMessages.sortedBy { it.timestamp })
+                    }
                 }.onFailure { error ->
                     android.util.Log.e("IndividualChatVM", "❌ Send message error: ${error.message}")
-                    _uiState.update { it.copy(error = error.message) }
+                    
+                    // Remove the optimistic message on error
+                    _uiState.update { state ->
+                        val updatedMessages = state.messages.filter { it.id != tempId }
+                        state.copy(
+                            messages = updatedMessages,
+                            error = error.message
+                        )
+                    }
                 }
             }
         }
+    }
+    
+    // Enhanced error handling
+    fun clearError() {
+        _uiState.update { it.copy(error = null) }
+    }
+
+    fun acknowledgeError() {
+        clearError()
     }
 
     override fun onCleared() {
