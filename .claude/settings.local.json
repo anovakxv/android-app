@@ -4,7 +4,13 @@
       "Bash(./gradlew compileDebugKotlin)",
       "Bash(./gradlew clean assembleDebug --stacktrace)",
       "Bash(cat \"C:\\Users\\Stephanie\\Desktop\\my-android-app\\android-app\\android-app-V.1\\app\\build.gradle.kts\")",
-      "Bash(cat \"C:\\Users\\Stephanie\\Desktop\\my-android-app\\android-app\\android-app-V.1\\app\\build.gradle\")"
+      "Bash(cat \"C:\\Users\\Stephanie\\Desktop\\my-android-app\\android-app\\android-app-V.1\\app\\build.gradle\")",
+      "Bash(tree \"C:\\Users\\Stephanie\\Desktop\\my-android-app\\android-app\\android-app-V.1\\Swift FrontEnd\\Rep\" -L 3)",
+      "Bash(./gradlew clean build --stacktrace)",
+      "Bash(tee build_output.txt)",
+      "Bash(cat build_output.txt)",
+      "Bash(./gradlew clean compileDebugKotlin --stacktrace)",
+      "Bash(tee -a build_output.txt)"
     ],
     "deny": [],
     "ask": []

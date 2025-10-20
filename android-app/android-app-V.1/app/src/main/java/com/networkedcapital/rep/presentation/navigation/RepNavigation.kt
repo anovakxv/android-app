@@ -23,6 +23,10 @@ import com.networkedcapital.rep.presentation.payment.PaymentsScreen
 import com.networkedcapital.rep.presentation.payment.PayTransactionScreen
 import com.networkedcapital.rep.presentation.payment.PortalPaymentSetupScreen
 import com.networkedcapital.rep.presentation.invites.InvitesScreen
+import com.networkedcapital.rep.presentation.settings.SettingsScreen
+import com.networkedcapital.rep.presentation.portal.EditPortalScreen
+import com.networkedcapital.rep.presentation.goals.EditGoalScreen
+import com.networkedcapital.rep.presentation.goals.UpdateGoalScreen
 import com.networkedcapital.rep.domain.model.TransactionType
 import com.networkedcapital.rep.presentation.test.ApiTestScreen
 import androidx.navigation.navArgument
@@ -139,6 +143,21 @@ fun RepNavigation(
                 userId = userId,
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onNavigateToSettings = {
+                    navController.navigate(Screen.Settings.route)
+                },
+                onNavigateToPortal = { portalId ->
+                    navController.navigate(Screen.PortalDetail.createRoute(portalId, "Portal"))
+                },
+                onNavigateToGoal = { goalId ->
+                    navController.navigate("${Screen.GoalDetail.route}/$goalId")
+                },
+                onNavigateToEditProfile = {
+                    navController.navigate(Screen.EditProfile.route)
+                },
+                onNavigateToMessage = { userId, userName ->
+                    // TODO: Wire up to IndividualChatScreen
                 }
             )
         }
@@ -262,6 +281,95 @@ fun RepNavigation(
                 }
             )
         }
+
+        // Settings Screen
+        composable(Screen.Settings.route) {
+            SettingsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToEditProfile = {
+                    navController.navigate(Screen.EditProfile.route)
+                },
+                onNavigateToPayments = {
+                    navController.navigate(Screen.Payments.route)
+                },
+                onNavigateToTerms = {
+                    navController.navigate(Screen.Onboarding.route)
+                },
+                onLogout = {
+                    authViewModel.logout()
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // Edit Portal Screen
+        composable(
+            route = Screen.EditPortal.route,
+            arguments = listOf(
+                navArgument("portalId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val portalId = backStackEntry.arguments?.getInt("portalId") ?: 0
+            // TODO: Load existing portal by portalId
+            EditPortalScreen(
+                existingPortal = null, // Will be loaded via ViewModel in future
+                onSave = { portal ->
+                    // TODO: Save portal via API
+                    navController.popBackStack()
+                },
+                onCancel = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Edit Goal Screen
+        composable(
+            route = Screen.EditGoal.route,
+            arguments = listOf(
+                navArgument("goalId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val goalId = backStackEntry.arguments?.getInt("goalId") ?: 0
+            // TODO: Load existing goal by goalId
+            EditGoalScreen(
+                existingGoal = null, // Will be loaded via ViewModel in future
+                onSave = { goal ->
+                    // TODO: Save goal via API
+                    navController.popBackStack()
+                },
+                onCancel = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Update Goal Screen
+        composable(
+            route = Screen.UpdateGoal.route,
+            arguments = listOf(
+                navArgument("goalId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val goalId = backStackEntry.arguments?.getInt("goalId") ?: 0
+            // TODO: Load goal quota and metric by goalId
+            UpdateGoalScreen(
+                goalId = goalId,
+                quota = 100.0, // TODO: Load from API
+                metricName = "Units", // TODO: Load from API
+                onSubmit = { addedValue, note ->
+                    // TODO: Submit progress update via API
+                    navController.popBackStack()
+                },
+                onCancel = {
+                    navController.popBackStack()
+                }
+            )
+        }
     }
 }
 
@@ -292,5 +400,19 @@ sealed class Screen(val route: String) {
     // Team Invites screen
     object Invites : Screen("invites/{userId}") {
         fun createRoute(userId: Int) = "invites/$userId"
+    }
+
+    // Settings screen
+    object Settings : Screen("settings")
+
+    // Edit screens
+    object EditPortal : Screen("edit_portal/{portalId}") {
+        fun createRoute(portalId: Int) = "edit_portal/$portalId"
+    }
+    object EditGoal : Screen("edit_goal/{goalId}") {
+        fun createRoute(goalId: Int) = "edit_goal/$goalId"
+    }
+    object UpdateGoal : Screen("update_goal/{goalId}") {
+        fun createRoute(goalId: Int) = "update_goal/$goalId"
     }
 }

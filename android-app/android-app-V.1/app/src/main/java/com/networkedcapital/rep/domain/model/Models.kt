@@ -40,7 +40,9 @@ data class User(
     val lastMessageDate: String? = null,
     // Add for compatibility with MainScreen
     val imageUrl: String? = null,
-    val avatarUrl: String? = null
+    val avatarUrl: String? = null,
+    // Admin flag
+    val is_admin: Boolean? = false
 ) : Parcelable {
     val displayName: String
         get() = fullName ?: fname?.let { fn -> 
