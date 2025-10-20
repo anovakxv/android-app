@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -279,19 +280,18 @@ fun GroupMemberRow(
                     .clickable { onMemberClick(member.id) }
             ) {
                 MemberAvatar(
-                    photoUrl = member.photoUrl,
-                    firstName = member.firstName,
-                    lastName = member.lastName,
+                    photoUrl = member.profilePictureUrl,
+                    fullName = member.fullName,
                     size = 40.dp
                 )
-                
+
                 Spacer(modifier = Modifier.height(4.dp))
-                
+
                 // Display name, truncated as needed
-                val displayName = if (member.firstName.length > 10) {
-                    member.firstName.take(8) + "..."
+                val displayName = if (member.fullName.length > 10) {
+                    member.fullName.take(8) + "..."
                 } else {
-                    member.firstName
+                    member.fullName
                 }
                 
                 Text(
@@ -311,8 +311,7 @@ fun GroupMemberRow(
 @Composable
 fun MemberAvatar(
     photoUrl: String?,
-    firstName: String?,
-    lastName: String?,
+    fullName: String?,
     size: Dp,
     modifier: Modifier = Modifier
 ) {
@@ -331,11 +330,8 @@ fun MemberAvatar(
                 modifier = Modifier.fillMaxSize()
             )
         } else {
-            // Display initials
-            val initials = buildString {
-                firstName?.firstOrNull()?.let { append(it) }
-                lastName?.firstOrNull()?.let { append(it) }
-            }.uppercase().take(2)
+            // Display initials from full name
+            val initials = fullName?.split(" ")?.mapNotNull { it.firstOrNull() }?.take(2)?.joinToString("")?.uppercase() ?: "?"
             
             Text(
                 text = initials,

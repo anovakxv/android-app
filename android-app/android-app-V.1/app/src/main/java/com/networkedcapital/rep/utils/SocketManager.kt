@@ -175,11 +175,11 @@ object SocketManager {
             Log.d(TAG, "❌ Disconnected: ${args.joinToString()}")
         }
 
-        socket.on(Socket.EVENT_ERROR) { args ->
+        socket.on("error") { args ->
             Log.w(TAG, "⚠️ Error: ${args.joinToString()}")
         }
 
-        socket.on(Socket.EVENT_RECONNECT) { args ->
+        socket.on("reconnect") { args ->
             Log.d(TAG, "🔄 Reconnected: ${args.joinToString()}")
         }
     }

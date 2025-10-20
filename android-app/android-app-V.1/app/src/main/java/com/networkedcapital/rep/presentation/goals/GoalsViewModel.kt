@@ -66,7 +66,7 @@ class GoalsViewModel : ViewModel() {
     }
     private suspend fun fetchGoalDetailFromApi(goalId: Int): GoalDetailResult {
         // TODO: Implement
-        return GoalDetailResult(Goal(0, "", "", "", 0.0, 0.0, 0.0, 0.0, "", "", "", "", "", emptyList(), 0, null), emptyList(), emptyList())
+        return GoalDetailResult(Goal(0, "", "", "", 0.0, 0.0, 0.0, 0.0, "", "", "", "", "", emptyList(), null, null), emptyList(), emptyList())
     }
 }
 

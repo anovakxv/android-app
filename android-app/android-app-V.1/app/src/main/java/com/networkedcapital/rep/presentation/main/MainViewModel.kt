@@ -99,10 +99,15 @@ class MainViewModel @Inject constructor(
     fun recalculateAttentionState() {
         val hasUnread = _hasUnreadDirectMessages.value || _hasUnreadGroupMessages.value
         viewModelScope.launch {
-            val hasPendingInvites = try {
-                inviteRepository.getPendingInvites().isNotEmpty()
+            var hasPendingInvites = false
+            try {
+                inviteRepository.getPendingInvites().collect { result ->
+                    result.onSuccess { invites ->
+                        hasPendingInvites = invites.isNotEmpty()
+                    }
+                }
             } catch (e: Exception) {
-                false
+                hasPendingInvites = false
             }
             _openNeedsAttention.value = hasUnread || hasPendingInvites
         }

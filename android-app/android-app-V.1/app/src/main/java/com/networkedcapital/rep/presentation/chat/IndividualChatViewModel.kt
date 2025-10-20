@@ -120,16 +120,17 @@ class IndividualChatViewModel @Inject constructor(
         )}
 
         // Socket connection awareness
-        _isConnected.value = SocketManager.isConnected()
-        
+        _isConnected.value = SocketManager.isConnected
+
         // Add connection observer
-        SocketManager.onConnectionStatusChange { connected ->
-            _isConnected.value = connected
-            if (connected && _uiState.value.isInitialized) {
-                // Re-setup socket on reconnection
-                setupSocketListener()
-            }
-        }
+        // TODO: SocketManager.onConnectionStatusChange doesn't exist yet
+        // SocketManager.onConnectionStatusChange { connected ->
+        //     _isConnected.value = connected
+        //     if (connected && _uiState.value.isInitialized) {
+        //         // Re-setup socket on reconnection
+        //         setupSocketListener()
+        //     }
+        // }
 
         android.util.Log.d("IndividualChatVM", "✨ INIT for otherUserId: $otherUserId")
 
@@ -326,7 +327,7 @@ class IndividualChatViewModel @Inject constructor(
         if (trimmed.isEmpty()) return
 
         android.util.Log.d("IndividualChatVM", "⬆️ Sending message...")
-        
+
         // Create optimistic message
         val tempId = -System.currentTimeMillis().toInt() // Temporary negative ID
         val optimisticMessage = MessageModel(

@@ -103,8 +103,7 @@ fun AddMembersScreen(
                         ) {
                             MemberAvatar(
                                 photoUrl = user.profilePictureUrl,
-                                firstName = user.firstName,
-                                lastName = user.lastName,
+                                fullName = user.displayName,
                                 size = 40.dp
                             )
                             

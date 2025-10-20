@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +22,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -28,13 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-
-data class SimpleMessage(
-    val id: Int,
-    val senderId: Int,
-    val text: String,
-    val timestamp: String
-)
+import com.networkedcapital.rep.domain.model.MessageModel
 
 @Composable
 fun IndividualChatScreen(
@@ -196,12 +192,14 @@ fun IndividualChatContent(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(1.dp)
-                                            .onAppear {
-                                                messages.firstOrNull()?.let {
-                                                    onLoadOlder(it.id)
-                                                }
-                                            }
                                     )
+
+                                    // Load older messages when reaching top
+                                    LaunchedEffect(messages.firstOrNull()?.id) {
+                                        messages.firstOrNull()?.let {
+                                            onLoadOlder(it.id)
+                                        }
+                                    }
                                 }
                             }
                         }

@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -165,21 +166,24 @@ fun RepNavigation(
         composable("${Screen.PortalDetail.route}/{portalId}/{portalName}") { backStackEntry ->
             val portalId = backStackEntry.arguments?.getString("portalId")?.toIntOrNull() ?: 0
             val portalName = backStackEntry.arguments?.getString("portalName") ?: "Portal"
+            val viewModel: com.networkedcapital.rep.presentation.portal.PortalDetailViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsState()
 
             com.networkedcapital.rep.presentation.portal.PortalDetailScreen(
+                uiState = uiState,
+                userId = authState.userId,
                 portalId = portalId,
-                portalName = portalName,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToGoal = { goalId ->
                     navController.navigate("${Screen.GoalDetail.route}/$goalId")
                 },
-                onNavigateToPayment = { portalId, portalName, goalId, goalName, transactionType ->
-                    navController.navigate(
-                        Screen.PayTransaction.createRoute(
-                            portalId, portalName, goalId, goalName, transactionType
-                        )
-                    )
-                }
+                onNavigateToEditGoal = { goalId, portalId ->
+                    navController.navigate(Screen.EditGoal.createRoute(goalId ?: 0))
+                },
+                onNavigateToEditPortal = { portalId ->
+                    navController.navigate(Screen.EditPortal.createRoute(portalId))
+                },
+                viewModel = viewModel
             )
         }
 

@@ -80,19 +80,18 @@ fun RemoveMembersScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         MemberAvatar(
-                            photoUrl = member.photoUrl,
-                            firstName = member.firstName,
-                            lastName = member.lastName,
+                            photoUrl = member.profilePictureUrl,
+                            fullName = member.fullName,
                             size = 40.dp
                         )
-                        
+
                         Spacer(modifier = Modifier.width(12.dp))
-                        
+
                         Column(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = "${member.firstName} ${member.lastName}",
+                                text = member.fullName,
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = Color.Red,
                                 fontWeight = FontWeight.SemiBold
@@ -125,10 +124,10 @@ fun RemoveMemberConfirmationDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Remove Member?") },
-        text = { 
+        text = {
             Text(
-                "Are you sure you want to remove ${member.firstName} ${member.lastName} from this group?"
-            ) 
+                "Are you sure you want to remove ${member.fullName} from this group?"
+            )
         },
         confirmButton = {
             Button(

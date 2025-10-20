@@ -131,16 +131,15 @@ class GroupChatViewModel @Inject constructor(
         this.chatId = chatId
         
         // Socket connection awareness
-        _isConnected.value = SocketManager.isConnected()
+        _isConnected.value = SocketManager.isConnected
         
-        // Add connection observer
-        SocketManager.onConnectionStatusChange { connected ->
-            _isConnected.value = connected
-            if (connected && isActive) {
-                // Reconnection handling
-                SocketManager.joinGroupChat(chatId)
-            }
-        }
+        // TODO: Add connection observer when SocketManager supports it
+        // SocketManager.onConnectionStatusChange { connected ->
+        //     _isConnected.value = connected
+        //     if (connected && isActive) {
+        //         SocketManager.joinGroupChat(chatId)
+        //     }
+        // }
 
         android.util.Log.d("GroupChatVM", "✨ init chat_$chatId")
     }
@@ -413,30 +412,21 @@ class GroupChatViewModel @Inject constructor(
     
     // Group management functions
     fun editGroupName(newName: String) {
+        // TODO: Implement updateGroupChat in MessageRepository
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            messageRepository.updateGroupChat(chatId, newName).collect { result ->
-                _uiState.update { it.copy(isLoading = false) }
-                result.onSuccess { updatedChat ->
-                    _uiState.update { state ->
-                        state.copy(groupName = updatedChat.name)
-                    }
-                }.onFailure { error ->
-                    _uiState.update { it.copy(error = error.message) }
-                }
-            }
+            _uiState.update { it.copy(groupName = newName) }
+            android.util.Log.d("GroupChatVM", "TODO: Update group name to: $newName")
         }
     }
 
     fun addMembers(userIds: List<Int>) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            messageRepository.addGroupChatMembers(chatId, userIds).collect { result ->
+            messageRepository.addMembersToGroupChat(chatId, userIds).collect { result ->
                 _uiState.update { it.copy(isLoading = false) }
-                result.onSuccess { members ->
-                    _uiState.update { state ->
-                        state.copy(groupMembers = members)
-                    }
+                result.onSuccess {
+                    // Refresh group chat details to get updated member list
+                    fetchGroupChat()
                 }.onFailure { error ->
                     _uiState.update { it.copy(error = error.message) }
                 }
@@ -447,12 +437,11 @@ class GroupChatViewModel @Inject constructor(
     fun removeMembers(userIds: List<Int>) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            messageRepository.removeGroupChatMembers(chatId, userIds).collect { result ->
+            messageRepository.removeMemberFromGroupChat(chatId, userIds.first()).collect { result ->
                 _uiState.update { it.copy(isLoading = false) }
-                result.onSuccess { members ->
-                    _uiState.update { state ->
-                        state.copy(groupMembers = members)
-                    }
+                result.onSuccess {
+                    // Refresh group chat details to get updated member list
+                    fetchGroupChat()
                 }.onFailure { error ->
                     _uiState.update { it.copy(error = error.message) }
                 }
@@ -461,14 +450,9 @@ class GroupChatViewModel @Inject constructor(
     }
 
     fun leaveGroup() {
+        // TODO: Implement leaveGroupChat in MessageRepository
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            messageRepository.leaveGroupChat(chatId).collect { result ->
-                _uiState.update { it.copy(isLoading = false) }
-                result.onFailure { error ->
-                    _uiState.update { it.copy(error = error.message) }
-                }
-            }
+            android.util.Log.d("GroupChatVM", "TODO: Leave group chat $chatId")
         }
     }
 

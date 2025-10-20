@@ -22,6 +22,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.networkedcapital.rep.domain.model.User
+import com.networkedcapital.rep.domain.model.Portal
+import com.networkedcapital.rep.domain.model.Goal
+import com.networkedcapital.rep.domain.model.WriteBlock
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -639,8 +643,7 @@ private fun GoalListItemProfile(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        val progress = (goal.current_value?.toFloatOrNull() ?: 0f) /
-                (goal.quota_value?.toFloatOrNull() ?: 1f)
+        val progress = (goal.progressPercent / 100.0).toFloat()
 
         LinearProgressIndicator(
             progress = progress.coerceIn(0f, 1f),
@@ -649,7 +652,7 @@ private fun GoalListItemProfile(
         )
 
         Text(
-            text = "${(progress * 100).toInt()}% [${goal.status ?: ""}]",
+            text = "${goal.filledQuota.toInt()} / ${goal.quota.toInt()} (${goal.progressPercent.toInt()}%)",
             fontSize = 12.sp,
             color = Color.Gray
         )

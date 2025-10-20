@@ -40,7 +40,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.gestures.detectDoubleTap
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
@@ -197,7 +196,8 @@ fun PortalDetailScreen(
                         selectedLeadUser = lead
                         showMessageSheet = true
                     } else {
-                        uiState.portalDetail?.chatId?.let { /* Navigate to chat */ }
+                        // TODO: Navigate to group chat for portal
+                        // Portal group chat navigation not yet implemented
                     }
                 }
             )
@@ -325,10 +325,8 @@ fun PortalDetailScreen(
                     Text("Start a conversation with this portal's lead:")
                     // Navigate to chat screen
                     Button(
-                        onClick = { 
-                            uiState.portalDetail?.chatId?.let {
-                                /* Navigate to chat with chatId */
-                            }
+                        onClick = {
+                            // TODO: Navigate to individual chat with selected lead
                             showMessageSheet = false
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -611,10 +609,7 @@ fun StorySection(
                                     .size(40.dp)
                                     .clip(CircleShape)
                                     .background(Color.Gray.copy(alpha = 0.15f), CircleShape),
-                                contentScale = ContentScale.Crop,
-                                error = {
-                                    InitialsAvatar(user = lead)
-                                }
+                                contentScale = ContentScale.Crop
                             )
                         } else {
                             InitialsAvatar(user = lead)
@@ -1068,27 +1063,7 @@ fun ZoomableImage(
                     translationX = offset.x,
                     translationY = offset.y
                 ),
-            contentScale = ContentScale.Fit,
-            error = {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = Icons.Default.BrokenImage,
-                            contentDescription = "Image Error",
-                            tint = Color.White.copy(alpha = 0.7f),
-                            modifier = Modifier.size(48.dp)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Failed to load image",
-                            color = Color.White.copy(alpha = 0.7f)
-                        )
-                    }
-                }
-            }
+            contentScale = ContentScale.Fit
         )
     }
 }

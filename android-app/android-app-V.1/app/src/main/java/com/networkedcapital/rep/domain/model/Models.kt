@@ -45,12 +45,12 @@ data class User(
     val is_admin: Boolean? = false
 ) : Parcelable {
     val displayName: String
-        get() = fullName ?: fname?.let { fn -> 
+        get() = fullName ?: fname?.let { fn ->
             lname?.let { ln -> "$fn $ln" } ?: fn
         } ?: firstName?.let { fn ->
             lastName?.let { ln -> "$fn $ln" } ?: fn
         } ?: username ?: email ?: "Unknown User"
-    
+
     val repTypeAndCity: String
         get() {
             val type = userType?.name ?: userType_string ?: ""
@@ -62,6 +62,10 @@ data class User(
                 else -> ""
             }
         }
+
+    // Compatibility properties for chat screens
+    val photoUrl: String? get() = profile_picture_url ?: imageUrl ?: avatarUrl
+    val profilePictureUrl: String? get() = profile_picture_url ?: imageUrl ?: avatarUrl
 }
 
 @Parcelize
@@ -292,6 +296,11 @@ data class ApiResponse<T>(
 )
 
 data class UsersApiResponse(
+    val result: List<User>
+)
+
+// Network users response (for NTWK tab and chat member management)
+data class NTWKUsersResponse(
     val result: List<User>
 )
 

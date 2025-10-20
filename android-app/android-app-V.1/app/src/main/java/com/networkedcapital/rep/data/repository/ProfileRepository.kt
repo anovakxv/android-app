@@ -121,7 +121,7 @@ class ProfileRepositoryImpl @Inject constructor(
 
     override suspend fun getUserPortals(userId: Int): Flow<Result<List<Portal>>> = flow {
         try {
-            val response = portalApiService.filterNetworkPortals(userId, "open")
+            val response = portalApiService.getFilteredPortals(userId, "open", null, false)
             if (response.isSuccessful && response.body() != null) {
                 emit(Result.success(response.body()!!.result))
             } else {
@@ -134,9 +134,9 @@ class ProfileRepositoryImpl @Inject constructor(
 
     override suspend fun getUserGoals(userId: Int): Flow<Result<List<Goal>>> = flow {
         try {
-            val response = goalApiService.getGoalsForUser(userId)
+            val response = goalApiService.getUserGoals()
             if (response.isSuccessful && response.body() != null) {
-                emit(Result.success(response.body()!!.aGoals))
+                emit(Result.success(response.body()!!))
             } else {
                 emit(Result.failure(Exception("Failed to load goals: ${response.message()}")))
             }

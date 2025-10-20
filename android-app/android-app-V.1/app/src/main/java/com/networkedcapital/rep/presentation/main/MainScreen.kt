@@ -33,6 +33,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -452,10 +453,10 @@ fun MainScreen(
     LaunchedEffect(uiState.currentUser?.id) {
         val userId = uiState.currentUser?.id ?: 0
         viewModel.loadData(userId)
-        
-        // NEW: Setup socket notifications for real-time updates
-        viewModel.setupSocketNotifications(userId)
-        
+
+        // TODO: Setup socket notifications - requires baseURL and token from auth context
+        // viewModel.setupSocketNotifications(baseURL, token, userId)
+
         // NEW: Check for unread messages
         viewModel.checkForUnreadMessages()
     }
@@ -660,13 +661,8 @@ fun MainScreen(
                     IconButton(
                         onClick = {
                             val chatId = uiState.activeChats.firstOrNull()?.id
-                            val intId = when (chatId) {
-                                is Int -> chatId
-                                is String -> chatId.toIntOrNull()
-                                else -> null
-                            }
-                            if (intId != null) {
-                                onNavigateToChat(intId)
+                            if (chatId != null) {
+                                onNavigateToChat(chatId)
                             } else {
                                 Log.e("MainScreen", "Invalid or missing chat ID: $chatId")
                             }
@@ -944,7 +940,7 @@ fun EnhancedActiveChatItem(
                     }
                 }
                 
-                val isUnread = chat.last_message?.read == "0" && chat.last_message.sender_id != chat.user.id
+                val isUnread = chat.last_message?.read == "0" && chat.last_message.senderId != chat.user.id
                 Text(
                     text = chat.last_message?.text ?: "",
                     fontWeight = if (isUnread) FontWeight.Bold else FontWeight.Normal,
