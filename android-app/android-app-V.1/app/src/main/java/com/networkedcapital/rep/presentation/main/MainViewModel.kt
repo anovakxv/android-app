@@ -99,15 +99,13 @@ class MainViewModel @Inject constructor(
     fun recalculateAttentionState() {
         val hasUnread = _hasUnreadDirectMessages.value || _hasUnreadGroupMessages.value
         viewModelScope.launch {
-            var hasPendingInvites = false
-            try {
-                inviteRepository.getPendingInvites().collect { result ->
-                    result.onSuccess { invites ->
-                        hasPendingInvites = invites.isNotEmpty()
-                    }
-                }
+            val hasPendingInvites = try {
+                inviteRepository.getPendingInvites()
+                    .firstOrNull()
+                    ?.getOrNull()
+                    ?.isNotEmpty() ?: false
             } catch (e: Exception) {
-                hasPendingInvites = false
+                false
             }
             _openNeedsAttention.value = hasUnread || hasPendingInvites
         }
@@ -489,10 +487,10 @@ class MainViewModel @Inject constructor(
     private suspend fun fetchCurrentUser() {
         try {
             authRepository.getCurrentUser()
-                .collect { result ->
-                    result.getOrNull()?.let { user ->
-                        _uiState.update { state -> state.copy(currentUser = user) }
-                    }
+                .firstOrNull()
+                ?.getOrNull()
+                ?.let { user ->
+                    _uiState.update { state -> state.copy(currentUser = user) }
                 }
         } catch (e: Exception) {
             // Ignore error, user will remain null

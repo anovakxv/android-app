@@ -9,6 +9,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -247,7 +248,7 @@ class IndividualChatViewModel @Inject constructor(
                 otherUserId = otherUserId,
                 beforeId = beforeId,
                 markAsRead = !append
-            ).collect { result ->
+            ).firstOrNull()?.let { result ->
                 _uiState.update { state ->
                     if (append) {
                         state.copy(isLoadingOlder = false)
@@ -360,7 +361,7 @@ class IndividualChatViewModel @Inject constructor(
             messageRepository.sendDirectMessage(
                 otherUserId = otherUserId,
                 message = trimmed
-            ).collect { result ->
+            ).firstOrNull()?.let { result ->
                 result.onSuccess { sentMessage ->
                     android.util.Log.d("IndividualChatVM", "✅ Send message successful")
                     

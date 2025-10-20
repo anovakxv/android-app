@@ -40,7 +40,7 @@ class InviteViewModel @Inject constructor(
             // Mark invites as read
             inviteRepository.markInvitesRead()
                 .catch { /* Ignore errors for marking read */ }
-                .collect { /* No action needed */ }
+                .firstOrNull() // Just trigger the call, don't wait
 
             // Load pending invites
             inviteRepository.getPendingInvites()
@@ -50,8 +50,7 @@ class InviteViewModel @Inject constructor(
                         isLoading = false
                     )
                 }
-                .collect { result ->
-                    result.fold(
+                .firstOrNull()?.fold(
                         onSuccess = { invites ->
                             _inviteState.value = _inviteState.value.copy(
                                 invites = invites,
@@ -65,7 +64,6 @@ class InviteViewModel @Inject constructor(
                             )
                         }
                     )
-                }
         }
     }
 
@@ -85,8 +83,7 @@ class InviteViewModel @Inject constructor(
                         showAlert = true
                     )
                 }
-                .collect { result ->
-                    result.fold(
+                .firstOrNull()?.fold(
                         onSuccess = {
                             // Remove invite from list
                             val updatedInvites = _inviteState.value.invites
@@ -107,7 +104,6 @@ class InviteViewModel @Inject constructor(
                             )
                         }
                     )
-                }
         }
     }
 
@@ -127,8 +123,7 @@ class InviteViewModel @Inject constructor(
                         showAlert = true
                     )
                 }
-                .collect { result ->
-                    result.fold(
+                .firstOrNull()?.fold(
                         onSuccess = {
                             // Remove invite from list
                             val updatedInvites = _inviteState.value.invites
@@ -149,7 +144,6 @@ class InviteViewModel @Inject constructor(
                             )
                         }
                     )
-                }
         }
     }
 

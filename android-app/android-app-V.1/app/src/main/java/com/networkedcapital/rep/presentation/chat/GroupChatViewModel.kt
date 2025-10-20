@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -287,7 +288,7 @@ class GroupChatViewModel @Inject constructor(
     private fun markCurrentChatReadIfNeeded(latestMessageId: Int) {
         // Trigger a refresh which marks as read
         viewModelScope.launch {
-            messageRepository.getGroupChat(chatId, limit = 1).collect { result ->
+            messageRepository.getGroupChat(chatId, limit = 1).firstOrNull()?.let { result ->
                 // Server marks as read automatically
             }
         }
@@ -303,7 +304,7 @@ class GroupChatViewModel @Inject constructor(
         _uiState.update { it.copy(isRefreshing = true, isLoading = true) }
 
         viewModelScope.launch {
-            messageRepository.getGroupChat(chatId).collect { result ->
+            messageRepository.getGroupChat(chatId).firstOrNull()?.let { result ->
                 _uiState.update { it.copy(isRefreshing = false, isLoading = false) }
 
                 android.util.Log.d("GroupChatVM", "✅ Fetch completion for chat_$chatId")
@@ -376,7 +377,7 @@ class GroupChatViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            messageRepository.sendGroupMessage(chatId, trimmed).collect { result ->
+            messageRepository.sendGroupMessage(chatId, trimmed).firstOrNull()?.let { result ->
                 result.onSuccess { realMessage ->
                     android.util.Log.d("GroupChatVM", "✅ Send group message successful")
 
@@ -422,7 +423,7 @@ class GroupChatViewModel @Inject constructor(
     fun addMembers(userIds: List<Int>) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            messageRepository.addMembersToGroupChat(chatId, userIds).collect { result ->
+            messageRepository.addMembersToGroupChat(chatId, userIds).firstOrNull()?.let { result ->
                 _uiState.update { it.copy(isLoading = false) }
                 result.onSuccess {
                     // Refresh group chat details to get updated member list
@@ -437,7 +438,7 @@ class GroupChatViewModel @Inject constructor(
     fun removeMembers(userIds: List<Int>) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            messageRepository.removeMemberFromGroupChat(chatId, userIds.first()).collect { result ->
+            messageRepository.removeMemberFromGroupChat(chatId, userIds.first()).firstOrNull()?.let { result ->
                 _uiState.update { it.copy(isLoading = false) }
                 result.onSuccess {
                     // Refresh group chat details to get updated member list
@@ -461,7 +462,7 @@ class GroupChatViewModel @Inject constructor(
         
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            messageRepository.deleteGroupChat(chatId).collect { result ->
+            messageRepository.deleteGroupChat(chatId).firstOrNull()?.let { result ->
                 _uiState.update { it.copy(isLoading = false) }
                 result.onFailure { error ->
                     _uiState.update { it.copy(error = error.message) }

@@ -46,8 +46,7 @@ class ProfileViewModel @Inject constructor(
             // Get current logged-in user ID
             authRepository.getCurrentUser()
                 .catch { /* Handle silently */ }
-                .collect { result ->
-                    result.fold(
+                .firstOrNull()?.fold(
                         onSuccess = { user ->
                             _uiState.value = _uiState.value.copy(
                                 currentUserId = user.id,
@@ -62,7 +61,6 @@ class ProfileViewModel @Inject constructor(
                             loadProfile()
                         }
                     )
-                }
         }
     }
 
@@ -88,8 +86,7 @@ class ProfileViewModel @Inject constructor(
                         errorMessage = throwable.message ?: "Failed to load user profile"
                     )
                 }
-                .collect { result ->
-                    result.fold(
+                .firstOrNull()?.fold(
                         onSuccess = { user ->
                             _uiState.value = _uiState.value.copy(
                                 user = user,
@@ -105,7 +102,6 @@ class ProfileViewModel @Inject constructor(
                             )
                         }
                     )
-                }
         }
     }
 
@@ -113,14 +109,12 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             profileRepository.getUserPortals(_uiState.value.viewedUserId)
                 .catch { /* Handle silently */ }
-                .collect { result ->
-                    result.fold(
+                .firstOrNull()?.fold(
                         onSuccess = { portals ->
                             _uiState.value = _uiState.value.copy(portals = portals)
                         },
                         onFailure = { /* Handle silently */ }
                     )
-                }
         }
     }
 
@@ -128,14 +122,12 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             profileRepository.getUserGoals(_uiState.value.viewedUserId)
                 .catch { /* Handle silently */ }
-                .collect { result ->
-                    result.fold(
+                .firstOrNull()?.fold(
                         onSuccess = { goals ->
                             _uiState.value = _uiState.value.copy(goals = goals)
                         },
                         onFailure = { /* Handle silently */ }
                     )
-                }
         }
     }
 
@@ -143,14 +135,12 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             profileRepository.getWrites(_uiState.value.viewedUserId)
                 .catch { /* Handle silently */ }
-                .collect { result ->
-                    result.fold(
+                .firstOrNull()?.fold(
                         onSuccess = { writeBlocks ->
                             _uiState.value = _uiState.value.copy(writeBlocks = writeBlocks)
                         },
                         onFailure = { /* Handle silently */ }
                     )
-                }
         }
     }
 
@@ -158,14 +148,12 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             profileRepository.getSkills()
                 .catch { /* Handle silently */ }
-                .collect { result ->
-                    result.fold(
+                .firstOrNull()?.fold(
                         onSuccess = { skills ->
                             _uiState.value = _uiState.value.copy(availableSkills = skills)
                         },
                         onFailure = { /* Handle silently */ }
                     )
-                }
         }
     }
 
@@ -175,14 +163,12 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             profileRepository.isBlocked(_uiState.value.viewedUserId)
                 .catch { /* Handle silently */ }
-                .collect { result ->
-                    result.fold(
+                .firstOrNull()?.fold(
                         onSuccess = { isBlocked ->
                             _uiState.value = _uiState.value.copy(isBlocked = isBlocked)
                         },
                         onFailure = { /* Handle silently */ }
                     )
-                }
         }
     }
 
@@ -289,8 +275,7 @@ class ProfileViewModel @Inject constructor(
                         errorMessage = throwable.message ?: "Failed to delete write"
                     )
                 }
-                .collect { result ->
-                    result.fold(
+                .firstOrNull()?.fold(
                         onSuccess = {
                             fetchWrites()
                         },
@@ -300,7 +285,6 @@ class ProfileViewModel @Inject constructor(
                             )
                         }
                     )
-                }
         }
     }
 
@@ -311,8 +295,7 @@ class ProfileViewModel @Inject constructor(
                 .catch { throwable ->
                     onComplete(false, throwable.message ?: "Failed to block user")
                 }
-                .collect { result ->
-                    result.fold(
+                .firstOrNull()?.fold(
                         onSuccess = {
                             _uiState.value = _uiState.value.copy(
                                 isBlocked = true,
@@ -324,7 +307,6 @@ class ProfileViewModel @Inject constructor(
                             onComplete(false, throwable.message ?: "Failed to block user")
                         }
                     )
-                }
         }
     }
 
@@ -334,8 +316,7 @@ class ProfileViewModel @Inject constructor(
                 .catch { throwable ->
                     onComplete(false, throwable.message ?: "Failed to unblock user")
                 }
-                .collect { result ->
-                    result.fold(
+                .firstOrNull()?.fold(
                         onSuccess = {
                             _uiState.value = _uiState.value.copy(
                                 isBlocked = false,
@@ -347,7 +328,6 @@ class ProfileViewModel @Inject constructor(
                             onComplete(false, throwable.message ?: "Failed to unblock user")
                         }
                     )
-                }
         }
     }
 
@@ -357,8 +337,7 @@ class ProfileViewModel @Inject constructor(
                 .catch { throwable ->
                     onComplete(false, throwable.message ?: "Failed to flag user")
                 }
-                .collect { result ->
-                    result.fold(
+                .firstOrNull()?.fold(
                         onSuccess = {
                             _uiState.value = _uiState.value.copy(
                                 actionResultMessage = "User flagged as inappropriate"
@@ -369,7 +348,6 @@ class ProfileViewModel @Inject constructor(
                             onComplete(false, throwable.message ?: "Failed to flag user")
                         }
                     )
-                }
         }
     }
 
@@ -379,8 +357,7 @@ class ProfileViewModel @Inject constructor(
                 .catch { throwable ->
                     onComplete(false, throwable.message ?: "Failed to add to network")
                 }
-                .collect { result ->
-                    result.fold(
+                .firstOrNull()?.fold(
                         onSuccess = {
                             _uiState.value = _uiState.value.copy(
                                 actionResultMessage = "Added to your network!"
@@ -391,7 +368,6 @@ class ProfileViewModel @Inject constructor(
                             onComplete(false, throwable.message ?: "Failed to add to network")
                         }
                     )
-                }
         }
     }
 

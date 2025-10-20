@@ -751,23 +751,30 @@ fun EnhancedPortalItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    // Match iOS design: 16:9 ratio for width 144: height = 144 * 9 / 16 = 81
+    val imageWidth = 144.dp
+    val imageHeight = 81.dp
+
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(8.dp)
+            .height(105.dp) // 81 + 24 padding
+            .clickable { onClick() }
+            .background(Color.White, RoundedCornerShape(12.dp))
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.Top
         ) {
-            // Portal Image with proper error handling
+            // Portal Image - 16:9 aspect ratio like iOS
             Box(
                 modifier = Modifier
-                    .size(64.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .width(imageWidth)
+                    .height(imageHeight)
+                    .clip(RoundedCornerShape(3.dp))
                     .background(Color(0xFFE0E0E0))
             ) {
                 val patchedUrl = patchPortalImageUrl(portal.imageUrl)
@@ -785,81 +792,90 @@ fun EnhancedPortalItem(
                     ) {
                         Text(
                             text = portal.name.take(1),
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Gray
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Portal Info
-            Column(modifier = Modifier.weight(1f)) {
+            // Portal Info - Match iOS layout
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                // Portal name - 17sp, semibold, 2 lines max
                 Text(
                     text = portal.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Black,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                
+
+                // Category - 12sp, secondary color
+                if (portal.categoriesId != null) {
+                    Text(
+                        text = "Category ${portal.categoriesId}",
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+                }
+
+                // Subtitle - 17sp, secondary, 2 lines max
                 if (!portal.subtitle.isNullOrBlank()) {
                     Text(
                         text = portal.subtitle,
-                        style = MaterialTheme.typography.bodySmall,
+                        fontSize = 17.sp,
                         color = Color.Gray,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                
-                if (portal.description.isNotBlank()) {
-                    Text(
-                        text = portal.description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.DarkGray,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                
-                // Show leads with profile pictures/initials
-                if (!portal.leads.isNullOrEmpty()) {
-                    Row(
-                        modifier = Modifier.padding(top = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        portal.leads.take(3).forEach { user ->
-                            UserProfileImageThumbnail(user = user, size = 24.dp)
-                            Spacer(modifier = Modifier.width(4.dp))
-                        }
-                        
-                        if ((portal.leads.size > 3)) {
-                            Text(
-                                text = "+${portal.leads.size - 3}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.Gray
-                            )
-                        }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                // Bottom row: City | Lead count
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // City - 12sp, secondary
+                    if (portal.citiesId != null) {
+                        Text(
+                            text = "City ${portal.citiesId}",
+                            fontSize = 12.sp,
+                            color = Color.Gray
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.width(1.dp))
+                    }
+
+                    // Lead count - 12sp, green
+                    if (portal.usersCount != null && portal.usersCount > 0) {
+                        Text(
+                            text = "${portal.usersCount} leads",
+                            fontSize = 12.sp,
+                            color = Color(0xFF00AA00) // iOS green
+                        )
                     }
                 }
             }
-
-            // Safety indicator
-            if (portal.isSafe) {
-                Box(
-                    modifier = Modifier.padding(start = 8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Shield,
-                        contentDescription = "Safe",
-                        tint = Color(0xFF8CC55D),
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
         }
+
+        // Bottom border - 1px gray like iOS
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(Color(0xFFE5E5E5))
+        )
     }
 }
 
