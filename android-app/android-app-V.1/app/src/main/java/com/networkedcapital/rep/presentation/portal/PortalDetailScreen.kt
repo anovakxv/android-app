@@ -78,6 +78,11 @@ fun PortalDetailScreen(
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     
+    // Load portal data when screen opens
+    LaunchedEffect(portalId, userId) {
+        viewModel.loadPortalDetail(portalId, userId)
+    }
+
     // Auto-show fullscreen gallery in landscape mode
     LaunchedEffect(isLandscape) {
         if (isLandscape && !showFullscreenImages && uiState.portalDetail?.aSections?.flatMap { it.aFiles ?: emptyList() }?.isNotEmpty() == true) {

@@ -1,6 +1,7 @@
 package com.networkedcapital.rep.domain.model
 
 import android.os.Parcelable
+import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 
@@ -105,11 +106,11 @@ data class PortalDetail(
     val name: String,
     val subtitle: String? = null,
     val about: String? = null,
-    val categoriesId: Int? = null,
-    val citiesId: Int? = null,
-    val leadId: Int? = null,
-    val usersId: Int? = null,
-    val usersCount: Int? = null,
+    @SerializedName("categories_id") val categoriesId: Int? = null,
+    @SerializedName("cities_id") val citiesId: Int? = null,
+    @SerializedName("lead_id") val leadId: Int? = null,
+    @SerializedName("users_id") val usersId: Int? = null,
+    @SerializedName("_c_users_count") val usersCount: Int? = null,
     val mainImageUrl: String? = null,
     val aGoals: List<Goal>? = null,
     val aPortalUsers: List<PortalUser>? = null,
@@ -127,12 +128,12 @@ data class PortalUser(
 @Parcelize
 data class PortalText(
     val id: Int,
-    val portalId: Int? = null,
+    @SerializedName("portal_id") val portalId: Int? = null,
     val title: String? = null,
     val text: String? = null,
     val section: String? = null,
-    val createdAt: String? = null,
-    val updatedAt: String? = null
+    @SerializedName("created_at") val createdAt: String? = null,
+    @SerializedName("updated_at") val updatedAt: String? = null
 ) : Parcelable
 
 @Parcelize

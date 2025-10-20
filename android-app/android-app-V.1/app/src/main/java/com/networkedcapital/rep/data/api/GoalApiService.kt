@@ -1,5 +1,6 @@
 package com.networkedcapital.rep.data.api
 
+import com.google.gson.annotations.SerializedName
 import com.networkedcapital.rep.domain.model.*
 import retrofit2.Response
 import retrofit2.http.*
@@ -10,7 +11,10 @@ interface GoalApiService {
     suspend fun getGoals(@Query("portal_id") portalId: String? = null): Response<List<Goal>>
     
     @GET(ApiConfig.GOAL_DETAILS)
-    suspend fun getGoalDetails(@Query("goal_id") goalId: String): Response<Goal>
+    suspend fun getGoalDetails(
+        @Query("goals_id") goalId: Int,
+        @Query("num_periods") numPeriods: Int = 7
+    ): Response<GoalDetailResponse>
     
     @POST(ApiConfig.GOAL_CREATE)
     suspend fun createGoal(@Body goal: CreateGoalRequest): Response<Goal>
@@ -27,14 +31,11 @@ interface GoalApiService {
     @POST(ApiConfig.GOAL_TEAM_MANAGE)
     suspend fun manageTeam(@Body request: ManageTeamRequest): Response<Goal>
     
-    @GET("api/goals/user_goals")
-    suspend fun getUserGoals(): Response<List<Goal>>
+    @GET(ApiConfig.GOALS_LIST)
+    suspend fun getUserGoals(@Query("users_id") userId: Int): Response<PortalGoalsApiResponse>
     
-    @POST("api/goals/join")
-    suspend fun joinGoal(@Body request: JoinGoalRequest): Response<Goal>
-    
-    @POST("api/goals/leave")
-    suspend fun leaveGoal(@Body request: LeaveGoalRequest): Response<Goal>
+    @POST("api/goals/join_leave")
+    suspend fun joinOrLeaveGoal(@Body request: JoinLeaveGoalRequest): Response<JoinLeaveGoalResponse>
 }
 
 data class CreateGoalRequest(
@@ -67,10 +68,54 @@ data class ManageTeamRequest(
     val userId: String
 )
 
-data class JoinGoalRequest(
-    val goalId: String
+data class JoinLeaveGoalRequest(
+    val aGoalsIDs: List<Int>,
+    val todo: String  // "join" or "leave"
 )
 
-data class LeaveGoalRequest(
-    val goalId: String
+data class JoinLeaveGoalResponse(
+    val result: Map<Int, String>,  // Map of goalId to result status
+    val team_sizes: Map<Int, Int>? = null  // Map of goalId to team size
+)
+
+data class GoalDetailResponse(
+    val result: GoalDetailData
+)
+
+data class GoalDetailData(
+    val id: Int,
+    val title: String,
+    val subtitle: String? = null,
+    val description: String? = null,
+    val progress: Double? = null,
+    @SerializedName("progress_percent") val progressPercent: Double? = null,
+    val quota: Double? = null,
+    @SerializedName("filled_quota") val filledQuota: Double? = null,
+    val metricName: String? = null,
+    val typeName: String? = null,
+    val reportingName: String? = null,
+    val quotaString: String? = null,
+    val valueString: String? = null,
+    val chartData: List<BarChartData>? = null,
+    val creatorId: Int? = null,
+    val portalId: Int? = null,
+    val portalName: String? = null,
+    val team: List<User>? = null,
+    @SerializedName("aLatestProgress") val aLatestProgress: List<ProgressLog>? = null
+)
+
+data class ProgressLog(
+    val id: Int,
+    @SerializedName("users_id") val usersId: Int? = null,
+    @SerializedName("added_value") val addedValue: Double? = null,
+    val note: String? = null,
+    val value: Double? = null,
+    val timestamp: String? = null,
+    val aAttachments: List<ProgressAttachment>? = null
+)
+
+data class ProgressAttachment(
+    val id: Int,
+    @SerializedName("file_url") val fileUrl: String? = null,
+    @SerializedName("is_image") val isImage: Boolean? = null
 )

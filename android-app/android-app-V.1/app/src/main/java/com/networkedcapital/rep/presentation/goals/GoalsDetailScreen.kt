@@ -33,7 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.networkedcapital.rep.domain.model.BarChartData
 import com.networkedcapital.rep.domain.model.FeedItem
@@ -50,9 +50,9 @@ fun GoalsDetailScreen(
     onMessage: (User) -> Unit,
     onEditGoal: () -> Unit,
     onUpdateGoal: () -> Unit,
-    onNavigateToPortal: (Int) -> Unit = {} // Added portal navigation
+    onNavigateToPortal: (Int) -> Unit = {}, // Added portal navigation
+    viewModel: GoalsDetailViewModel = hiltViewModel()
 ) {
-    val viewModel: GoalsDetailViewModel = viewModel()
     val goal by viewModel.goal.collectAsState()
     val feed by viewModel.feed.collectAsState()
     val team by viewModel.team.collectAsState()

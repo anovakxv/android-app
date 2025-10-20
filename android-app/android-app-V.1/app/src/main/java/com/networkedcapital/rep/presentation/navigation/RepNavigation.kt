@@ -125,7 +125,7 @@ fun RepNavigation(
                         navController.navigate("${Screen.PortalDetail.route}/$portalId/$userId")
                     },
                 onNavigateToPersonDetail = { personId ->
-                    // TODO: Implement navigation to person detail screen
+                    navController.navigate("${Screen.Profile.route}/$personId")
                 },
                 onNavigateToChat = { chatId ->
                     // TODO: Implement navigation to chat screen

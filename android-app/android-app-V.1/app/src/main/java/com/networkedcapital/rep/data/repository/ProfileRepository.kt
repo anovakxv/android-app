@@ -134,9 +134,9 @@ class ProfileRepositoryImpl @Inject constructor(
 
     override suspend fun getUserGoals(userId: Int): Flow<Result<List<Goal>>> = flow {
         try {
-            val response = goalApiService.getUserGoals()
+            val response = goalApiService.getUserGoals(userId)
             if (response.isSuccessful && response.body() != null) {
-                emit(Result.success(response.body()!!))
+                emit(Result.success(response.body()!!.aGoals))
             } else {
                 emit(Result.failure(Exception("Failed to load goals: ${response.message()}")))
             }
