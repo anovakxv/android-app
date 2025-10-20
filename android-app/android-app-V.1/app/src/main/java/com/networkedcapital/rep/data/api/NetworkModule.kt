@@ -106,4 +106,10 @@ object NetworkModule {
     fun provideInviteApiService(retrofit: Retrofit): InviteApiService {
         return retrofit.create(InviteApiService::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideUserApiService(retrofit: Retrofit): UserApiService {
+        return retrofit.create(UserApiService::class.java)
+    }
 }

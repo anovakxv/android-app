@@ -1,161 +1,758 @@
 package com.networkedcapital.rep.presentation.chat
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.networkedcapital.rep.domain.model.GroupMemberModel
+import com.networkedcapital.rep.domain.model.GroupMessageModel
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberUpdatedState
 
-// --- Add missing data classes ---
-data class GroupMember(
-    val id: Int,
-    val name: String,
-    val photoUrl: String?
-)
-
-data class GroupMessage(
-    val id: Int,
-    val senderId: Int,
-    val senderName: String,
-    val senderPhotoUrl: String?,
-    val text: String,
-    val timestamp: String
-)
-// --- End data classes ---
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupChatScreen(
-    groupName: String,
-    groupMembers: List<GroupMember>,
-    messages: List<GroupMessage>,
+    viewModel: GroupChatViewModel = hiltViewModel(),
+    chatId: Int,
     currentUserId: Int,
-    inputText: String,
-    onInputTextChange: (String) -> Unit,
-    onSend: () -> Unit,
-    onBack: () -> Unit
+    onNavigateBack: () -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
-        // Top Bar
-        TopAppBar(
-            title = { Text(groupName, fontWeight = FontWeight.Bold) },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
-                }
-            }
+    val uiState by viewModel.uiState.collectAsState()
+    val shouldScrollToBottom by viewModel.shouldScrollToBottom.collectAsState()
+    val isConnected by viewModel.isConnected.collectAsState()
+    
+    val editSheetState = rememberModalBottomSheetState()
+    val context = LocalContext.current
+    
+    // Initialize and activate chat
+    LaunchedEffect(chatId, currentUserId) {
+        viewModel.initialize(currentUserId, chatId)
+        viewModel.activate()
+    }
+    
+    // Cleanup on dispose
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.deactivate()
+        }
+    }
+    
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+            // Custom iOS-style header
+            GroupChatHeader(
+                title = uiState.groupName,
+                isCreator = uiState.isCreator,
+                onBackClick = onNavigateBack,
+                onEditGroupClick = viewModel::showEditGroupSheet
+            )
+            
+            // Connection status
+            ConnectionStatusBar(isConnected = isConnected)
+            
+            // Group members row
+            GroupMemberRow(
+                members = uiState.groupMembers,
+                onMemberClick = { /* Optional: Show member details */ }
+            )
+            
+            Divider()
+            
+            // Messages list with auto-scrolling
+            MessagesList(
+                messages = uiState.messages,
+                currentUserId = currentUserId,
+                viewModel = viewModel,
+                shouldScrollToBottom = shouldScrollToBottom,
+                modifier = Modifier.weight(1f)
+            )
+            
+            // Growing text input
+            GrowingTextInput(
+                value = uiState.inputText,
+                onValueChange = viewModel::onInputTextChange,
+                onSend = viewModel::sendMessage
+            )
+        }
+        
+        // Error dialog
+        ErrorDialog(
+            error = uiState.error,
+            onDismiss = viewModel::acknowledgeError
         )
-        // Group Members Row
-        LazyRow(
+        
+        // Loading overlay
+        LoadingOverlay(isLoading = uiState.isLoading)
+    }
+    
+    // Group edit sheet
+    if (uiState.showEditSheet) {
+        EditGroupSheet(
+            groupName = uiState.editGroupNameText,
+            onNameChanged = viewModel::onEditGroupNameTextChange,
+            onSave = viewModel::saveEditGroupName,
+            onCancel = viewModel::hideEditGroupSheet,
+            onAddMembers = viewModel::showAddMemberSheet,
+            onRemoveMembers = viewModel::showRemoveMemberSheet,
+            onDelete = viewModel::showDeleteConfirmation,
+            isCreator = uiState.isCreator,
+            onLeave = viewModel::leaveGroup,
+            sheetState = editSheetState
+        )
+    }
+    
+    // Delete confirmation
+    if (uiState.showDeleteConfirmation) {
+        DeleteConfirmationDialog(
+            onConfirm = viewModel::confirmDeleteChat,
+            onDismiss = viewModel::hideDeleteConfirmation
+        )
+    }
+    // Add Members Sheet
+    if (uiState.showAddMemberSheet) {
+        val currentMembers = uiState.groupMembers.map { it.id }.toSet()
+        AddMembersScreen(
+            chatId = chatId,
+            alreadySelected = currentMembers,
+            onMembersSelected = viewModel::onAddMembersSelected,
+            onCancel = viewModel::hideAddMemberSheet
+        )
+    }
+
+    // Remove Members Sheet
+    if (uiState.showRemoveMemberSheet) {
+        RemoveMembersScreen(
+            members = uiState.groupMembers,
+            currentUserId = currentUserId,
+            isCreator = uiState.isCreator,
+            onRemoveMember = viewModel::showRemoveMemberConfirmation,
+            onCancel = viewModel::hideRemoveMemberSheet
+        )
+    }
+
+    // Remove Member Confirmation
+    uiState.memberToRemove?.let { member ->
+        RemoveMemberConfirmationDialog(
+            member = member,
+            onConfirm = viewModel::confirmRemoveMember,
+            onDismiss = viewModel::hideRemoveMemberConfirmation
+        )
+    }
+}
+
+@Composable
+fun GroupChatHeader(
+    title: String,
+    isCreator: Boolean,
+    onBackClick: () -> Unit,
+    onEditGroupClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .background(Color.White)
+            .shadow(elevation = 2.dp)
+    ) {
+        // Back button
+        IconButton(
+            onClick = onBackClick,
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .padding(start = 4.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back",
+                tint = Color(0xFF8CC55D)
+            )
+        }
+        
+        // Title in center
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.align(Alignment.Center)
+        )
+        
+        // Edit button (only for creator)
+        if (isCreator) {
+            IconButton(
+                onClick = onEditGroupClick,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit, 
+                    contentDescription = "Edit Group",
+                    tint = Color(0xFF8CC55D)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ConnectionStatusBar(isConnected: Boolean) {
+    AnimatedVisibility(
+        visible = !isConnected,
+        enter = slideInVertically() + fadeIn(),
+        exit = slideOutVertically() + fadeOut()
+    ) {
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFFF6F6F6))
-                .padding(vertical = 6.dp, horizontal = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                .background(Color.Red.copy(alpha = 0.8f))
+                .padding(4.dp),
+            contentAlignment = Alignment.Center
         ) {
-            items(groupMembers) { member ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    AsyncImage(
-                        model = member.photoUrl,
-                        contentDescription = member.name,
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(Color.Gray.copy(alpha = 0.3f))
-                    )
-                    Text(
-                        member.name,
-                        fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                        maxLines = 1
-                    )
+            Text(
+                "No connection. Reconnecting...",
+                color = Color.White,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+@Composable
+fun GroupMemberRow(
+    members: List<GroupMemberModel>,
+    onMemberClick: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyRow(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(Color(0xFFF9F9F9))
+            .padding(vertical = 8.dp, horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(horizontal = 8.dp)
+    ) {
+        items(members) { member ->
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .width(52.dp)
+                    .clickable { onMemberClick(member.id) }
+            ) {
+                MemberAvatar(
+                    photoUrl = member.photoUrl,
+                    firstName = member.firstName,
+                    lastName = member.lastName,
+                    size = 40.dp
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                // Display name, truncated as needed
+                val displayName = if (member.firstName.length > 10) {
+                    member.firstName.take(8) + "..."
+                } else {
+                    member.firstName
                 }
+                
+                Text(
+                    text = displayName,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.DarkGray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.width(52.dp)
+                )
             }
         }
-        Divider()
-        // Messages
-        LazyColumn(
-            modifier = Modifier.weight(1f).padding(horizontal = 12.dp, vertical = 8.dp),
-            reverseLayout = false
-        ) {
-            items(messages) { msg ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = if (msg.senderId == currentUserId) Arrangement.End else Arrangement.Start
-                ) {
-                    if (msg.senderId != currentUserId) {
-                        AsyncImage(
-                            model = msg.senderPhotoUrl,
-                            contentDescription = msg.senderName,
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(CircleShape)
-                                .background(Color.Gray.copy(alpha = 0.3f))
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-                    Column(horizontalAlignment = if (msg.senderId == currentUserId) Alignment.End else Alignment.Start) {
-                        if (msg.senderId != currentUserId) {
-                            Text(
-                                msg.senderName,
-                                fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                                color = Color.Gray
-                            )
-                        }
-                        Surface(
-                            color = if (msg.senderId == currentUserId) Color(0xFF00C853) else Color(0xFFF2F2F2),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Text(
-                                msg.text,
-                                modifier = Modifier.padding(10.dp),
-                                color = if (msg.senderId == currentUserId) Color.White else Color.Black
-                            )
-                        }
-                        Text(
-                            msg.timestamp,
-                            fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                            color = Color.Gray
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+    }
+}
+
+@Composable
+fun MemberAvatar(
+    photoUrl: String?,
+    firstName: String?,
+    lastName: String?,
+    size: Dp,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(Color(0xFFE0E0E0)),
+        contentAlignment = Alignment.Center
+    ) {
+        if (!photoUrl.isNullOrEmpty()) {
+            AsyncImage(
+                model = photoUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            // Display initials
+            val initials = buildString {
+                firstName?.firstOrNull()?.let { append(it) }
+                lastName?.firstOrNull()?.let { append(it) }
+            }.uppercase().take(2)
+            
+            Text(
+                text = initials,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.DarkGray,
+                fontWeight = FontWeight.Medium
+            )
         }
-        // Input Bar
+    }
+}
+
+@Composable
+fun MessagesList(
+    messages: List<GroupMessageModel>,
+    currentUserId: Int,
+    viewModel: GroupChatViewModel,
+    shouldScrollToBottom: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val listState = rememberLazyListState()
+    
+    // Auto scroll to bottom on new messages
+    LaunchedEffect(shouldScrollToBottom, messages.size) {
+        if (shouldScrollToBottom && messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.size - 1)
+        }
+    }
+    
+    // Auto scroll on init if messages present
+    LaunchedEffect(Unit) {
+        if (messages.isNotEmpty()) {
+            listState.scrollToItem(messages.size - 1)
+        }
+    }
+    
+    LazyColumn(
+        state = listState,
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(vertical = 8.dp)
+    ) {
+        items(messages) { message ->
+            val isFromCurrentUser = message.senderId == currentUserId
+            val formattedTime = viewModel.formatTimestamp(message.timestamp)
+            
+            MessageBubble(
+                message = message,
+                isFromCurrentUser = isFromCurrentUser,
+                formattedTime = formattedTime,
+                viewModel = viewModel
+            )
+        }
+    }
+}
+
+@Composable
+fun MessageBubble(
+    message: GroupMessageModel,
+    isFromCurrentUser: Boolean,
+    formattedTime: String,
+    viewModel: GroupChatViewModel,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.White)
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(vertical = 4.dp),
+            horizontalArrangement = if (isFromCurrentUser) Arrangement.End else Arrangement.Start
         ) {
-            OutlinedTextField(
-                value = inputText,
-                onValueChange = onInputTextChange,
-                placeholder = { Text("Type a message...") },
-                modifier = Modifier.weight(1f),
-                singleLine = true
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(
-                onClick = onSend,
-                enabled = inputText.trim().isNotEmpty()
-            ) {
-                Text("Send")
+            if (!isFromCurrentUser) {
+                // Sender Avatar
+                Box(
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFE0E0E0)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    val senderPhotoUrl = message.senderPhotoUrl
+                    if (!senderPhotoUrl.isNullOrEmpty()) {
+                        AsyncImage(
+                            model = senderPhotoUrl,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        // Display initials if no photo
+                        val nameParts = message.senderName.split(" ")
+                        val initials = buildString {
+                            if (nameParts.isNotEmpty() && nameParts[0].isNotEmpty()) {
+                                append(nameParts[0][0])
+                            }
+                            if (nameParts.size > 1 && nameParts[1].isNotEmpty()) {
+                                append(nameParts[1][0])
+                            }
+                        }.uppercase().take(2)
+                        
+                        Text(
+                            text = initials,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.DarkGray
+                        )
+                    }
+                }
             }
+            
+            Column(
+                horizontalAlignment = if (isFromCurrentUser) Alignment.End else Alignment.Start
+            ) {
+                // Sender name (only for messages from others)
+                if (!isFromCurrentUser) {
+                    Text(
+                        text = message.senderName,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(bottom = 2.dp, start = 4.dp)
+                    )
+                }
+                
+                // Message bubble
+                Box(
+                    modifier = Modifier.clip(
+                        RoundedCornerShape(
+                            topStart = if (isFromCurrentUser) 12.dp else 4.dp,
+                            topEnd = if (isFromCurrentUser) 4.dp else 12.dp,
+                            bottomStart = 12.dp,
+                            bottomEnd = 12.dp
+                        )
+                    )
+                ) {
+                    Surface(
+                        color = if (isFromCurrentUser) Color.Black else Color(0xFFF0F0F0),
+                        shape = RoundedCornerShape(
+                            topStart = if (isFromCurrentUser) 12.dp else 4.dp,
+                            topEnd = if (isFromCurrentUser) 4.dp else 12.dp,
+                            bottomStart = 12.dp,
+                            bottomEnd = 12.dp
+                        )
+                    ) {
+                        Text(
+                            text = message.text,
+                            color = if (isFromCurrentUser) Color(0xFF8CC55D) else Color.Black, // Green for own messages on black background
+                            modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+                
+                // Timestamp
+                Text(
+                    text = formattedTime,
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                    color = Color.Gray,
+                    modifier = Modifier.padding(top = 2.dp, start = 4.dp, end = 4.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun GrowingTextInput(
+    value: String,
+    onValueChange: (String) -> Unit,
+    onSend: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val density = LocalDensity.current
+    val lineHeight = MaterialTheme.typography.bodyLarge.lineHeight.value * density.density
+    
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(Color(0xFFF9F9F9))
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.Bottom
+    ) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .background(Color.White, RoundedCornerShape(18.dp))
+                .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(18.dp))
+        ) {
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .heightIn(min = 36.dp, max = lineHeight.dp * 4), // Max 4 lines
+                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                    color = Color.Black
+                ),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Send
+                ),
+                keyboardActions = KeyboardActions(
+                    onSend = {
+                        if (value.trim().isNotEmpty()) {
+                            onSend()
+                        }
+                    }
+                ),
+                decorationBox = { innerTextField ->
+                    Box(
+                        contentAlignment = Alignment.CenterStart,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        if (value.isEmpty()) {
+                            Text(
+                                "Message...",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Color.Gray
+                            )
+                        }
+                        innerTextField()
+                    }
+                }
+            )
+        }
+        
+        Spacer(modifier = Modifier.width(8.dp))
+        
+        // iOS-style send button
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .background(
+                    if (value.trim().isEmpty()) Color(0xFFE0E0E0) else Color(0xFF8CC55D),
+                    CircleShape
+                )
+                .clickable(enabled = value.trim().isNotEmpty()) {
+                    if (value.trim().isNotEmpty()) {
+                        onSend()
+                    }
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Send,
+                contentDescription = "Send",
+                tint = if (value.trim().isEmpty()) Color.Gray else Color.White,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditGroupSheet(
+    groupName: String,
+    onNameChanged: (String) -> Unit,
+    onSave: () -> Unit,
+    onCancel: () -> Unit,
+    onAddMembers: () -> Unit,
+    onRemoveMembers: () -> Unit,
+    onDelete: () -> Unit,
+    isCreator: Boolean,
+    onLeave: () -> Unit,
+    sheetState: SheetState,
+    modifier: Modifier = Modifier
+) {
+    ModalBottomSheet(
+        onDismissRequest = onCancel,
+        sheetState = sheetState,
+        containerColor = Color.White
+    ) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Edit Group",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            
+            OutlinedTextField(
+                value = groupName,
+                onValueChange = onNameChanged,
+                label = { Text("Group Name") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            
+            Button(
+                onClick = onSave,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF8CC55D)
+                ),
+                enabled = groupName.trim().isNotEmpty()
+            ) {
+                Text("Save Changes")
+            }
+            
+            Button(
+                onClick = onAddMembers,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF8CC55D)
+                )
+            ) {
+                Text("Add Members")
+            }
+            
+            if (isCreator) {
+                Button(
+                    onClick = onRemoveMembers,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color(0xFF8CC55D)
+                    ),
+                    border = BorderStroke(1.dp, Color(0xFF8CC55D))
+                ) {
+                    Text("Remove Members")
+                }
+                
+                Button(
+                    onClick = onDelete,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Red
+                    ),
+                    border = BorderStroke(1.dp, Color.Red)
+                ) {
+                    Text("Delete Group")
+                }
+            } else {
+                Button(
+                    onClick = onLeave,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Red
+                    ),
+                    border = BorderStroke(1.dp, Color.Red)
+                ) {
+                    Text("Leave Group")
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+fun DeleteConfirmationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Delete Group?") },
+        text = { Text("This will permanently delete the group for all members and cannot be undone.") },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+            ) {
+                Text("Delete")
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+fun ErrorDialog(
+    error: String?,
+    onDismiss: () -> Unit
+) {
+    if (error != null) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Error") },
+            text = { Text(error) },
+            confirmButton = {
+                Button(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8CC55D))
+                ) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun LoadingOverlay(isLoading: Boolean) {
+    if (isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f)),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                color = Color(0xFF8CC55D)
+            )
         }
     }
 }
