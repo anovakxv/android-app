@@ -534,7 +534,9 @@ class MainViewModel @Inject constructor(
                 .firstOrNull()
                 ?.getOrNull()
                 ?.let { user ->
-                    _uiState.update { state -> state.copy(currentUser = user) }
+                    // Patch current user's profile picture with S3 URL
+                    val patchedUser = patchUserImage(user)
+                    _uiState.update { state -> state.copy(currentUser = patchedUser) }
                 }
         } catch (e: Exception) {
             // Ignore error, user will remain null

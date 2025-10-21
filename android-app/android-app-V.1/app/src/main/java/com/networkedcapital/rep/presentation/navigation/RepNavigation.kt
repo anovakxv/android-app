@@ -163,15 +163,15 @@ fun RepNavigation(
             )
         }
         
-        composable("${Screen.PortalDetail.route}/{portalId}/{portalName}") { backStackEntry ->
+        composable("${Screen.PortalDetail.route}/{portalId}/{userId}") { backStackEntry ->
             val portalId = backStackEntry.arguments?.getString("portalId")?.toIntOrNull() ?: 0
-            val portalName = backStackEntry.arguments?.getString("portalName") ?: "Portal"
+            val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull() ?: authState.userId
             val viewModel: com.networkedcapital.rep.presentation.portal.PortalDetailViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsState()
 
             com.networkedcapital.rep.presentation.portal.PortalDetailScreen(
                 uiState = uiState,
-                userId = authState.userId,
+                userId = userId,
                 portalId = portalId,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToGoal = { goalId ->
@@ -385,8 +385,8 @@ sealed class Screen(val route: String) {
     object EditProfile : Screen("edit_profile")
     object Main : Screen("main")
     object Profile : Screen("profile")
-    object PortalDetail : Screen("portal_detail/{portalId}/{portalName}") {
-        fun createRoute(portalId: Int, portalName: String) = "portal_detail/$portalId/$portalName"
+    object PortalDetail : Screen("portal_detail/{portalId}/{userId}") {
+        fun createRoute(portalId: Int, userId: Int) = "portal_detail/$portalId/$userId"
     }
     object GoalDetail : Screen("goal_detail")
     object ApiTest : Screen("api_test")

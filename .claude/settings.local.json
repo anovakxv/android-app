@@ -18,7 +18,8 @@
       "Read(//c/**)",
       "Bash(adb logcat -d)",
       "Bash(tee compile_output.txt)",
-      "Bash(find android-app/android-app-V.1/Python_Backend -name \"*.py\" -type f -exec grep -l \"api/user/profile\" {} ;)"
+      "Bash(find android-app/android-app-V.1/Python_Backend -name \"*.py\" -type f -exec grep -l \"api/user/profile\" {} ;)",
+      "Bash(./gradlew clean compileDebugKotlin)"
     ],
     "deny": [],
     "ask": []
