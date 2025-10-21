@@ -2,6 +2,7 @@ package com.networkedcapital.rep.domain.model
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import com.google.gson.annotations.JsonAdapter
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 
@@ -28,6 +29,7 @@ data class User(
     val created_at: String? = null,
     val updated_at: String? = null,
     val profile_picture_url: String? = null,
+    @JsonAdapter(SkillsDeserializer::class)
     val skills: List<String>? = null,
     val userType: UserType? = null,
     // Additional fields from iOS app

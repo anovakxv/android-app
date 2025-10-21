@@ -89,11 +89,14 @@ class MainViewModel @Inject constructor(
     }
 
     /**
-     * Patches a portal's mainImageUrl.
+     * Patches a portal's mainImageUrl and copies it to imageUrl.
+     * Backend returns mainImageUrl, but UI uses imageUrl, so we must copy it over.
      */
     private fun patchPortalImage(portal: Portal): Portal {
+        val patchedMainImage = patchImageUrl(portal.mainImageUrl)
         return portal.copy(
-            mainImageUrl = patchImageUrl(portal.mainImageUrl)
+            mainImageUrl = patchedMainImage,
+            imageUrl = patchedMainImage  // Copy mainImageUrl to imageUrl for UI compatibility
         )
     }
 

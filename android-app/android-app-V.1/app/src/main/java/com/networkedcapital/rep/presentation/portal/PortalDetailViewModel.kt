@@ -59,62 +59,51 @@ class PortalDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            try {
-                // Load portal detail
-                portalRepository.getPortalDetail(portalId, userId).firstOrNull()?.fold(
-                    onSuccess = { portalDetail ->
-                        val patchedPortalDetail = patchPortalDetailImages(portalDetail)
-                        android.util.Log.d("PortalDetailViewModel", "Loaded portal detail: $patchedPortalDetail")
-                        _uiState.update {
-                            it.copy(
-                                portalDetail = patchedPortalDetail,
-                                isLoading = false
-                            )
-                        }
+            // Load portal detail
+            portalRepository.getPortalDetail(portalId, userId).firstOrNull()?.fold(
+                onSuccess = { portalDetail ->
+                    val patchedPortalDetail = patchPortalDetailImages(portalDetail)
+                    android.util.Log.d("PortalDetailViewModel", "Loaded portal detail: $patchedPortalDetail")
+                    _uiState.update {
+                        it.copy(
+                            portalDetail = patchedPortalDetail,
+                            isLoading = false
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    android.util.Log.e("PortalDetailViewModel", "Error loading portal detail: ${error.message}", error)
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = error.message
+                        )
+                    }
+                }
+            )
+
+            // Load portal goals
+            portalRepository.getPortalGoals(portalId).firstOrNull()?.fold(
+                onSuccess = { goals ->
+                    android.util.Log.d("PortalDetailViewModel", "Loaded portal goals: $goals")
+                    _uiState.update { it.copy(portalGoals = goals) }
+                },
+                onFailure = { error ->
+                    android.util.Log.e("PortalDetailViewModel", "Error loading portal goals: ${error.message}", error)
+                }
+            )
+
+            // Load reporting increments if needed
+            if (_uiState.value.reportingIncrements.isEmpty()) {
+                portalRepository.getReportingIncrements().firstOrNull()?.fold(
+                    onSuccess = { increments ->
+                        android.util.Log.d("PortalDetailViewModel", "Loaded reporting increments: $increments")
+                        _uiState.update { it.copy(reportingIncrements = increments) }
                     },
                     onFailure = { error ->
-                        android.util.Log.e("PortalDetailViewModel", "Error loading portal detail: ${error.message}", error)
-                        _uiState.update {
-                            it.copy(
-                                isLoading = false,
-                                error = error.message
-                            )
-                        }
+                        android.util.Log.e("PortalDetailViewModel", "Error loading reporting increments: ${error.message}", error)
                     }
                 )
-
-                // Load portal goals
-                portalRepository.getPortalGoals(portalId).firstOrNull()?.fold(
-                    onSuccess = { goals ->
-                        android.util.Log.d("PortalDetailViewModel", "Loaded portal goals: $goals")
-                        _uiState.update { it.copy(portalGoals = goals) }
-                    },
-                    onFailure = { error ->
-                        android.util.Log.e("PortalDetailViewModel", "Error loading portal goals: ${error.message}", error)
-                    }
-                )
-
-                // Load reporting increments if needed
-                if (_uiState.value.reportingIncrements.isEmpty()) {
-                    portalRepository.getReportingIncrements().firstOrNull()?.fold(
-                        onSuccess = { increments ->
-                            android.util.Log.d("PortalDetailViewModel", "Loaded reporting increments: $increments")
-                            _uiState.update { it.copy(reportingIncrements = increments) }
-                        },
-                        onFailure = { error ->
-                            android.util.Log.e("PortalDetailViewModel", "Error loading reporting increments: ${error.message}", error)
-                        }
-                    )
-                }
-
-            } catch (e: Exception) {
-                android.util.Log.e("PortalDetailViewModel", "Exception in loadPortalDetail: ${e.message}", e)
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = e.message
-                    )
-                }
             }
         }
     }
@@ -125,30 +114,22 @@ class PortalDetailViewModel @Inject constructor(
 
     fun flagPortal(portalId: Int, reason: String = "") {
         viewModelScope.launch {
-            try {
-                portalRepository.flagPortal(portalId, reason).firstOrNull()?.fold(
-                    onSuccess = {
-                        _uiState.update {
-                            it.copy(
-                                flagResult = "Portal flagged. Thank you for your report."
-                            )
-                        }
-                    },
-                    onFailure = { error ->
-                        _uiState.update {
-                            it.copy(
-                                    flagResult = error.message ?: "Failed to flag portal."
-                                )
-                            }
-                        }
-                    )
-            } catch (e: Exception) {
-                _uiState.update { 
-                    it.copy(
-                        flagResult = e.message ?: "Failed to flag portal."
-                    )
+            portalRepository.flagPortal(portalId, reason).firstOrNull()?.fold(
+                onSuccess = {
+                    _uiState.update {
+                        it.copy(
+                            flagResult = "Portal flagged. Thank you for your report."
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(
+                            flagResult = error.message ?: "Failed to flag portal."
+                        )
+                    }
                 }
-            }
+            )
         }
     }
 
