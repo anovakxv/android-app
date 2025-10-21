@@ -149,7 +149,7 @@ fun RepNavigation(
                     navController.navigate(Screen.Settings.route)
                 },
                 onNavigateToPortal = { portalId ->
-                    navController.navigate(Screen.PortalDetail.createRoute(portalId, "Portal"))
+                    navController.navigate(Screen.PortalDetail.createRoute(portalId, authState.userId))
                 },
                 onNavigateToGoal = { goalId ->
                     navController.navigate("${Screen.GoalDetail.route}/$goalId")
