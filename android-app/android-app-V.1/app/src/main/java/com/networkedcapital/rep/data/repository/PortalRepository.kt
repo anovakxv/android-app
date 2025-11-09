@@ -1,9 +1,12 @@
 package com.networkedcapital.rep.data.repository
 
 import com.networkedcapital.rep.data.api.*
+import com.networkedcapital.rep.data.local.dao.*
+import com.networkedcapital.rep.data.local.entity.*
 import com.networkedcapital.rep.domain.model.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import javax.inject.Inject
@@ -11,7 +14,11 @@ import javax.inject.Singleton
 
 @Singleton
 class PortalRepository @Inject constructor(
-    private val portalApiService: PortalApiService
+    private val portalApiService: PortalApiService,
+    private val portalDao: PortalDao,
+    private val userDao: UserDao,
+    private val activeChatDao: ActiveChatDao,
+    private val goalDao: GoalDao
 ) {
 
     suspend fun getPortals(): Flow<Result<List<Portal>>> = flow {
@@ -29,34 +36,81 @@ class PortalRepository @Inject constructor(
     }
 
     suspend fun getFilteredPortals(userId: Int, tab: String, safeOnly: Boolean = false): List<Portal> {
-        val limitParam = if (tab == "all") 50 else null
-        val response = portalApiService.getFilteredPortals(userId, tab, limitParam, safeOnly)
-        
-        if (response.isSuccessful) {
-            return response.body()?.result ?: emptyList()
-        } else {
-            throw Exception("Failed to get filtered portals: ${response.message()}")
+        return try {
+            // Try network first
+            val limitParam = if (tab == "all") 50 else null
+            val response = portalApiService.getFilteredPortals(userId, tab, limitParam, safeOnly)
+
+            if (response.isSuccessful) {
+                val portals = response.body()?.result ?: emptyList()
+                // Cache portals in Room
+                val entities = portals.map { PortalEntity.fromDomainModel(it) }
+                portalDao.insertPortals(entities)
+                portals
+            } else {
+                // On network error, try to load from cache
+                val cachedEntities = if (safeOnly) {
+                    portalDao.getPortalsBySafeStatus(true)
+                } else {
+                    portalDao.getAllPortals()
+                }
+                cachedEntities.map { it.toDomainModel() }
+            }
+        } catch (e: Exception) {
+            // On exception, fallback to cache
+            val cachedEntities = if (safeOnly) {
+                portalDao.getPortalsBySafeStatus(true)
+            } else {
+                portalDao.getAllPortals()
+            }
+            cachedEntities.map { it.toDomainModel() }
         }
     }
 
     suspend fun getFilteredPeople(userId: Int, tab: String): List<User> {
-        val limitParam = if (tab == "all") 50 else null
-        val response = portalApiService.getFilteredPeople(userId, tab, limitParam)
-        
-        if (response.isSuccessful) {
-            return response.body()?.result ?: emptyList()
-        } else {
-            throw Exception("Failed to get filtered people: ${response.message()}")
+        return try {
+            // Try network first
+            val limitParam = if (tab == "all") 50 else null
+            val response = portalApiService.getFilteredPeople(userId, tab, limitParam)
+
+            if (response.isSuccessful) {
+                val users = response.body()?.result ?: emptyList()
+                // Cache users in Room
+                val entities = users.map { UserEntity.fromDomainModel(it) }
+                userDao.insertUsers(entities)
+                users
+            } else {
+                // On network error, try to load from cache
+                val cachedEntities = userDao.getAllUsers()
+                cachedEntities.map { it.toDomainModel() }
+            }
+        } catch (e: Exception) {
+            // On exception, fallback to cache
+            val cachedEntities = userDao.getAllUsers()
+            cachedEntities.map { it.toDomainModel() }
         }
     }
 
     suspend fun getActiveChats(userId: Int): List<ActiveChat> {
-        val response = portalApiService.getActiveChats(userId)
-        
-        if (response.isSuccessful) {
-            return response.body()?.result ?: emptyList()
-        } else {
-            throw Exception("Failed to get active chats: ${response.message()}")
+        return try {
+            // Try network first
+            val response = portalApiService.getActiveChats(userId)
+
+            if (response.isSuccessful) {
+                val chats = response.body()?.result ?: emptyList()
+                // Cache active chats in Room
+                val entities = chats.map { ActiveChatEntity.fromDomainModel(it) }
+                activeChatDao.insertChats(entities)
+                chats
+            } else {
+                // On network error, try to load from cache
+                val cachedEntities = activeChatDao.getAllChats()
+                cachedEntities.map { it.toDomainModel() }
+            }
+        } catch (e: Exception) {
+            // On exception, fallback to cache
+            val cachedEntities = activeChatDao.getAllChats()
+            cachedEntities.map { it.toDomainModel() }
         }
     }
 
@@ -267,15 +321,27 @@ class PortalRepository @Inject constructor(
             if (response.isSuccessful) {
                 val goalsResponse = response.body()
                 if (goalsResponse != null) {
-                    emit(Result.success(goalsResponse.aGoals))
+                    val goals = goalsResponse.aGoals
+                    // Cache goals in Room
+                    val entities = goals.map { GoalEntity.fromDomainModel(it) }
+                    goalDao.insertGoals(entities)
+                    emit(Result.success(goals))
                 } else {
                     emit(Result.success(emptyList()))
                 }
             } else {
-                emit(Result.failure(Exception("Failed to get portal goals: ${response.message()}")))
+                // On network error, try to load from cache
+                val cachedEntities = goalDao.getGoalsByPortalId(portalId)
+                emit(Result.success(cachedEntities.map { it.toDomainModel() }))
             }
         } catch (e: Exception) {
-            emit(Result.failure(e))
+            // On exception, fallback to cache
+            try {
+                val cachedEntities = goalDao.getGoalsByPortalId(portalId)
+                emit(Result.success(cachedEntities.map { it.toDomainModel() }))
+            } catch (cacheException: Exception) {
+                emit(Result.failure(e))
+            }
         }
     }
 
@@ -304,6 +370,33 @@ class PortalRepository @Inject constructor(
             }
         } catch (e: Exception) {
             emit(Result.failure(e))
+        }
+    }
+
+    /**
+     * Get cached portals as a Flow for reactive UI updates
+     */
+    fun getCachedPortalsFlow(): Flow<List<Portal>> {
+        return portalDao.getAllPortalsFlow().map { entities ->
+            entities.map { it.toDomainModel() }
+        }
+    }
+
+    /**
+     * Get cached users as a Flow for reactive UI updates
+     */
+    fun getCachedUsersFlow(): Flow<List<User>> {
+        return userDao.getAllUsersFlow().map { entities ->
+            entities.map { it.toDomainModel() }
+        }
+    }
+
+    /**
+     * Get cached active chats as a Flow for reactive UI updates
+     */
+    fun getCachedActiveChatsFlow(): Flow<List<ActiveChat>> {
+        return activeChatDao.getAllChatsFlow().map { entities ->
+            entities.map { it.toDomainModel() }
         }
     }
 }

@@ -2,13 +2,17 @@ package com.networkedcapital.rep.data.repository
 
 import com.networkedcapital.rep.domain.model.User
 import com.networkedcapital.rep.data.api.UserApiService
+import com.networkedcapital.rep.data.local.dao.UserDao
+import com.networkedcapital.rep.data.local.entity.UserEntity
 import com.networkedcapital.rep.presentation.settings.NotificationSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
-    private val userApiService: UserApiService
+    private val userApiService: UserApiService,
+    private val userDao: UserDao
 ) : UserRepository {
 
     override suspend fun getNetworkUsersNotInChat(chatId: Int): List<User> {
@@ -43,9 +47,26 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun getNetworkMembers(): Flow<Result<List<User>>> = flow {
         try {
             val response = userApiService.getNetworkMembers()
-            emit(Result.success(response.result))
+            val users = response.result
+
+            // Cache users in Room
+            val entities = users.map { UserEntity.fromDomainModel(it) }
+            userDao.insertUsers(entities)
+
+            emit(Result.success(users))
         } catch (e: Exception) {
-            emit(Result.failure(e))
+            // On exception, try to load from cache
+            try {
+                val cachedEntities = userDao.getAllUsers()
+                val cachedUsers = cachedEntities.map { it.toDomainModel() }
+                if (cachedUsers.isNotEmpty()) {
+                    emit(Result.success(cachedUsers))
+                } else {
+                    emit(Result.failure(e))
+                }
+            } catch (cacheException: Exception) {
+                emit(Result.failure(e))
+            }
         }
     }
 
@@ -73,5 +94,21 @@ class UserRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             emit(Result.failure(e))
         }
+    }
+
+    /**
+     * Get cached users as a Flow for reactive UI updates
+     */
+    fun getCachedUsersFlow(): Flow<List<User>> {
+        return userDao.getAllUsersFlow().map { entities ->
+            entities.map { it.toDomainModel() }
+        }
+    }
+
+    /**
+     * Search cached users by name
+     */
+    suspend fun searchCachedUsers(query: String): List<User> {
+        return userDao.searchUsersByName(query).map { it.toDomainModel() }
     }
 }

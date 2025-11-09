@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -42,7 +44,7 @@ fun RepNavigation(
     modifier: Modifier = Modifier
 ) {
     val authState by authViewModel.authState.collectAsState()
-    
+
     NavHost(
         navController = navController,
         startDestination = when {
@@ -103,7 +105,7 @@ fun RepNavigation(
                 }
             )
         }
-        
+
         composable(Screen.Onboarding.route) {
             TermsOfUseScreen(
                 onAccept = {
@@ -123,16 +125,16 @@ fun RepNavigation(
                 }
             )
         }
-        
+
         composable(Screen.Main.route) {
             MainScreen(
                 onNavigateToProfile = { userId ->
                     navController.navigate("${Screen.Profile.route}/$userId")
                 },
-                    onNavigateToPortalDetail = { portalId ->
-                        val userId = authState.userId
-                        navController.navigate("${Screen.PortalDetail.route}/$portalId/$userId")
-                    },
+                onNavigateToPortalDetail = { portalId ->
+                    val userId = authState.userId
+                    navController.navigate("${Screen.PortalDetail.route}/$portalId/$userId")
+                },
                 onNavigateToPersonDetail = { personId ->
                     navController.navigate("${Screen.Profile.route}/$personId")
                 },
@@ -146,9 +148,19 @@ fun RepNavigation(
                 }
             )
         }
-        
+
         composable("${Screen.Profile.route}/{userId}") { backStackEntry ->
-            val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull() ?: 0
+            val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull()
+
+            // Safety check - if userId is invalid, go back
+            if (userId == null || userId <= 0) {
+                android.util.Log.w("RepNavigation", "Invalid userId for ProfileScreen")
+                LaunchedEffect(Unit) {
+                    navController.popBackStack()
+                }
+                return@composable
+            }
+
             ProfileScreen(
                 userId = userId,
                 onNavigateBack = {
@@ -171,16 +183,36 @@ fun RepNavigation(
                 }
             )
         }
-        
+
         composable("${Screen.PortalDetail.route}/{portalId}/{userId}") { backStackEntry ->
-            val portalId = backStackEntry.arguments?.getString("portalId")?.toIntOrNull() ?: 0
-            val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull() ?: authState.userId
+            val portalId = backStackEntry.arguments?.getString("portalId")?.toIntOrNull()
+            val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull()
+
+            // Safety check - if parameters are invalid, go back
+            if (portalId == null || portalId <= 0) {
+                android.util.Log.w("RepNavigation", "Invalid portalId for PortalDetailScreen")
+                LaunchedEffect(Unit) {
+                    navController.popBackStack()
+                }
+                return@composable
+            }
+
+            val finalUserId = userId ?: authState.userId
             val viewModel: com.networkedcapital.rep.presentation.portal.PortalDetailViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsState()
 
+            // Initialize data loading when screen first loads - THIS WAS MISSING!
+            LaunchedEffect(portalId, finalUserId) {
+                try {
+                    viewModel.loadPortalDetail(portalId, finalUserId)
+                } catch (e: Exception) {
+                    android.util.Log.e("RepNavigation", "Error loading portal detail data", e)
+                }
+            }
+
             com.networkedcapital.rep.presentation.portal.PortalDetailScreen(
                 uiState = uiState,
-                userId = userId,
+                userId = finalUserId,
                 portalId = portalId,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToGoal = { goalId ->
@@ -203,10 +235,25 @@ fun RepNavigation(
         }
 
         composable("${Screen.GoalDetail.route}/{goalId}") { backStackEntry ->
-            val goalId = backStackEntry.arguments?.getString("goalId")?.toIntOrNull() ?: 0
+            val goalId = backStackEntry.arguments?.getString("goalId")?.toIntOrNull()
+
+            // Safety check - if goalId is invalid, go back
+            if (goalId == null || goalId <= 0) {
+                android.util.Log.w("RepNavigation", "Invalid goalId for GoalDetailScreen")
+                LaunchedEffect(Unit) {
+                    navController.popBackStack()
+                }
+                return@composable
+            }
+
             // TODO: Replace with your actual GoalDetailScreen implementation
-            // For now, show an empty Box to avoid syntax errors
-            Box(modifier = Modifier.fillMaxSize())
+            // For now, show a placeholder with the goalId
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Goal Detail Screen - ID: $goalId\n\n(Coming soon)")
+            }
         }
 
         // Payments Screen
@@ -282,7 +329,7 @@ fun RepNavigation(
                 navArgument("userId") { type = NavType.IntType }
             )
         ) { backStackEntry ->
-            val userId = backStackEntry.arguments?.getInt("userId") ?: 0
+            val userId = backStackEntry.arguments?.getInt("userId") ?: authState.userId
 
             InvitesScreen(
                 userId = userId,

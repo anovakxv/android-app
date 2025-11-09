@@ -1,16 +1,20 @@
 package com.networkedcapital.rep.data.repository
 
 import com.networkedcapital.rep.data.api.*
+import com.networkedcapital.rep.data.local.dao.GoalDao
+import com.networkedcapital.rep.data.local.entity.GoalEntity
 import com.networkedcapital.rep.domain.model.ReportingIncrement
 import com.networkedcapital.rep.domain.model.Goal
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class GoalRepository @Inject constructor(
-    private val goalApiService: GoalApiService
+    private val goalApiService: GoalApiService,
+    private val goalDao: GoalDao
 ) {
 
     suspend fun getReportingIncrements(): Flow<Result<List<ReportingIncrement>>> = flow {
@@ -58,6 +62,7 @@ class GoalRepository @Inject constructor(
             if (response.isSuccessful) {
                 val goalResponse = response.body()
                 if (goalResponse?.result != null) {
+                    // Note: Can't cache here without full goal object from API
                     emit(Result.success(goalResponse.result))
                 } else if (goalResponse?.error != null) {
                     emit(Result.failure(Exception(goalResponse.error)))
@@ -101,6 +106,7 @@ class GoalRepository @Inject constructor(
             if (response.isSuccessful) {
                 val goalResponse = response.body()
                 if (goalResponse?.result != null) {
+                    // Note: Can't cache here without full goal object from API
                     emit(Result.success(goalResponse.result))
                 } else if (goalResponse?.error != null) {
                     emit(Result.failure(Exception(goalResponse.error)))
@@ -113,5 +119,28 @@ class GoalRepository @Inject constructor(
         } catch (e: Exception) {
             emit(Result.failure(e))
         }
+    }
+
+    /**
+     * Get cached goals as a Flow for reactive UI updates
+     */
+    fun getCachedGoalsFlow(): Flow<List<Goal>> {
+        return goalDao.getAllGoalsFlow().map { entities ->
+            entities.map { it.toDomainModel() }
+        }
+    }
+
+    /**
+     * Get cached goals by portal ID
+     */
+    suspend fun getCachedGoalsByPortalId(portalId: Int): List<Goal> {
+        return goalDao.getGoalsByPortalId(portalId).map { it.toDomainModel() }
+    }
+
+    /**
+     * Get cached goal by ID
+     */
+    suspend fun getCachedGoalById(goalId: Int): Goal? {
+        return goalDao.getGoalById(goalId)?.toDomainModel()
     }
 }
