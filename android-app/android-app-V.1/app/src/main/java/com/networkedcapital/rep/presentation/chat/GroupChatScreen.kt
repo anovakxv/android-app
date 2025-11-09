@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -95,7 +96,7 @@ fun GroupChatScreen(
                 onMemberClick = { /* Optional: Show member details */ }
             )
             
-            Divider()
+            HorizontalDivider()
             
             // Messages list with auto-scrolling
             MessagesList(
@@ -202,7 +203,7 @@ fun GroupChatHeader(
                 .padding(start = 4.dp)
         ) {
             Icon(
-                imageVector = Icons.Default.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
                 tint = Color(0xFF8CC55D)
             )
@@ -576,7 +577,7 @@ fun GrowingTextInput(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Default.Send,
+                imageVector = Icons.AutoMirrored.Filled.Send,
                 contentDescription = "Send",
                 tint = if (value.trim().isEmpty()) Color.Gray else Color.White,
                 modifier = Modifier.size(20.dp)

@@ -235,5 +235,25 @@ class AuthRepository @Inject constructor(
             emit(Result.failure(e))
         }
     }
+
+    suspend fun forgotPassword(email: String): Flow<Result<String>> = flow {
+        try {
+            val response = authApiService.forgotPassword(ForgotPasswordRequest(email = email))
+            if (response.isSuccessful) {
+                val forgotPasswordResponse = response.body()
+                if (forgotPasswordResponse?.result == "sent") {
+                    emit(Result.success("Password reset email sent to $email"))
+                } else if (forgotPasswordResponse?.error != null) {
+                    emit(Result.failure(Exception(forgotPasswordResponse.error)))
+                } else {
+                    emit(Result.failure(Exception("Failed to send reset email")))
+                }
+            } else {
+                emit(Result.failure(Exception("Failed to send reset email: ${response.message()}")))
+            }
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
 }
 

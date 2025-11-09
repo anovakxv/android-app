@@ -129,7 +129,7 @@ fun AddMembersScreen(
                             }
                         }
                         
-                        Divider(
+                        HorizontalDivider(
                             modifier = Modifier.padding(start = 68.dp),
                             color = Color.LightGray.copy(alpha = 0.5f)
                         )

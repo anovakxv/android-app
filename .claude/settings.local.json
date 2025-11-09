@@ -19,7 +19,11 @@
       "Bash(adb logcat -d)",
       "Bash(tee compile_output.txt)",
       "Bash(find android-app/android-app-V.1/Python_Backend -name \"*.py\" -type f -exec grep -l \"api/user/profile\" {} ;)",
-      "Bash(./gradlew clean compileDebugKotlin)"
+      "Bash(./gradlew clean compileDebugKotlin)",
+      "Bash(find:*)",
+      "Bash(for file in portal/PortalDetailScreen.kt portal/EditPortalScreen.kt payment/PortalPaymentSetupScreen.kt payment/PayTransactionScreen.kt payment/PaymentsScreen.kt main/MainScreen.kt goals/UpdateGoalScreen.kt goals/GoalsDetailScreen.kt goals/EditGoalScreen.kt chat/IndividualChatScreen.kt chat/GroupChatScreen.kt auth/ForgotPasswordScreen.kt)",
+      "Bash(do sed -i '/import androidx\\.compose\\.material\\.icons\\.filled/a import androidx.compose.material.icons.automirrored.filled.*' \"$file\")",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

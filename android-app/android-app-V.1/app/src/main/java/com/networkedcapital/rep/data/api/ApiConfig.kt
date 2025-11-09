@@ -31,12 +31,13 @@ object ApiConfig {
     // Goal endpoints - match Flask Goals_Routes
     const val GOALS_LIST = "api/goals/list"
     const val GOAL_DETAILS = "api/goals/details"
-    const val GOAL_CREATE = "api/goals/"
+    const val GOAL_CREATE = "api/goals/create"
     const val GOAL_EDIT = "api/goals/edit"
     const val GOAL_DELETE = "api/goals/delete"
     const val GOAL_PROGRESS_UPDATE = "api/goals/progress"
     const val GOAL_TEAM_MANAGE = "api/goals/team"
     const val GOAL_JOIN_LEAVE = "api/goals/join_or_leave"
+    const val GOAL_REPORTING_INCREMENTS = "api/goals/reporting_increments"
     
     // Messaging endpoints - match Flask Messaging_Routes
     const val MESSAGES_GET = "api/message/get_messages"

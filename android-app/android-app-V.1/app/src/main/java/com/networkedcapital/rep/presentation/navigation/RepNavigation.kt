@@ -15,6 +15,7 @@ import androidx.navigation.compose.composable
 import com.networkedcapital.rep.presentation.auth.AuthViewModel
 import com.networkedcapital.rep.presentation.auth.LoginScreen
 import com.networkedcapital.rep.presentation.auth.RegisterScreen
+import com.networkedcapital.rep.presentation.auth.ForgotPasswordScreen
 import com.networkedcapital.rep.presentation.onboarding.TermsOfUseScreen
 import com.networkedcapital.rep.presentation.onboarding.AboutRepScreen
 import com.networkedcapital.rep.presentation.onboarding.EditProfileScreen
@@ -80,6 +81,14 @@ fun RepNavigation(
                     }
                 },
                 onNavigateToForgotPassword = {
+                    navController.navigate(Screen.ForgotPassword.route)
+                }
+            )
+        }
+
+        composable(Screen.ForgotPassword.route) {
+            ForgotPasswordScreen(
+                onNavigateBack = {
                     navController.popBackStack()
                 }
             )
@@ -380,6 +389,7 @@ fun RepNavigation(
 sealed class Screen(val route: String) {
     object Register : Screen("register")
     object Login : Screen("login")
+    object ForgotPassword : Screen("forgot_password")
     object Onboarding : Screen("onboarding")
     object AboutRep : Screen("about_rep")
     object EditProfile : Screen("edit_profile")

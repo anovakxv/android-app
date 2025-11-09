@@ -619,7 +619,7 @@ struct MainSegmentedPicker: View {
                     ZStack(alignment: .topLeading) {
                         (selectedIndex == index ? Color.black : Color.white)
                         Text(segments[index])
-                            .fontWeight(.medium)
+                            .font(.system(size: 13, weight: .medium))
                             .foregroundColor(selectedIndex == index ? .white : .black)
                             .frame(maxWidth: .infinity, minHeight: 32)
                             .padding(.vertical, 2)
@@ -646,7 +646,7 @@ struct MainSegmentedPicker: View {
             }
         }
         .animation(.easeInOut(duration: 0.15), value: attentionDotIndices)
-        .frame(width: 240, height: 32)
+        .frame(width: 220, height: 32)
         .background(Color(UIColor(red: 0.976, green: 0.976, blue: 0.976, alpha: 1.0)))
         .overlay(
             RoundedRectangle(cornerRadius: 4)
@@ -812,7 +812,10 @@ struct MainScreen: View {
                 }
             }
             guard !jwtToken.isEmpty, userId != 0 else { return }
-            if page == .portals {
+            if section == 0 {
+                // Always load chats for section 0
+                peopleVM.fetchPeople(userId: userId, section: 0, isTabSwitch: true)
+            } else if page == .portals {
                 portalsVM.fetchPortals(userId: userId, section: section, safeOnly: showOnlySafePortals)
             } else {
                 peopleVM.fetchPeople(userId: userId, section: section, isTabSwitch: true)
@@ -852,44 +855,41 @@ struct MainScreen: View {
             }
         }
         .onChange(of: section) { newSection in
-            if page == .portals {
-                // If we have background data for this section, use it first
+            if newSection == 0 {
+                // Always load chats when section 0 is selected
+                let backgroundChats = peopleVM.getBackgroundActiveChats()
+                if !backgroundChats.isEmpty {
+                    peopleVM.activeChats = backgroundChats
+                }
+                peopleVM.fetchPeople(userId: userId, section: 0, isTabSwitch: true)
+
+                // Start loading the other sections in the background
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    peopleVM.loadBackgroundData(from: newSection, to: (newSection + 1) % 3, userId: userId)
+                    peopleVM.loadBackgroundData(from: newSection, to: (newSection + 2) % 3, userId: userId)
+                }
+            } else if page == .portals {
+                // Existing portal logic for sections 1 & 2
                 let backgroundData = portalsVM.getBackgroundPortals(for: newSection)
                 if !backgroundData.isEmpty {
-                    // Instantly show background data
                     portalsVM.portals = backgroundData
                 }
-                
-                // Then refresh to get the latest data
+
                 portalsVM.fetchPortals(userId: userId, section: newSection, safeOnly: showOnlySafePortals, isTabSwitch: true)
-                
-                // Start loading the other sections in the background
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     portalsVM.loadBackgroundData(from: newSection, to: (newSection + 1) % 3, userId: userId, safeOnly: showOnlySafePortals)
                     portalsVM.loadBackgroundData(from: newSection, to: (newSection + 2) % 3, userId: userId, safeOnly: showOnlySafePortals)
                 }
             } else {
-                // People page handling
-                if newSection == 0 {
-                    // Active chats section
-                    let backgroundChats = peopleVM.getBackgroundActiveChats()
-                    if !backgroundChats.isEmpty {
-                        // Instantly show background data
-                        peopleVM.activeChats = backgroundChats
-                    }
-                } else {
-                    // Network or All users section
-                    let backgroundUsers = peopleVM.getBackgroundData(for: newSection)
-                    if !backgroundUsers.isEmpty {
-                        // Instantly show background data
-                        peopleVM.users = backgroundUsers
-                    }
+                // Existing people logic for sections 1 & 2
+                let backgroundUsers = peopleVM.getBackgroundData(for: newSection)
+                if !backgroundUsers.isEmpty {
+                    peopleVM.users = backgroundUsers
                 }
-                
-                // Then refresh to get the latest data
+
                 peopleVM.fetchPeople(userId: userId, section: newSection, isTabSwitch: true)
-                
-                // Start loading the other sections in the background
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     peopleVM.loadBackgroundData(from: newSection, to: (newSection + 1) % 3, userId: userId)
                     peopleVM.loadBackgroundData(from: newSection, to: (newSection + 2) % 3, userId: userId)
@@ -898,7 +898,12 @@ struct MainScreen: View {
         }
         .onChange(of: page) { newPage in
             scheduleUnreadPollingIfNeeded()
-            
+
+            // Don't reload data if we're on Chats tab - it doesn't change with page toggle
+            if section == 0 {
+                return
+            }
+
             if newPage == .portals {
                 print("🔄 Refreshing portals after tab switch")
                 
@@ -1221,6 +1226,36 @@ extension MainScreenContent {
     }
 }
 
+// MARK: - ChatsList Component
+
+struct ChatsList: View {
+    @ObservedObject var peopleVM: PeopleViewModel
+    var filteredActiveChats: [ActiveChat]
+    @ObservedObject var invitesManager: GoalTeamInvitesManager
+
+    var body: some View {
+        Group {
+            if peopleVM.isLoading {
+                ProgressView("Loading chats...")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let error = peopleVM.errorMessage {
+                Text(error)
+                    .foregroundColor(.red)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if filteredActiveChats.isEmpty && invitesManager.pendingInvites.isEmpty {
+                Text("No chats found.")
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ActiveChatList(
+                    chats: filteredActiveChats,
+                    invitesManager: invitesManager
+                )
+            }
+        }
+    }
+}
+
 struct MainScreenContent: View {
     @Binding var page: MainScreen.Page
     @Binding var section: Int
@@ -1265,7 +1300,7 @@ struct MainScreenContent: View {
                 }
             } else {
                 if filteredUsers.isEmpty {
-                    Text("No people found.")
+                    Text(section == 1 ? "No members of your network yet. View a profile and +NTWK to build your network!" : "No people found.")
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
@@ -1284,7 +1319,7 @@ struct MainScreenContent: View {
                     .foregroundColor(.red)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if filteredPortals.isEmpty {
-                Text("No portals found.")
+                Text(section == 1 ? "No members of your network yet. View a profile and +NTWK to build your network!" : "No portals found.")
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -1295,21 +1330,33 @@ struct MainScreenContent: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            switch page {
-            case .people:
-                peopleContent
-            case .portals:
-                portalsContent
+            if section == 0 {
+                // Always show chats for section 0, regardless of page
+                ChatsList(
+                    peopleVM: peopleVM,
+                    filteredActiveChats: filteredActiveChats,
+                    invitesManager: invitesManager
+                )
+            } else {
+                // For sections 1 & 2, keep the toggle between people/portals
+                switch page {
+                case .people:
+                    peopleContent
+                case .portals:
+                    portalsContent
+                }
             }
         }
         .overlay(alignment: .bottomTrailing) {
             Button(
                 action: {
                     page = page == .people ? .portals : .people
-                    if page == .portals {
-                        portalsVM.fetchPortals(userId: userId, section: section, safeOnly: showOnlySafePortals)
-                    } else {
-                        peopleVM.fetchPeople(userId: userId, section: section)
+                    if section != 0 {  // Only fetch if not on Chats tab
+                        if page == .portals {
+                            portalsVM.fetchPortals(userId: userId, section: section, safeOnly: showOnlySafePortals)
+                        } else {
+                            peopleVM.fetchPeople(userId: userId, section: section)
+                        }
                     }
                     searchText = ""
                     portalsVM.clearSearch()
@@ -1487,9 +1534,6 @@ struct MainScreenContent: View {
             }
             pendingAction = nil
         }
-        .onAppear {
-            invitesManager.fetchPendingInvites()
-        }
     }
 }
 
@@ -1512,19 +1556,18 @@ struct MainScreenToolbar: ViewModifier {
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     MainSegmentedPicker(
-                        segments: ["OPEN", "NTWK", "ALL"],
+                        segments: ["Chats", "Network", "Purpose"],
                         selectedIndex: $section,
                         attentionDotIndices: openNeedsAttention ? [0] : [],
                         onSelect: { idx in
-                            if idx == 0 && openNeedsAttention {
-                                forceShowPeopleOpen()
+                            section = idx
+                            if idx == 0 {
+                                // Always load chats data for tab 0 (regardless of notification dot)
+                                peopleVM.fetchPeople(userId: userId, section: 0, isTabSwitch: true)
+                            } else if page == .portals {
+                                portalsVM.fetchPortals(userId: userId, section: idx, safeOnly: showOnlySafePortals, isTabSwitch: true)
                             } else {
-                                section = idx
-                                if page == .portals {
-                                    portalsVM.fetchPortals(userId: userId, section: idx, safeOnly: showOnlySafePortals, isTabSwitch: true)
-                                } else {
-                                    peopleVM.fetchPeople(userId: userId, section: idx, isTabSwitch: true)
-                                }
+                                peopleVM.fetchPeople(userId: userId, section: idx, isTabSwitch: true)
                             }
                         }
                     )

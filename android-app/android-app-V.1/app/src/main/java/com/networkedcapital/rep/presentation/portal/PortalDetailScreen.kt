@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -387,7 +388,7 @@ fun PortalDetailHeader(
         ) {
             IconButton(onClick = onBackClick) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     tint = Color(0xFF8CC55D)
                 )
@@ -411,7 +412,7 @@ fun PortalDetailHeader(
                 )
             }
         }
-        Divider(
+        HorizontalDivider(
             color = Color(0xFFE4E4E4),
             modifier = Modifier.align(Alignment.BottomCenter)
         )
@@ -493,7 +494,7 @@ fun PortalContentSection(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
 
-        Divider(color = Color(0xFFE4E4E4))
+        HorizontalDivider(color = Color(0xFFE4E4E4))
 
         // Content based on selected section
         when (selectedSection) {
@@ -606,9 +607,10 @@ fun StorySection(
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier.width(40.dp)
                     ) {
-                        if (!lead.profileImageUrlCompat.isNullOrBlank()) {
+                        // Image URL already patched by PortalDetailViewModel
+                        if (!lead.profile_picture_url.isNullOrBlank()) {
                             AsyncImage(
-                                model = lead.profileImageUrlCompat,
+                                model = lead.profile_picture_url,
                                 contentDescription = "${lead.firstName} ${lead.lastName}",
                                 modifier = Modifier
                                     .size(40.dp)
@@ -629,7 +631,7 @@ fun StorySection(
                 }
             }
             
-            Divider(
+            HorizontalDivider(
                 color = Color(0xFFE4E4E4), 
                 modifier = Modifier.padding(top = 16.dp)
             )
@@ -692,7 +694,7 @@ fun PortalBottomBar(
         color = Color.White
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            Divider(
+            HorizontalDivider(
                 color = Color(0xFFE4E4E4),
                 thickness = 1.dp,
                 modifier = Modifier.fillMaxWidth()
@@ -963,7 +965,7 @@ fun FullscreenImageViewer(
                         .background(Color.Black.copy(alpha = 0.3f), CircleShape)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Previous",
                         tint = Color.White
                     )
@@ -985,7 +987,7 @@ fun FullscreenImageViewer(
                         .background(Color.Black.copy(alpha = 0.3f), CircleShape)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ArrowForward,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                         contentDescription = "Next",
                         tint = Color.White
                     )
@@ -1120,7 +1122,7 @@ fun GoalListItem(goal: Goal, onClick: () -> Unit) {
             
             // Divider
             if (goal.typeName != null) {
-                Divider(color = Color(0xFFE4E4E4))
+                HorizontalDivider(color = Color(0xFFE4E4E4))
                 
                 // Type label
                 Row(
@@ -1214,14 +1216,6 @@ fun GoalBarChart(data: List<BarChartData>) {
         }
     }
 }
-
-val User.profileImageUrlCompat: String?
-    get() = this::class.members.firstOrNull { it.name == "profileImageUrl" }
-        ?.call(this) as? String
-        ?: this::class.members.firstOrNull { it.name == "imageUrl" }
-            ?.call(this) as? String
-        ?: this::class.members.firstOrNull { it.name == "avatarUrl" }
-            ?.call(this) as? String
 
 @Composable
 fun LinkableText(text: String) {

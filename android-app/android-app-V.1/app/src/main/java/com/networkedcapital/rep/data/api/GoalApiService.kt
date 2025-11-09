@@ -6,54 +6,78 @@ import retrofit2.Response
 import retrofit2.http.*
 
 interface GoalApiService {
-    
+
     @GET(ApiConfig.GOALS_LIST)
     suspend fun getGoals(@Query("portal_id") portalId: String? = null): Response<List<Goal>>
-    
+
     @GET(ApiConfig.GOAL_DETAILS)
     suspend fun getGoalDetails(
         @Query("goals_id") goalId: Int,
         @Query("num_periods") numPeriods: Int = 7
     ): Response<GoalDetailResponse>
-    
+
+    @GET(ApiConfig.GOAL_REPORTING_INCREMENTS)
+    suspend fun getReportingIncrements(): Response<ReportingIncrementsResponse>
+
     @POST(ApiConfig.GOAL_CREATE)
-    suspend fun createGoal(@Body goal: CreateGoalRequest): Response<Goal>
-    
-    @PUT(ApiConfig.GOAL_EDIT)
-    suspend fun updateGoal(@Body goal: UpdateGoalRequest): Response<Goal>
-    
+    suspend fun createGoal(@Body request: GoalCreateRequest): Response<GoalResponse>
+
+    @POST(ApiConfig.GOAL_EDIT)
+    suspend fun editGoal(@Body request: GoalEditRequest): Response<GoalResponse>
+
     @DELETE(ApiConfig.GOAL_DELETE)
     suspend fun deleteGoal(@Query("goal_id") goalId: String): Response<Unit>
-    
+
     @POST(ApiConfig.GOAL_PROGRESS_UPDATE)
     suspend fun updateProgress(@Body request: UpdateProgressRequest): Response<Goal>
-    
+
     @POST(ApiConfig.GOAL_TEAM_MANAGE)
     suspend fun manageTeam(@Body request: ManageTeamRequest): Response<Goal>
-    
+
     @GET(ApiConfig.GOALS_LIST)
     suspend fun getUserGoals(@Query("users_id") userId: Int): Response<PortalGoalsApiResponse>
-    
+
     @POST("api/goals/join_leave")
     suspend fun joinOrLeaveGoal(@Body request: JoinLeaveGoalRequest): Response<JoinLeaveGoalResponse>
 }
 
-data class CreateGoalRequest(
-    val title: String,
-    val description: String,
-    val targetDate: String, // ISO date string
-    val portalId: String,
-    val isPrivate: Boolean = false,
-    val progressType: String = "percentage" // "percentage" or "checkpoints"
+// Response for reporting increments - matches iOS structure
+data class ReportingIncrementsResponse(
+    val reportingIncrements: List<ReportingIncrement>
 )
 
-data class UpdateGoalRequest(
-    val goalId: String,
+// Request for creating a goal - matches iOS/Backend structure
+data class GoalCreateRequest(
     val title: String,
+    val subtitle: String,
     val description: String,
-    val targetDate: String,
-    val isPrivate: Boolean = false,
-    val progressType: String = "percentage"
+    val goal_type: String,
+    val quota: Int,
+    val reporting_increments_id: Int,
+    val user_id: Int,
+    val portals_id: Int? = null,  // Optional portal ID
+    val metric: String? = null     // Required only if goal_type is "Other"
+)
+
+// Request for editing a goal - matches iOS/Backend structure
+data class GoalEditRequest(
+    val goals_id: Int,
+    val title: String,
+    val subtitle: String,
+    val description: String,
+    val goal_type: String,
+    val quota: Int,
+    val reporting_increments_id: Int,
+    val user_id: Int,
+    val portals_id: Int? = null,  // Optional portal ID
+    val metric: String? = null     // Required only if goal_type is "Other"
+)
+
+// Generic goal response
+data class GoalResponse(
+    val result: String? = null,
+    val error: String? = null,
+    val goal: Goal? = null
 )
 
 data class UpdateProgressRequest(

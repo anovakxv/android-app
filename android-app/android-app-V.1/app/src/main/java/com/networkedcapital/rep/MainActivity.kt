@@ -86,7 +86,7 @@ fun MainSegmentedPicker(
                 )
             }
             if (idx < segments.lastIndex) {
-                Divider(
+                HorizontalDivider(
                     color = Color(0xFFE4E4E4),
                     modifier = Modifier
                         .width(1.dp)
@@ -229,7 +229,7 @@ fun PortalsList(portals: List<String>) {
                     .fillMaxWidth()
                     .padding(16.dp)
             )
-            Divider()
+            HorizontalDivider()
         }
     }
 }
@@ -244,7 +244,7 @@ fun PeopleList(people: List<String>) {
                     .fillMaxWidth()
                     .padding(16.dp)
             )
-            Divider()
+            HorizontalDivider()
         }
     }
 }
@@ -259,7 +259,7 @@ fun ChatsList(chats: List<String>) {
                     .fillMaxWidth()
                     .padding(16.dp)
             )
-            Divider()
+            HorizontalDivider()
         }
     }
 }

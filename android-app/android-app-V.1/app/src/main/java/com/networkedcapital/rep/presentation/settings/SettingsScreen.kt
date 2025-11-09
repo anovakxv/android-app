@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,7 +47,7 @@ fun SettingsScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
                             tint = repGreen
                         )
@@ -76,7 +77,7 @@ fun SettingsScreen(
                     iconTint = darkGreen,
                     onClick = onNavigateToEditProfile
                 )
-                Divider()
+                HorizontalDivider()
             }
 
             // Payments Section
@@ -91,7 +92,7 @@ fun SettingsScreen(
                     iconTint = darkGreen,
                     onClick = onNavigateToPayments
                 )
-                Divider()
+                HorizontalDivider()
             }
 
             // Notifications Section
@@ -135,7 +136,7 @@ fun SettingsScreen(
             }
 
             item {
-                Divider()
+                HorizontalDivider()
             }
 
             // Legal Section
@@ -150,7 +151,7 @@ fun SettingsScreen(
                     iconTint = Color.Gray,
                     onClick = onNavigateToTerms
                 )
-                Divider()
+                HorizontalDivider()
             }
 
             // Admin Tools Section (conditional)
@@ -166,7 +167,7 @@ fun SettingsScreen(
                         iconTint = Color(0xFF2196F3), // Blue color
                         onClick = onNavigateToStripeConnectApproval
                     )
-                    Divider()
+                    HorizontalDivider()
                 }
             }
 

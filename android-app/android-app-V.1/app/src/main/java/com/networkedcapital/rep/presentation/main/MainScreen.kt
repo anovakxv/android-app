@@ -16,6 +16,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -172,17 +173,6 @@ fun EmptyStateView(message: String, modifier: Modifier = Modifier) {
         }
     }
 }
-
-// Helper to robustly patch/validate image URLs (S3/full URLs)
-fun patchPortalImageUrl(url: String?): String? {
-    if (url.isNullOrBlank()) return null
-    // If already a full URL, return as is
-    if (url.startsWith("http://") || url.startsWith("https://")) return url
-    // S3 or relative path handling (customize as needed)
-    val s3Base = "https://rep-portal-files.s3.amazonaws.com/"
-    return if (url.startsWith("/")) s3Base + url.removePrefix("/") else s3Base + url
-}
-
 // NEW: iOS-Style Black Segmented Control
 @Composable
 fun MainSegmentedPicker(
@@ -478,7 +468,8 @@ fun MainScreen(
                 IconButton(onClick = {
                     uiState.currentUser?.id?.let { onNavigateToProfile(it) }
                 }) {
-                    val profileImageUrl = uiState.currentUser?.profileImageUrlCompat
+                    // Image URL already patched by MainViewModel
+                    val profileImageUrl = uiState.currentUser?.profile_picture_url
                     if (!profileImageUrl.isNullOrEmpty()) {
                         AsyncImage(
                             model = profileImageUrl,
@@ -498,16 +489,13 @@ fun MainScreen(
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            
-            // NEW: iOS-Style Black Segmented Control in center
-            val segments = when (uiState.currentPage) {
-                MainPage.PORTALS -> listOf("Open", "Network", "All")
-                MainPage.PEOPLE -> listOf("Chats", "Network", "All")
-            }
+
+            // iOS-Style Black Segmented Control with fixed labels
+            val segments = listOf("Chats", "Network", "Purpose")
             MainSegmentedPicker(
                 segments = segments,
                 selectedIndex = uiState.selectedSection,
-                onSelect = { section -> 
+                onSelect = { section ->
                     val userId = uiState.currentUser?.id ?: 0
                     viewModel.onSectionChanged(section, userId)
                 },
@@ -584,46 +572,56 @@ fun MainScreen(
                     onRetry = { viewModel.loadData(uiState.currentUser?.id ?: 0) }
                 )
             } else {
-                when (uiState.currentPage) {
-                    MainPage.PORTALS -> {
-                        val portals = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) {
-                            uiState.searchPortals
-                        } else {
-                            uiState.portals
-                        }
-                        if (portals.isEmpty()) {
-                            EmptyStateView(
-                                message = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) "No portals match your search." else "No portals to display."
-                            )
-                        } else {
-                            PortalsList(
-                                portals = portals,
-                                onPortalClick = onNavigateToPortalDetail,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
+                // Section 0 always shows chats (matching iOS behavior)
+                if (uiState.selectedSection == 0) {
+                    if (uiState.activeChats.isNotEmpty()) {
+                        ActiveChatsList(
+                            chats = uiState.activeChats,
+                            onChatClick = { chatId ->
+                                val intId = when (chatId) {
+                                    is Int -> chatId
+                                    is String -> chatId.toIntOrNull()
+                                    else -> null
+                                }
+                                if (intId != null) {
+                                    onNavigateToChat(intId)
+                                } else {
+                                    Log.e("MainScreen", "Invalid chat ID: $chatId")
+                                }
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        EmptyStateView(message = "No chats to display.")
                     }
-                    MainPage.PEOPLE -> {
-                        if (uiState.selectedSection == 0 && uiState.activeChats.isNotEmpty()) {
-                            // Show active chats for first tab
-                            ActiveChatsList(
-                                chats = uiState.activeChats,
-                                onChatClick = { chatId ->
-                                    val intId = when (chatId) {
-                                        is Int -> chatId
-                                        is String -> chatId.toIntOrNull()
-                                        else -> null
-                                    }
-                                    if (intId != null) {
-                                        onNavigateToChat(intId)
+                } else {
+                    // For sections 1 & 2, show portals or people based on current page
+                    when (uiState.currentPage) {
+                        MainPage.PORTALS -> {
+                            val portals = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) {
+                                uiState.searchPortals
+                            } else {
+                                uiState.portals
+                            }
+                            if (portals.isEmpty()) {
+                                EmptyStateView(
+                                    message = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) {
+                                        "No portals match your search."
+                                    } else if (uiState.selectedSection == 1) {
+                                        "No members of your network yet. View a profile and +NTWK to build your network!"
                                     } else {
-                                        Log.e("MainScreen", "Invalid chat ID: $chatId")
+                                        "No portals to display."
                                     }
-                                },
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        } else {
-                            // Show people list for other tabs
+                                )
+                            } else {
+                                PortalsList(
+                                    portals = portals,
+                                    onPortalClick = onNavigateToPortalDetail,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                        }
+                        MainPage.PEOPLE -> {
                             val people = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) {
                                 uiState.searchUsers
                             } else {
@@ -631,7 +629,13 @@ fun MainScreen(
                             }
                             if (people.isEmpty()) {
                                 EmptyStateView(
-                                    message = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) "No people match your search." else "No people to display."
+                                    message = if (uiState.showSearch && uiState.searchQuery.isNotBlank()) {
+                                        "No people match your search."
+                                    } else if (uiState.selectedSection == 1) {
+                                        "No members of your network yet. View a profile and +NTWK to build your network!"
+                                    } else {
+                                        "No people to display."
+                                    }
                                 )
                             } else {
                                 PeopleList(
@@ -644,86 +648,22 @@ fun MainScreen(
                     }
                 }
             }
-        }
-
-        // Bottom Bar: Chat and Safe Toggle with FAB
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(vertical = 8.dp, horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
-            ) {
-                // Chat Icon with Badge
-                Box {
-                    IconButton(
-                        onClick = {
-                            val chatId = uiState.activeChats.firstOrNull()?.id
-                            if (chatId != null) {
-                                onNavigateToChat(chatId)
-                            } else {
-                                Log.e("MainScreen", "Invalid or missing chat ID: $chatId")
-                            }
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ChatBubble,
-                            contentDescription = "Messages",
-                            tint = if (hasUnreadMessages || hasUnreadGroupMessages) {
-                                Color(0xFF8CC55D)  // Green to match iOS
-                            } else {
-                                Color.Gray
-                            }
-                        )
-                    }
-                    if (hasUnreadMessages || hasUnreadGroupMessages) {
-                        Badge(
-                            modifier = Modifier.offset(x = 20.dp, y = (-4).dp),
-                            containerColor = Color(0xFF8CC55D)
-                        ) {
-                            Text(text = "", fontSize = 8.sp)
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                // Safe Portals Toggle
-                IconButton(
-                    onClick = {
-                        val userId = uiState.currentUser?.id ?: 0
-                        viewModel.toggleSafePortals(userId)
-                    }
-                ) {
-                    Icon(
-                        imageVector = if (uiState.showOnlySafePortals) Icons.Default.Shield else Icons.Default.Public,
-                        contentDescription = if (uiState.showOnlySafePortals) "Show All Portals" else "Show Safe Portals Only",
-                        tint = if (uiState.showOnlySafePortals) Color(0xFF8CC55D) else Color.Gray
-                    )
-                }
-            }
-
-            // Rep Logo as Floating Action Button (bottom right)
+            // Rep Logo Button (bottom right) - transparent like iOS
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 24.dp, bottom = 16.dp)
+                    .padding(end = 36.dp, bottom = 12.dp)
             ) {
-                FloatingActionButton(
-                    onClick = {
-                        val userId = uiState.currentUser?.id ?: 0
-                        viewModel.togglePage(userId)
-                    },
-                    containerColor = Color(0xFF8CC55D)
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.replogo),
-                        contentDescription = "Rep Logo (Switch Portal/People)",
-                        modifier = Modifier.size(36.dp)
-                    )
-                }
+                Image(
+                    painter = painterResource(id = R.drawable.replogo),
+                    contentDescription = "Rep Logo (Switch Portal/People)",
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clickable {
+                            val userId = uiState.currentUser?.id ?: 0
+                            viewModel.togglePage(userId)
+                        }
+                )
             }
         }
     }
@@ -777,10 +717,10 @@ fun EnhancedPortalItem(
                     .clip(RoundedCornerShape(3.dp))
                     .background(Color(0xFFE0E0E0))
             ) {
-                val patchedUrl = patchPortalImageUrl(portal.imageUrl)
-                if (!patchedUrl.isNullOrEmpty()) {
+                // Image URL already patched by MainViewModel
+                if (!portal.imageUrl.isNullOrEmpty()) {
                     AsyncImage(
-                        model = patchedUrl,
+                        model = portal.imageUrl,
                         contentDescription = portal.name,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
@@ -889,7 +829,8 @@ fun UserProfileImageThumbnail(user: User, size: Dp = 40.dp) {
             .background(Color(0xFFE0E0E0)),
         contentAlignment = Alignment.Center
     ) {
-        val profileImageUrl = user.profileImageUrlCompat
+        // Image URL already patched by MainViewModel
+        val profileImageUrl = user.profile_picture_url
         if (!profileImageUrl.isNullOrEmpty()) {
             AsyncImage(
                 model = profileImageUrl,
@@ -1061,7 +1002,7 @@ fun PortalDetailScreen(
                 title = { Text(portal.name) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -1111,9 +1052,9 @@ fun PortalImageCarousel(images: List<PortalFile>) {
             .horizontalScroll(rememberScrollState())
     ) {
         images.forEach { file ->
-            val patchedUrl = patchPortalImageUrl(file.url)
+            // Image URL already patched by ViewModel
             AsyncImage(
-                model = patchedUrl,
+                model = file.url,
                 contentDescription = "Portal Image",
                 modifier = Modifier
                     .padding(8.dp)
@@ -1136,8 +1077,8 @@ fun PortalStorySectionAndroid(leads: List<User>, storyBlocks: List<PortalText>) 
         ) {
             leads.forEach { user: User ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(end = 12.dp)) {
-                    val profileImageUrl = user.profileImageUrlCompat
-                    // FIX: Only safe or non-null asserted calls allowed on nullable receiver
+                    // Image URL already patched by MainViewModel
+                    val profileImageUrl = user.profile_picture_url
                     if (!profileImageUrl.isNullOrEmpty()) {
                         AsyncImage(
                             model = profileImageUrl,
@@ -1161,7 +1102,7 @@ fun PortalStorySectionAndroid(leads: List<User>, storyBlocks: List<PortalText>) 
                 }
             }
         }
-        Divider()
+        HorizontalDivider()
         // Story text blocks
         storyBlocks.filter { it.section == "story" }.forEach { block ->
             if (!block.title.isNullOrBlank()) {
@@ -1238,7 +1179,7 @@ fun ActiveChatsList(
                 onClick = { chat.id?.let { onChatClick(it) } }
             )
             // Add divider between items
-            Divider(
+            HorizontalDivider(
                 modifier = Modifier.padding(start = 80.dp),
                 color = Color(0xFFE0E0E0),
                 thickness = 0.5.dp
@@ -1331,20 +1272,6 @@ fun UserProfileImage(
 ) {
     UserProfileImageThumbnail(user = user, size = 60.dp)
 }
-
-// Add this extension property at the end of the file (only once, not duplicated)
-val User.profileImageUrlCompat: String?
-    get() = try {
-        this::class.members.firstOrNull { it.name == "profileImageUrl" }
-            ?.call(this) as? String
-            ?: this::class.members.firstOrNull { it.name == "imageUrl" }
-                ?.call(this) as? String
-            ?: this::class.members.firstOrNull { it.name == "avatarUrl" }
-                ?.call(this) as? String
-    } catch (e: Exception) {
-        null
-    }
-
 // Add extension property for display name
 val User.displayName: String
     get() {

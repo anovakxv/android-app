@@ -154,9 +154,13 @@ data class PortalFile(
 @Parcelize
 data class ReportingIncrement(
     val id: Int,
-    val name: String,
-    val value: String
-) : Parcelable
+    val title: String,
+    val name: String? = null,  // Backward compatibility
+    val value: String? = null  // Backward compatibility
+) : Parcelable {
+    // For backward compatibility, return title if name is null
+    val displayName: String get() = name ?: title
+}
 
 @Parcelize
 data class Goal(

@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -165,7 +166,7 @@ fun ProfileScreen(
                                     onClick = { onNavigateToPortal(portal.id) }
                                 )
                                 if (portal != uiState.portals.last()) {
-                                    Divider(color = Color(0xFFE4E4E4))
+                                    HorizontalDivider(color = Color(0xFFE4E4E4))
                                 }
                             }
                         }
@@ -193,7 +194,7 @@ fun ProfileScreen(
                                     onClick = { onNavigateToGoal(goal.id) }
                                 )
                                 if (goal != uiState.goals.last()) {
-                                    Divider(color = Color(0xFFE4E4E4))
+                                    HorizontalDivider(color = Color(0xFFE4E4E4))
                                 }
                             }
                         }
@@ -318,7 +319,7 @@ fun ProfileScreen(
                         .padding(vertical = 12.dp)
                 )
 
-                Divider()
+                HorizontalDivider()
 
                 if (uiState.isBlocked) {
                     Text(
@@ -351,7 +352,7 @@ fun ProfileScreen(
                     )
                 }
 
-                Divider()
+                HorizontalDivider()
 
                 Text(
                     text = "Flag as Inappropriate",
@@ -366,7 +367,7 @@ fun ProfileScreen(
                         .padding(vertical = 12.dp)
                 )
 
-                Divider()
+                HorizontalDivider()
 
                 Text(
                     text = "Cancel",
@@ -505,7 +506,7 @@ private fun ProfileNavigationHeader(
         }
     }
 
-    Divider(color = Color(0xFFE4E4E4))
+    HorizontalDivider(color = Color(0xFFE4E4E4))
 }
 
 @Composable
@@ -594,7 +595,7 @@ private fun ProfileSegmentedPicker(
                 )
             }
             if (index < segments.size - 1) {
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier
                         .width(1.dp)
                         .fillMaxHeight(),
@@ -673,7 +674,7 @@ private fun GoalListItemProfile(
         val progress = (goal.progressPercent / 100.0).toFloat()
 
         LinearProgressIndicator(
-            progress = progress.coerceIn(0f, 1f),
+            progress = { progress.coerceIn(0f, 1f) },
             modifier = Modifier.fillMaxWidth(),
             color = Color(red = 0.549f, green = 0.78f, blue = 0.365f)
         )
@@ -747,7 +748,7 @@ private fun WriteEditor(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Divider()
+        HorizontalDivider()
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -809,7 +810,7 @@ private fun ProfileBottomBar(
     onMessage: () -> Unit
 ) {
     Column {
-        Divider(color = Color(0xFFE4E4E4))
+        HorizontalDivider(color = Color(0xFFE4E4E4))
 
         Row(
             modifier = Modifier
@@ -842,7 +843,7 @@ private fun ProfileBottomBar(
             if (!isCurrentUser) {
                 IconButton(onClick = onMessage) {
                     Icon(
-                        imageVector = Icons.Default.Message,
+                        imageVector = Icons.AutoMirrored.Filled.Message,
                         contentDescription = "Message",
                         tint = Color.Black
                     )

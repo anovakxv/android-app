@@ -5,9 +5,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.Help
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -48,7 +52,7 @@ fun PaymentsScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -207,7 +211,7 @@ private fun PaymentMethodsSection(
             Text("Edit Payment Methods")
             Spacer(modifier = Modifier.weight(1f))
             Icon(
-                imageVector = Icons.Default.OpenInNew,
+                imageVector = Icons.AutoMirrored.Filled.OpenInNew,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp)
             )
@@ -260,7 +264,7 @@ private fun PaymentSupportSection(
             modifier = Modifier.fillMaxWidth()
         ) {
             Icon(
-                imageVector = Icons.Default.Help,
+                imageVector = Icons.AutoMirrored.Filled.Help,
                 contentDescription = null,
                 modifier = Modifier.size(20.dp)
             )
@@ -268,7 +272,7 @@ private fun PaymentSupportSection(
             Text("Request Refund or Payment Help")
             Spacer(modifier = Modifier.weight(1f))
             Icon(
-                imageVector = Icons.Default.OpenInNew,
+                imageVector = Icons.AutoMirrored.Filled.OpenInNew,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp)
             )
@@ -359,7 +363,7 @@ private fun TransactionCard(
             fontWeight = FontWeight.SemiBold
         )
     }
-    Divider()
+    HorizontalDivider()
 }
 
 @Composable

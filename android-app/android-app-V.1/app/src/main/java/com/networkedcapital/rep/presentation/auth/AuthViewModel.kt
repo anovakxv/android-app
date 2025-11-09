@@ -18,7 +18,8 @@ data class AuthState(
     val userId: Int = 0,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val isLoggedIn: Boolean = false
+    val isLoggedIn: Boolean = false,
+    val forgotPasswordSuccess: String? = null
 )
 
 @HiltViewModel
@@ -273,5 +274,43 @@ class AuthViewModel @Inject constructor(
     
     fun clearError() {
         _authState.value = _authState.value.copy(errorMessage = null)
+    }
+
+    fun forgotPassword(email: String) {
+        viewModelScope.launch {
+            _authState.value = _authState.value.copy(
+                isLoading = true,
+                errorMessage = null,
+                forgotPasswordSuccess = null
+            )
+            authRepository.forgotPassword(email)
+                .catch { throwable ->
+                    _authState.value = _authState.value.copy(
+                        isLoading = false,
+                        errorMessage = throwable.message ?: "Failed to send reset email"
+                    )
+                }
+                .collect { result ->
+                    result.fold(
+                        onSuccess = { message ->
+                            _authState.value = _authState.value.copy(
+                                isLoading = false,
+                                forgotPasswordSuccess = message,
+                                errorMessage = null
+                            )
+                        },
+                        onFailure = { throwable ->
+                            _authState.value = _authState.value.copy(
+                                isLoading = false,
+                                errorMessage = throwable.message ?: "Failed to send reset email"
+                            )
+                        }
+                    )
+                }
+        }
+    }
+
+    fun clearForgotPasswordSuccess() {
+        _authState.value = _authState.value.copy(forgotPasswordSuccess = null)
     }
 }

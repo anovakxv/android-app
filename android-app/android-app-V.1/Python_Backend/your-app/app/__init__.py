@@ -17,6 +17,7 @@ from config import Config
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from app.scheduler import init_scheduler
 
 db = SQLAlchemy()
 
@@ -25,7 +26,10 @@ socketio = SocketIO(
     cors_allowed_origins=[
         "https://repnetwork.app",
         "https://www.repnetwork.app",
-        "http://localhost:5173"
+        "https://repsomething.com",
+        "https://www.repsomething.com",
+        "http://localhost:5173",
+        "http://localhost:5174"
     ],
     message_queue=os.getenv("REDIS_URL"),
     async_mode="eventlet"
@@ -39,7 +43,21 @@ def create_app():
     if not app.config.get("SECRET_KEY"):
         app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me")
 
-    CORS(app, origins=["https://networkedcapital.co", "http://localhost:5173"])
+    # CORS configuration - use environment variable for additional origins
+    cors_origins = [
+        "https://networkedcapital.co",
+        "https://repsomething.com",
+        "https://www.repsomething.com",
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+        "http://localhost:5176"
+    ]
+    # Add production web app origin if specified
+    if os.getenv("WEB_APP_ORIGIN"):
+        cors_origins.append(os.getenv("WEB_APP_ORIGIN"))
+
+    CORS(app, origins=cors_origins)
 
     db.init_app(app)
     socketio.init_app(app)
@@ -84,6 +102,7 @@ def create_app():
     from app.routes.User_Routes.DeviceToken import user_bp as device_token_bp
     from app.routes.User_Routes.SearchPeople import search_people_bp
     from app.routes.User_Routes.Payments import payments_bp # <-- ADDED
+    from app.routes.User_Routes.TriggerDailySummary import admin_bp as trigger_summary_bp
 
     app.register_blueprint(search_people_bp)
     app.register_blueprint(add_to_network_bp, url_prefix='/api/user')
@@ -101,6 +120,7 @@ def create_app():
     app.register_blueprint(device_token_bp, url_prefix='/api/user')
     app.register_blueprint(get_people_bp)  # already has its own routes
     app.register_blueprint(payments_bp) # <-- ADDED
+    app.register_blueprint(trigger_summary_bp, url_prefix='/api/user')
 
     # --- Portal Blueprints ---
     from app.routes.Portal_Routes.Get_Portals import portal_bp as portal_list_bp
@@ -161,7 +181,14 @@ def create_app():
     app.register_blueprint(update_goal_filled_quota_bp, url_prefix='/api/goals')
     app.register_blueprint(get_goals_bp, url_prefix='/api/goals')
 
+    # --- Public Web Routes (no auth required) ---
+    from app.routes.public_web import register_public_routes
+    register_public_routes(app)
+
     # Socket.IO events (import last)
     from . import socket_events
+
+    # Initialize scheduler (only starts if WORKER_MODE=true)
+    init_scheduler(app)
 
     return app

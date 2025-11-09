@@ -178,10 +178,10 @@ private fun InviteCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Profile image
-                if (invite.patchedInviterProfilePictureURL != null) {
+                // Profile image - already patched by InviteViewModel
+                if (invite.inviterPhotoURL != null) {
                     AsyncImage(
-                        model = invite.patchedInviterProfilePictureURL,
+                        model = invite.inviterPhotoURL,
                         contentDescription = "Profile picture",
                         modifier = Modifier.size(40.dp)
                     )

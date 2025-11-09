@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -124,7 +125,7 @@ fun GoalsDetailScreen(
                 ) {
                     IconButton(onClick = onBack) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
                             tint = Color(0xFF8CC55D)
                         )
@@ -157,7 +158,7 @@ fun GoalsDetailScreen(
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Icon(
-                                            imageVector = Icons.Default.ArrowForward,
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                             contentDescription = "Go to Portal",
                                             tint = Color(0xFF006400),
                                             modifier = Modifier.size(10.dp)
@@ -170,7 +171,7 @@ fun GoalsDetailScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Box(modifier = Modifier.size(24.dp)) // Placeholder for right icon
                 }
-                Divider(
+                HorizontalDivider(
                     color = Color(0xFFE4E4E4),
                     modifier = Modifier.align(Alignment.BottomCenter)
                 )
@@ -380,7 +381,7 @@ fun GoalsDetailScreen(
                     enabled = !isCreatingTeamChat
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Chat,
+                        imageVector = Icons.AutoMirrored.Filled.Chat,
                         contentDescription = "Team Chat",
                         tint = Color.Black,
                         modifier = Modifier.size(20.dp)
@@ -686,7 +687,7 @@ fun GoalsDetailScreen(
                             }
                         }
                         
-                        Divider(modifier = Modifier.padding(vertical = 8.dp))
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                         
                         Text("ID: ${selectedProfileUser!!.id}")
                         Text("Username: ${selectedProfileUser!!.username ?: "(none)"}")
@@ -890,7 +891,7 @@ fun EnhancedFeedItemView(item: FeedItem, onProfileClick: (User) -> Unit) {
             }
         }
         
-        Divider(modifier = Modifier.padding(top = 12.dp))
+        HorizontalDivider(modifier = Modifier.padding(top = 12.dp))
     }
 }
 
@@ -971,7 +972,7 @@ fun EnhancedTeamMemberItem(user: User, onMessage: (User) -> Unit, onProfileClick
                 .border(1.dp, Color(0xFFE4E4E4), CircleShape)
         ) {
             Icon(
-                imageVector = Icons.Default.Chat,
+                imageVector = Icons.AutoMirrored.Filled.Chat,
                 contentDescription = "Message",
                 tint = Color.Black,
                 modifier = Modifier.size(20.dp)
