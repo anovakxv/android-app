@@ -97,16 +97,40 @@ fun PortalDetailScreen(
         it.typeName == "Fund" || it.typeName == "Sales" 
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Surface(shadowElevation = 4.dp) {
-            PortalDetailHeader(
-                portalName = uiState.portalDetail?.name ?: "Portal",
-                onBackClick = onNavigateBack,
-                onMoreClick = { if (uiState.portalDetail != null) showActionSheet = true }
-            )
+    Scaffold(
+        topBar = {
+            Surface(shadowElevation = 4.dp) {
+                PortalDetailHeader(
+                    portalName = uiState.portalDetail?.name ?: "Portal",
+                    onBackClick = onNavigateBack,
+                    onMoreClick = { if (uiState.portalDetail != null) showActionSheet = true }
+                )
+            }
+        },
+        bottomBar = {
+            if (uiState.portalDetail != null) {
+                PortalBottomBar(
+                    onAddClick = { /* TODO: Implement Join Team logic */ },
+                    onMessageClick = {
+                        // Find lead user to message
+                        val lead = uiState.portalDetail?.aLeads?.firstOrNull()
+                        if (lead != null) {
+                            selectedLeadUser = lead
+                            showMessageSheet = true
+                        } else {
+                            // TODO: Navigate to group chat for portal
+                            // Portal group chat navigation not yet implemented
+                        }
+                    }
+                )
+            }
         }
-
-        Box(modifier = Modifier.weight(1f)) {
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        ) {
             when {
                 uiState.isLoading -> {
                     Box(
@@ -152,7 +176,7 @@ fun PortalDetailScreen(
                     var selectedSection by remember { mutableStateOf(0) }
 
                     // The main content of the screen - single LazyColumn for everything
-                    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
                         // Show image gallery if images exist
                         val images = portal.aSections?.flatMap { it.aFiles ?: emptyList() } ?: emptyList()
                         if (images.isNotEmpty()) {
@@ -200,7 +224,7 @@ fun PortalDetailScreen(
                             }
                         }
 
-                        // Add bottom padding
+                        // Add bottom padding for content
                         item {
                             Spacer(modifier = Modifier.height(24.dp))
                         }
@@ -219,24 +243,6 @@ fun PortalDetailScreen(
                     }
                 }
             }
-        }
-        
-        // Bottom Bar
-        if (uiState.portalDetail != null) {
-            PortalBottomBar(
-                onAddClick = { /* TODO: Implement Join Team logic */ },
-                onMessageClick = {
-                    // Find lead user to message
-                    val lead = uiState.portalDetail?.aLeads?.firstOrNull()
-                    if (lead != null) {
-                        selectedLeadUser = lead
-                        showMessageSheet = true
-                    } else {
-                        // TODO: Navigate to group chat for portal
-                        // Portal group chat navigation not yet implemented
-                    }
-                }
-            )
         }
     }
 

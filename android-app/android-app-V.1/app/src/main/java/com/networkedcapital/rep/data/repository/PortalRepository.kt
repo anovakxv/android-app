@@ -343,17 +343,15 @@ class PortalRepository @Inject constructor(
     }
 
     suspend fun getReportingIncrements(): Flow<Result<List<ReportingIncrement>>> = flow {
-        try {
-            val response = portalApiService.getReportingIncrements()
-            if (response.isSuccessful) {
-                val increments = response.body() ?: emptyList()
-                emit(Result.success(increments))
-            } else {
-                emit(Result.failure(Exception("Failed to get reporting increments: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val response = portalApiService.getReportingIncrements()
+        if (response.isSuccessful) {
+            val increments = response.body() ?: emptyList()
+            emit(Result.success(increments))
+        } else {
+            throw Exception("Failed to get reporting increments: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     suspend fun flagPortal(portalId: Int, reason: String = ""): Flow<Result<Unit>> = flow {
