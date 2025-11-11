@@ -185,8 +185,7 @@ fun PortalDetailScreen(
                                 items(goals) { goal ->
                                     GoalListItem(
                                         goal = goal,
-                                        onClick = { onNavigateToGoal(goal.id) },
-                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                        onClick = { onNavigateToGoal(goal.id) }
                                     )
                                 }
                             }
