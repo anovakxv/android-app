@@ -110,9 +110,9 @@ fun AddMembersScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             
                             Text(
-                                text = "${user.firstName} ${user.lastName}",
+                                text = user.displayName,
                                 style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = if (isSelected || isAlreadyInGroup) 
+                                fontWeight = if (isSelected || isAlreadyInGroup)
                                     FontWeight.SemiBold else FontWeight.Normal,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,

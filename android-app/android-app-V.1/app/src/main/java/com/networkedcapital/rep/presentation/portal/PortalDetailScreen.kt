@@ -151,7 +151,7 @@ fun PortalDetailScreen(
                     val goals = uiState.portalGoals ?: portal.aGoals ?: emptyList()
                     var selectedSection by remember { mutableStateOf(0) }
 
-                    // The main content of the screen
+                    // The main content of the screen - single LazyColumn for everything
                     LazyColumn(modifier = Modifier.fillMaxWidth()) {
                         // Show image gallery if images exist
                         val images = portal.aSections?.flatMap { it.aFiles ?: emptyList() } ?: emptyList()
@@ -164,15 +164,46 @@ fun PortalDetailScreen(
                             }
                         }
 
-                        // Segmented control and content sections
+                        // Segmented control (non-scrolling header)
                         item {
-                            PortalContentSection(
-                                portal = portal,
-                                goals = goals,
-                                selectedSection = selectedSection,
-                                onSectionChange = { selectedSection = it },
-                                onGoalClick = onNavigateToGoal
-                            )
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                PortalSegmentedControl(
+                                    sections = listOf("Goal Teams", "Story"),
+                                    selectedIndex = selectedSection,
+                                    onSelectionChanged = { selectedSection = it },
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                )
+                                HorizontalDivider(color = Color(0xFFE4E4E4))
+                            }
+                        }
+
+                        // Content based on selected section - add items directly to this LazyColumn
+                        when (selectedSection) {
+                            0 -> {
+                                // Goal Teams Section - add goals as items
+                                items(goals) { goal ->
+                                    GoalListItem(
+                                        goal = goal,
+                                        onClick = { onGoalClick(goal.id) },
+                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                    )
+                                }
+                            }
+                            1 -> {
+                                // Story Section - add story content as items
+                                item {
+                                    StorySection(
+                                        portal = portal,
+                                        modifier = Modifier.padding(horizontal = 16.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        // Add bottom padding
+                        item {
+                            Spacer(modifier = Modifier.height(24.dp))
                         }
                     }
                 }
@@ -320,9 +351,9 @@ fun PortalDetailScreen(
     if (showMessageSheet && selectedLeadUser != null) {
         AlertDialog(
             onDismissRequest = { showMessageSheet = false },
-            title = { 
+            title = {
                 Text(
-                    "Send Message to ${selectedLeadUser?.firstName} ${selectedLeadUser?.lastName}",
+                    "Send Message to ${selectedLeadUser?.displayName ?: "User"}",
                     fontWeight = FontWeight.Bold
                 ) 
             },
@@ -476,42 +507,6 @@ fun ImageGallery(
 }
 
 @Composable
-fun PortalContentSection(
-    portal: PortalDetail,
-    goals: List<Goal>,
-    selectedSection: Int,
-    onSectionChange: (Int) -> Unit,
-    onGoalClick: (Int) -> Unit
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Spacer(modifier = Modifier.height(4.dp))
-        
-        // Segmented Control - iOS style
-        PortalSegmentedControl(
-            sections = listOf("Goal Teams", "Story"),
-            selectedIndex = selectedSection,
-            onSelectionChanged = onSectionChange,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
-
-        HorizontalDivider(color = Color(0xFFE4E4E4))
-
-        // Content based on selected section
-        when (selectedSection) {
-            0 -> GoalTeamsSection(
-                goals = goals,
-                onGoalClick = onGoalClick,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            1 -> StorySection(
-                portal = portal,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-        }
-    }
-}
-
-@Composable
 fun PortalSegmentedControl(
     sections: List<String>,
     selectedIndex: Int,
@@ -559,37 +554,15 @@ fun PortalSegmentedControl(
 }
 
 @Composable
-fun GoalTeamsSection(
-    goals: List<Goal>,
-    onGoalClick: (Int) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    LazyColumn(
-        modifier = modifier.padding(top = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(bottom = 24.dp)
-    ) {
-        items(goals) { goal ->
-            GoalListItem(
-                goal = goal,
-                onClick = { onGoalClick(goal.id) }
-            )
-        }
-    }
-}
-
-@Composable
 fun StorySection(
     portal: PortalDetail,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(
+    Column(
         modifier = modifier.padding(top = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(bottom = 24.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Leads section
-        item {
             Text(
                 text = "Leads",
                 fontSize = 18.sp,
@@ -611,7 +584,7 @@ fun StorySection(
                         if (!lead.profile_picture_url.isNullOrBlank()) {
                             AsyncImage(
                                 model = lead.profile_picture_url,
-                                contentDescription = "${lead.firstName} ${lead.lastName}",
+                                contentDescription = lead.displayName,
                                 modifier = Modifier
                                     .size(40.dp)
                                     .clip(CircleShape)
@@ -622,7 +595,7 @@ fun StorySection(
                             InitialsAvatar(user = lead)
                         }
                         Text(
-                            text = "${lead.firstName?.take(1) ?: ""}${lead.lastName?.take(1) ?: ""}",
+                            text = "${(lead.firstName ?: lead.fname)?.take(1) ?: ""}${(lead.lastName ?: lead.lname)?.take(1) ?: ""}",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.Black
@@ -631,14 +604,13 @@ fun StorySection(
                 }
             }
             
-            HorizontalDivider(
-                color = Color(0xFFE4E4E4), 
-                modifier = Modifier.padding(top = 16.dp)
-            )
-        }
+        HorizontalDivider(
+            color = Color(0xFFE4E4E4),
+            modifier = Modifier.padding(top = 16.dp)
+        )
 
         // Story text blocks
-        items(portal.aTexts?.filter { it.section == "story" } ?: emptyList()) { textBlock ->
+        portal.aTexts?.filter { it.section == "story" }?.forEach { textBlock ->
             Column(
                 verticalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier.padding(vertical = 4.dp)
@@ -672,7 +644,7 @@ fun InitialsAvatar(user: User) {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "${user.firstName?.take(1) ?: ""}${user.lastName?.take(1) ?: ""}",
+            text = "${(user.firstName ?: user.fname)?.take(1) ?: ""}${(user.lastName ?: user.lname)?.take(1) ?: ""}",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black

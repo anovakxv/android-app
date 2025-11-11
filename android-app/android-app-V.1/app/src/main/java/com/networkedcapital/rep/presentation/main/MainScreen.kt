@@ -834,14 +834,15 @@ fun UserProfileImageThumbnail(user: User, size: Dp = 40.dp) {
         if (!profileImageUrl.isNullOrEmpty()) {
             AsyncImage(
                 model = profileImageUrl,
-                contentDescription = "${user.firstName} ${user.lastName}",
+                contentDescription = user.displayName,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
         } else {
             val initials = buildString {
-                user.firstName?.firstOrNull()?.let { append(it) }
-                user.lastName?.firstOrNull()?.let { append(it) }
+                // Try firstName/lastName first, fallback to fname/lname
+                (user.firstName ?: user.fname)?.firstOrNull()?.let { append(it) }
+                (user.lastName ?: user.lname)?.firstOrNull()?.let { append(it) }
                 if (isEmpty() && !user.username.isNullOrEmpty()) {
                     append(user.username.first())
                 }
@@ -1082,7 +1083,7 @@ fun PortalStorySectionAndroid(leads: List<User>, storyBlocks: List<PortalText>) 
                     if (!profileImageUrl.isNullOrEmpty()) {
                         AsyncImage(
                             model = profileImageUrl,
-                            contentDescription = "${user.firstName} ${user.lastName}",
+                            contentDescription = user.displayName,
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(CircleShape),
@@ -1096,7 +1097,7 @@ fun PortalStorySectionAndroid(leads: List<User>, storyBlocks: List<PortalText>) 
                         )
                     }
                     Text(
-                        text = "${user.firstName.firstOrNull() ?: ""}${user.lastName.firstOrNull() ?: ""}",
+                        text = "${(user.firstName ?: user.fname)?.firstOrNull() ?: ""}${(user.lastName ?: user.lname)?.firstOrNull() ?: ""}",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -1234,7 +1235,7 @@ fun PersonItem(
             // Person Info
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "${person.firstName} ${person.lastName}",
+                    text = person.displayName,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
