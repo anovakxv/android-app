@@ -7,6 +7,7 @@ import com.networkedcapital.rep.domain.model.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.catch
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import javax.inject.Inject
@@ -298,50 +299,46 @@ class PortalRepository @Inject constructor(
     }
 
     suspend fun getPortalDetail(portalId: Int, userId: Int): Flow<Result<PortalDetail>> = flow {
-        try {
-            val response = portalApiService.getPortalDetail(portalId, userId)
-            if (response.isSuccessful) {
-                val portalDetailResponse = response.body()
-                if (portalDetailResponse != null) {
-                    emit(Result.success(portalDetailResponse.result))
-                } else {
-                    emit(Result.failure(Exception("Portal detail not found")))
-                }
+        val response = portalApiService.getPortalDetail(portalId, userId)
+        if (response.isSuccessful) {
+            val portalDetailResponse = response.body()
+            if (portalDetailResponse != null) {
+                emit(Result.success(portalDetailResponse.result))
             } else {
-                emit(Result.failure(Exception("Failed to get portal detail: ${response.message()}")))
+                throw Exception("Portal detail not found")
             }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        } else {
+            throw Exception("Failed to get portal detail: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     suspend fun getPortalGoals(portalId: Int): Flow<Result<List<Goal>>> = flow {
-        try {
-            val response = portalApiService.getPortalGoals(portalId)
-            if (response.isSuccessful) {
-                val goalsResponse = response.body()
-                if (goalsResponse != null) {
-                    val goals = goalsResponse.aGoals
-                    // Cache goals in Room
-                    val entities = goals.map { GoalEntity.fromDomainModel(it) }
-                    goalDao.insertGoals(entities)
-                    emit(Result.success(goals))
-                } else {
-                    emit(Result.success(emptyList()))
-                }
+        val response = portalApiService.getPortalGoals(portalId)
+        if (response.isSuccessful) {
+            val goalsResponse = response.body()
+            if (goalsResponse != null) {
+                val goals = goalsResponse.aGoals
+                // Cache goals in Room
+                val entities = goals.map { GoalEntity.fromDomainModel(it) }
+                goalDao.insertGoals(entities)
+                emit(Result.success(goals))
             } else {
-                // On network error, try to load from cache
-                val cachedEntities = goalDao.getGoalsByPortalId(portalId)
-                emit(Result.success(cachedEntities.map { it.toDomainModel() }))
+                emit(Result.success(emptyList()))
             }
-        } catch (e: Exception) {
-            // On exception, fallback to cache
-            try {
-                val cachedEntities = goalDao.getGoalsByPortalId(portalId)
-                emit(Result.success(cachedEntities.map { it.toDomainModel() }))
-            } catch (cacheException: Exception) {
-                emit(Result.failure(e))
-            }
+        } else {
+            // On network error, try to load from cache
+            val cachedEntities = goalDao.getGoalsByPortalId(portalId)
+            emit(Result.success(cachedEntities.map { it.toDomainModel() }))
+        }
+    }.catch { e ->
+        // On exception, fallback to cache
+        try {
+            val cachedEntities = goalDao.getGoalsByPortalId(portalId)
+            emit(Result.success(cachedEntities.map { it.toDomainModel() }))
+        } catch (cacheException: Exception) {
+            emit(Result.failure(e as? Exception ?: Exception(e.message)))
         }
     }
 

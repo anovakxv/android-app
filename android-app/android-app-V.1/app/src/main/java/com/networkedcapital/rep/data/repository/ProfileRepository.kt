@@ -6,6 +6,7 @@ import com.networkedcapital.rep.data.api.ProfileApiService
 import com.networkedcapital.rep.domain.model.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.catch
 import javax.inject.Inject
 
 interface ProfileRepository {
@@ -31,42 +32,36 @@ class ProfileRepositoryImpl @Inject constructor(
 ) : ProfileRepository {
 
     override suspend fun getUserProfile(userId: Int): Flow<Result<User>> = flow {
-        try {
-            val response = profileApiService.getUserProfile(userId)
-            if (response.isSuccessful && response.body() != null) {
-                emit(Result.success(response.body()!!.result))
-            } else {
-                emit(Result.failure(Exception("Failed to load profile: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val response = profileApiService.getUserProfile(userId)
+        if (response.isSuccessful && response.body() != null) {
+            emit(Result.success(response.body()!!.result))
+        } else {
+            throw Exception("Failed to load profile: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     override suspend fun getSkills(): Flow<Result<List<Skill>>> = flow {
-        try {
-            val response = profileApiService.getSkills()
-            if (response.isSuccessful && response.body() != null) {
-                emit(Result.success(response.body()!!.result))
-            } else {
-                emit(Result.failure(Exception("Failed to load skills: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val response = profileApiService.getSkills()
+        if (response.isSuccessful && response.body() != null) {
+            emit(Result.success(response.body()!!.result))
+        } else {
+            throw Exception("Failed to load skills: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     override suspend fun getWrites(userId: Int): Flow<Result<List<WriteBlock>>> = flow {
-        try {
-            val response = profileApiService.getWrites(userId)
-            if (response.isSuccessful && response.body() != null) {
-                emit(Result.success(response.body()!!.result))
-            } else {
-                emit(Result.failure(Exception("Failed to load writes: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val response = profileApiService.getWrites(userId)
+        if (response.isSuccessful && response.body() != null) {
+            emit(Result.success(response.body()!!.result))
+        } else {
+            throw Exception("Failed to load writes: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     override suspend fun addWrite(title: String, content: String): Flow<Result<WriteBlock>> = flow {
@@ -120,29 +115,25 @@ class ProfileRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getUserPortals(userId: Int): Flow<Result<List<Portal>>> = flow {
-        try {
-            val response = portalApiService.getFilteredPortals(userId, "open", null, false)
-            if (response.isSuccessful && response.body() != null) {
-                emit(Result.success(response.body()!!.result))
-            } else {
-                emit(Result.failure(Exception("Failed to load portals: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val response = portalApiService.getFilteredPortals(userId, "open", null, false)
+        if (response.isSuccessful && response.body() != null) {
+            emit(Result.success(response.body()!!.result))
+        } else {
+            throw Exception("Failed to load portals: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     override suspend fun getUserGoals(userId: Int): Flow<Result<List<Goal>>> = flow {
-        try {
-            val response = goalApiService.getUserGoals(userId)
-            if (response.isSuccessful && response.body() != null) {
-                emit(Result.success(response.body()!!.aGoals))
-            } else {
-                emit(Result.failure(Exception("Failed to load goals: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val response = goalApiService.getUserGoals(userId)
+        if (response.isSuccessful && response.body() != null) {
+            emit(Result.success(response.body()!!.aGoals))
+        } else {
+            throw Exception("Failed to load goals: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     override suspend fun isBlocked(userId: Int): Flow<Result<Boolean>> = flow {

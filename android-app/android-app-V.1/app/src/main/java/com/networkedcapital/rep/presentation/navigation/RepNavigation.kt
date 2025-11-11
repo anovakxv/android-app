@@ -129,17 +129,17 @@ fun RepNavigation(
         composable(Screen.Main.route) {
             MainScreen(
                 onNavigateToProfile = { userId ->
-                    navController.navigate("${Screen.Profile.route}/$userId")
+                    navController.navigate(Screen.Profile.createRoute(userId))
                 },
                 onNavigateToPortalDetail = { portalId ->
                     val userId = authState.userId
-                    navController.navigate("${Screen.PortalDetail.route}/$portalId/$userId")
+                    navController.navigate(Screen.PortalDetail.createRoute(portalId, userId))
                 },
                 onNavigateToPersonDetail = { personId ->
-                    navController.navigate("${Screen.Profile.route}/$personId")
+                    navController.navigate(Screen.Profile.createRoute(personId))
                 },
                 onNavigateToChat = { chatId ->
-                    // TODO: Implement navigation to chat screen
+                    navController.navigate(Screen.GroupChat.createRoute(chatId))
                 },
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
@@ -149,7 +149,7 @@ fun RepNavigation(
             )
         }
 
-        composable("${Screen.Profile.route}/{userId}") { backStackEntry ->
+        composable(Screen.Profile.route) { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull()
 
             // Safety check - if userId is invalid, go back
@@ -173,18 +173,18 @@ fun RepNavigation(
                     navController.navigate(Screen.PortalDetail.createRoute(portalId, authState.userId))
                 },
                 onNavigateToGoal = { goalId ->
-                    navController.navigate("${Screen.GoalDetail.route}/$goalId")
+                    navController.navigate(Screen.GoalDetail.createRoute(goalId))
                 },
                 onNavigateToEditProfile = {
                     navController.navigate(Screen.EditProfile.route)
                 },
                 onNavigateToMessage = { userId, userName ->
-                    // TODO: Wire up to IndividualChatScreen
+                    navController.navigate(Screen.IndividualChat.createRoute(userId, userName, null))
                 }
             )
         }
 
-        composable("${Screen.PortalDetail.route}/{portalId}/{userId}") { backStackEntry ->
+        composable(Screen.PortalDetail.route) { backStackEntry ->
             val portalId = backStackEntry.arguments?.getString("portalId")?.toIntOrNull()
             val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull()
 
@@ -216,7 +216,7 @@ fun RepNavigation(
                 portalId = portalId,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToGoal = { goalId ->
-                    navController.navigate("${Screen.GoalDetail.route}/$goalId")
+                    navController.navigate(Screen.GoalDetail.createRoute(goalId))
                 },
                 onNavigateToEditGoal = { goalId, portalId ->
                     navController.navigate(Screen.EditGoal.createRoute(goalId ?: 0))
@@ -234,7 +234,7 @@ fun RepNavigation(
             )
         }
 
-        composable("${Screen.GoalDetail.route}/{goalId}") { backStackEntry ->
+        composable(Screen.GoalDetail.route) { backStackEntry ->
             val goalId = backStackEntry.arguments?.getString("goalId")?.toIntOrNull()
 
             // Safety check - if goalId is invalid, go back
@@ -246,14 +246,74 @@ fun RepNavigation(
                 return@composable
             }
 
-            // TODO: Replace with your actual GoalDetailScreen implementation
-            // For now, show a placeholder with the goalId
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Goal Detail Screen - ID: $goalId\n\n(Coming soon)")
+            com.networkedcapital.rep.presentation.goals.GoalsDetailScreen(
+                goalId = goalId,
+                onBack = { navController.popBackStack() },
+                onMessage = { user ->
+                    // Navigate to IndividualChatScreen
+                    navController.navigate(
+                        Screen.IndividualChat.createRoute(
+                            user.id,
+                            user.firstName ?: "User",
+                            user.profile_picture_url
+                        )
+                    )
+                },
+                onEditGoal = {
+                    navController.navigate(Screen.EditGoal.createRoute(goalId))
+                },
+                onUpdateGoal = {
+                    navController.navigate(Screen.UpdateGoal.createRoute(goalId))
+                },
+                onNavigateToPortal = { portalId ->
+                    navController.navigate(Screen.PortalDetail.createRoute(portalId, authState.userId))
+                }
+            )
+        }
+
+        // Individual Chat Screen
+        composable(Screen.IndividualChat.route) { backStackEntry ->
+            val chatId = backStackEntry.arguments?.getString("chatId")?.toIntOrNull()
+            val userName = backStackEntry.arguments?.getString("userName") ?: "User"
+            val userPhotoUrl = backStackEntry.arguments?.getString("userPhotoUrl")?.let {
+                if (it == "null") null else it
             }
+
+            // Safety check - if chatId is invalid, go back
+            if (chatId == null || chatId <= 0) {
+                android.util.Log.w("RepNavigation", "Invalid chatId for IndividualChatScreen")
+                LaunchedEffect(Unit) {
+                    navController.popBackStack()
+                }
+                return@composable
+            }
+
+            com.networkedcapital.rep.presentation.chat.IndividualChatScreen(
+                chatId = chatId,
+                userName = userName,
+                userPhotoUrl = userPhotoUrl,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Group Chat Screen
+        composable(Screen.GroupChat.route) { backStackEntry ->
+            val chatId = backStackEntry.arguments?.getString("chatId")?.toIntOrNull()
+
+            // Safety check - if chatId is invalid, go back
+            if (chatId == null || chatId <= 0) {
+                android.util.Log.w("RepNavigation", "Invalid chatId for GroupChatScreen")
+                LaunchedEffect(Unit) {
+                    navController.popBackStack()
+                }
+                return@composable
+            }
+
+            com.networkedcapital.rep.presentation.chat.GroupChatScreen(
+                chatId = chatId,
+                currentUserId = authState.userId,
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
 
         // Payments Screen
@@ -337,7 +397,7 @@ fun RepNavigation(
                     navController.popBackStack()
                 },
                 onViewGoal = { goalId ->
-                    navController.navigate("${Screen.GoalDetail.route}/$goalId")
+                    navController.navigate(Screen.GoalDetail.createRoute(goalId))
                 }
             )
         }
@@ -441,11 +501,22 @@ sealed class Screen(val route: String) {
     object AboutRep : Screen("about_rep")
     object EditProfile : Screen("edit_profile")
     object Main : Screen("main")
-    object Profile : Screen("profile")
+    object Profile : Screen("profile/{userId}") {
+        fun createRoute(userId: Int) = "profile/$userId"
+    }
     object PortalDetail : Screen("portal_detail/{portalId}/{userId}") {
         fun createRoute(portalId: Int, userId: Int) = "portal_detail/$portalId/$userId"
     }
-    object GoalDetail : Screen("goal_detail")
+    object GoalDetail : Screen("goal_detail/{goalId}") {
+        fun createRoute(goalId: Int) = "goal_detail/$goalId"
+    }
+    object IndividualChat : Screen("individual_chat/{chatId}/{userName}/{userPhotoUrl}") {
+        fun createRoute(chatId: Int, userName: String, userPhotoUrl: String?) =
+            "individual_chat/$chatId/$userName/${userPhotoUrl ?: "null"}"
+    }
+    object GroupChat : Screen("group_chat/{chatId}") {
+        fun createRoute(chatId: Int) = "group_chat/$chatId"
+    }
     object ApiTest : Screen("api_test")
 
     // Payment & Subscription screens
