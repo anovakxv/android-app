@@ -25,7 +25,8 @@
       "Bash(do sed -i '/import androidx\\.compose\\.material\\.icons\\.filled/a import androidx.compose.material.icons.automirrored.filled.*' \"$file\")",
       "Bash(done)",
       "Bash(.gradlew clean compileDebugKotlin:*)",
-      "Bash(Select-Object -First 200)"
+      "Bash(Select-Object -First 200)",
+      "Bash(tee:*)"
     ],
     "deny": [],
     "ask": []
