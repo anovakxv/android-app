@@ -87,14 +87,16 @@ class GoalsDetailViewModel @Inject constructor(
                     _goal.value = convertToGoal(goalDetailData)
 
                     // Convert team to User list with patched profile pictures
-                    val teamDict = goalDetailData.team?.associateBy { it.id } ?: emptyMap()
-                    _team.value = goalDetailData.team?.map { user ->
+                    val patchedTeam = goalDetailData.team?.map { user ->
                         user.copy(
                             profile_picture_url = patchProfilePictureUrl(
                                 user.profile_picture_url ?: user.imageName
                             )
                         )
                     } ?: emptyList()
+
+                    val teamDict = patchedTeam.associateBy { it.id }
+                    _team.value = patchedTeam
 
                     // Convert progress logs to FeedItem list
                     _feed.value = convertProgressLogsToFeed(goalDetailData.aLatestProgress, teamDict)
@@ -140,7 +142,8 @@ class GoalsDetailViewModel @Inject constructor(
         return logs.sortedByDescending { it.timestamp }.take(20).map { log ->
             val user = log.usersId?.let { teamDict[it] }
             val userName = user?.displayName ?: "Unknown User"
-            val profilePictureUrl = patchProfilePictureUrl(user?.profile_picture_url ?: user?.imageName)
+            // User already has patched profile_picture_url from teamDict
+            val profilePictureUrl = user?.profile_picture_url
 
             // Convert attachments
             val attachments = log.aAttachments?.mapNotNull { att ->

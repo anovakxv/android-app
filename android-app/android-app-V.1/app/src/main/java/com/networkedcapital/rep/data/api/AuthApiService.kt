@@ -31,7 +31,7 @@ interface AuthApiService {
     suspend fun logout(): Response<LogoutResponse>
     
     @GET(ApiConfig.PROFILE)
-    suspend fun getProfile(): Response<User>
+    suspend fun getProfile(): Response<UserProfileApiResponse>
     
     @POST(ApiConfig.EDIT_PROFILE)
     suspend fun updateProfile(@Body user: User): Response<UserEditResponse>

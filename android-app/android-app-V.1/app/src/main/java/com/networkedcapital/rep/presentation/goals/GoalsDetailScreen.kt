@@ -345,47 +345,47 @@ fun GoalsDetailScreen(
             }
             
             // iOS-Style Bottom Bar
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .background(Color.White)
-                    .padding(horizontal = 16.dp)
-                    .border(
-                        width = 1.dp,
-                        color = Color(0xFFE4E4E4),
-                        shape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp)
-                    ),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Button(
-                    onClick = { showSheet = true },
+            Column {
+                HorizontalDivider(color = Color(0xFFE4E4E4))
+
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .height(40.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF8CC55D),
-                        contentColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(6.dp)
+                        .fillMaxWidth()
+                        .height(64.dp)
+                        .background(Color.White)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Actions", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-                }
-                
-                IconButton(
-                    onClick = { openGoalTeamChat() },
-                    modifier = Modifier
-                        .size(44.dp)
-                        .border(1.dp, Color(0xFFE4E4E4), CircleShape),
-                    enabled = !isCreatingTeamChat
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Chat,
-                        contentDescription = "Team Chat",
-                        tint = Color.Black,
-                        modifier = Modifier.size(20.dp)
-                    )
+                    Button(
+                        onClick = { showSheet = true },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(41.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(red = 0.482f, green = 0.749f, blue = 0.294f)
+                        ),
+                        shape = RoundedCornerShape(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Actions",
+                            tint = Color.White
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    IconButton(
+                        onClick = { openGoalTeamChat() },
+                        enabled = !isCreatingTeamChat
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Message,
+                            contentDescription = "Team Chat",
+                            tint = Color.Black
+                        )
+                    }
                 }
             }
         }
@@ -435,92 +435,137 @@ fun GoalsDetailScreen(
             ModalBottomSheet(
                 onDismissRequest = { showSheet = false },
                 sheetState = sheetState,
-                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
                 containerColor = Color.White
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 16.dp, horizontal = 24.dp)
+                        .padding(vertical = 16.dp, horizontal = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     // Check if user is already on the team
                     val isOnTeam = team.any { it.id == viewModel.getCurrentUserId() }
                     val isCreator = goal?.creatorId == viewModel.getCurrentUserId()
-                    
+
                     // Show "Join Team" only if user is not already on the team
                     if (!isOnTeam && !isCreator && goal?.typeName == "Recruiting") {
-                        ActionButton(
-                            text = "Join Team",
-                            onClick = {
-                                viewModel.joinRecruitingGoal(goal?.id ?: 0) { success ->
-                                    showSheet = false
-                                    if (success) {
-                                        viewModel.loadGoal(goal?.id ?: 0)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.joinRecruitingGoal(goal?.id ?: 0) { success ->
+                                        showSheet = false
+                                        if (success) {
+                                            viewModel.loadGoal(goal?.id ?: 0)
+                                        }
                                     }
                                 }
-                            }
-                        )
+                                .padding(vertical = 8.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Join Team",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF8CC55D)
+                            )
+                        }
+                        HorizontalDivider()
                     }
-                    
+
                     // Show "Invite to Team" only if user is on the team or is creator
                     if (isOnTeam || isCreator) {
-                        ActionButton(
-                            text = "Invite to Team",
-                            onClick = {
-                                showSheet = false
-                                // Show invite team sheet
-                            }
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    showSheet = false
+                                    // Show invite team sheet
+                                }
+                                .padding(vertical = 8.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Invite to Team",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF8CC55D)
+                            )
+                        }
+                        HorizontalDivider()
                     }
-                    
+
                     // Update Progress for non-Recruiting goals
                     if (goal?.typeName != "Recruiting") {
-                        ActionButton(
-                            text = "Update Progress", 
-                            onClick = {
-                                showSheet = false
-                                onUpdateGoal()
-                            }
-                        )
-                    }
-                    
-                    ActionButton(
-                        text = "Edit Goal",
-                        onClick = {
-                            showSheet = false
-                            onEditGoal()
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    showSheet = false
+                                    onUpdateGoal()
+                                }
+                                .padding(vertical = 8.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Update Progress",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF8CC55D)
+                            )
                         }
-                    )
-                    
-                    Button(
-                        onClick = {
-                            showSheet = false
-                            // Show delete confirmation
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.White,
-                            contentColor = Color.Red
-                        ),
-                        modifier = Modifier.fillMaxWidth()
+                        HorizontalDivider()
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                showSheet = false
+                                onEditGoal()
+                            }
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            "Delete Goal", 
-                            fontSize = 16.sp, 
-                            fontWeight = FontWeight.Medium
+                            text = "Edit Goal",
+                            fontSize = 16.sp,
+                            color = Color(0xFF8CC55D)
                         )
                     }
-                    
-                    Button(
-                        onClick = { showSheet = false },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.White,
-                            contentColor = Color.Gray
-                        ),
-                        modifier = Modifier.fillMaxWidth()
+
+                    HorizontalDivider()
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                showSheet = false
+                                // Show delete confirmation
+                            }
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            "Cancel", 
-                            fontSize = 16.sp
+                            text = "Delete Goal",
+                            fontSize = 16.sp,
+                            color = Color.Red
+                        )
+                    }
+
+                    HorizontalDivider()
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showSheet = false }
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Cancel",
+                            fontSize = 16.sp,
+                            color = Color.Gray
                         )
                     }
                 }
@@ -942,7 +987,7 @@ fun EnhancedTeamMemberItem(user: User, onMessage: (User) -> Unit, onProfileClick
                 .clickable { onProfileClick(user) }
         ) {
             Text(
-                text = user.fullName ?: user.fname ?: user.username ?: "User",
+                text = user.displayName,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )

@@ -66,6 +66,7 @@ fun PortalDetailScreen(
     onNavigateToGoal: (Int) -> Unit,
     onNavigateToEditGoal: (Int?, Int) -> Unit,
     onNavigateToEditPortal: (Int) -> Unit,
+    onMessage: (User) -> Unit = {},
     viewModel: PortalDetailViewModel
 ) {
     var showActionSheet by remember { mutableStateOf(false) }
@@ -116,8 +117,7 @@ fun PortalDetailScreen(
                         // Find lead user to message
                         val lead = uiState.portalDetail?.aLeads?.firstOrNull()
                         if (lead != null) {
-                            selectedLeadUser = lead
-                            showMessageSheet = true
+                            onMessage(lead)
                         } else {
                             // TODO: Navigate to group chat for portal
                             // Portal group chat navigation not yet implemented

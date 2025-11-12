@@ -407,7 +407,7 @@ fun MainScreen(
     onNavigateToProfile: (Int) -> Unit,
     onNavigateToPortalDetail: (Int) -> Unit,
     onNavigateToPersonDetail: (Int) -> Unit,
-    onNavigateToChat: (Int) -> Unit,
+    onNavigateToChat: (ActiveChat) -> Unit,
     onLogout: () -> Unit,
     viewModel: MainViewModel = hiltViewModel()
 ) {
@@ -583,16 +583,11 @@ fun MainScreen(
                     if (uiState.activeChats.isNotEmpty()) {
                         ActiveChatsList(
                             chats = uiState.activeChats,
-                            onChatClick = { chatId ->
-                                val intId = when (chatId) {
-                                    is Int -> chatId
-                                    is String -> chatId.toIntOrNull()
-                                    else -> null
-                                }
-                                if (intId != null) {
-                                    onNavigateToChat(intId)
+                            onChatClick = { chat ->
+                                if (chat is ActiveChat) {
+                                    onNavigateToChat(chat)
                                 } else {
-                                    Log.e("MainScreen", "Invalid chat ID: $chatId")
+                                    Log.e("MainScreen", "Invalid chat object")
                                 }
                             },
                             modifier = Modifier.fillMaxSize()
@@ -876,11 +871,37 @@ fun EnhancedActiveChatItem(
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (chat.type == "direct" && chat.user != null) {
-            UserProfileImageThumbnail(user = chat.user, size = 64.dp)
-            
+        if (chat.type == "DM") {
+            // Profile picture for DM
+            if (!chat.profilePictureUrl.isNullOrEmpty()) {
+                AsyncImage(
+                    model = chat.profilePictureUrl,
+                    contentDescription = "Profile picture",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFE0E0E0))
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFE0E0E0)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = chat.name.take(1).uppercase(),
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.width(16.dp))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -888,32 +909,31 @@ fun EnhancedActiveChatItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = chat.user.displayName,
+                        text = chat.name,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 17.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    
-                    if (chat.last_message_time != null) {
+
+                    if (chat.timestamp != null) {
                         Text(
-                            text = formatTimeAgo(chat.last_message_time),
+                            text = formatTimeAgo(chat.timestamp),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
                     }
                 }
-                
-                val isUnread = chat.last_message?.read == "0" && chat.last_message.senderId != chat.user.id
+
                 Text(
-                    text = chat.last_message?.text ?: "",
-                    fontWeight = if (isUnread) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isUnread) Color(0xFF8CC55D) else Color.Gray,
+                    text = chat.lastMessage ?: "",
+                    fontWeight = if (chat.unreadCount > 0) FontWeight.Bold else FontWeight.Normal,
+                    color = if (chat.unreadCount > 0) Color(0xFF8CC55D) else Color.Gray,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-        } else if (chat.type == "group" && chat.chat != null) {
+        } else if (chat.type == "GROUP") {
             // Group chat avatar (circle with first 2 letters)
             Box(
                 modifier = Modifier
@@ -923,15 +943,15 @@ fun EnhancedActiveChatItem(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = (chat.chat.name?.take(2) ?: "GC").uppercase(),
+                    text = chat.name.take(2).uppercase(),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )
             }
-            
+
             Spacer(modifier = Modifier.width(16.dp))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -939,27 +959,26 @@ fun EnhancedActiveChatItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = chat.chat.name ?: "Group Chat",
+                        text = chat.name,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 17.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    
-                    if (chat.last_message_time != null) {
+
+                    if (chat.timestamp != null) {
                         Text(
-                            text = formatTimeAgo(chat.last_message_time),
+                            text = formatTimeAgo(chat.timestamp),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
                     }
                 }
-                
-                val isUnread = chat.last_message?.read == "0" // For group chats we don't compare IDs
+
                 Text(
-                    text = chat.last_message?.text ?: "",
-                    fontWeight = if (isUnread) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isUnread) Color(0xFF8CC55D) else Color.Gray,
+                    text = chat.lastMessage ?: "",
+                    fontWeight = if (chat.unreadCount > 0) FontWeight.Bold else FontWeight.Normal,
+                    color = if (chat.unreadCount > 0) Color(0xFF8CC55D) else Color.Gray,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -1172,7 +1191,7 @@ fun PortalsList(
 @Composable
 fun ActiveChatsList(
     chats: List<ActiveChat>,
-    onChatClick: (Any) -> Unit,
+    onChatClick: (ActiveChat) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -1183,7 +1202,7 @@ fun ActiveChatsList(
         items(chats) { chat ->
             EnhancedActiveChatItem(
                 chat = chat,
-                onClick = { chat.id?.let { onChatClick(it) } }
+                onClick = { onChatClick(chat) }
             )
             // Add divider between items
             HorizontalDivider(

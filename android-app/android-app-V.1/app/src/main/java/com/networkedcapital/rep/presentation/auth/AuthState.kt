@@ -108,9 +108,9 @@ class AuthStateect constructor(
         try {
             val response = authApiService.getProfile()
             if (response.isSuccessful) {
-                val user = response.body()
-                if (user != null) {
-                    emit(Result.success(user))
+                val userResponse = response.body()
+                if (userResponse != null) {
+                    emit(Result.success(userResponse.result))
                 } else {
                     emit(Result.failure(Exception("User not found")))
                 }

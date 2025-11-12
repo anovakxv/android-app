@@ -138,8 +138,25 @@ fun RepNavigation(
                 onNavigateToPersonDetail = { personId ->
                     navController.navigate(Screen.Profile.createRoute(personId))
                 },
-                onNavigateToChat = { chatId ->
-                    navController.navigate(Screen.GroupChat.createRoute(chatId))
+                onNavigateToChat = { chat ->
+                    // Differentiate between DM and GROUP chats
+                    if (chat is com.networkedcapital.rep.domain.model.ActiveChat) {
+                        if (chat.type == "DM") {
+                            // Navigate to individual chat with user info
+                            navController.navigate(
+                                Screen.IndividualChat.createRoute(
+                                    chat.usersId ?: chat.id,
+                                    chat.name,
+                                    chat.profilePictureUrl
+                                )
+                            )
+                        } else {
+                            // Navigate to group chat
+                            navController.navigate(
+                                Screen.GroupChat.createRoute(chat.chatsId ?: chat.id)
+                            )
+                        }
+                    }
                 },
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
@@ -224,6 +241,16 @@ fun RepNavigation(
                 onNavigateToEditPortal = { portalId ->
                     navController.navigate(Screen.EditPortal.createRoute(portalId))
                 },
+                onMessage = { user ->
+                    // Navigate to IndividualChatScreen
+                    navController.navigate(
+                        Screen.IndividualChat.createRoute(
+                            user.id,
+                            user.displayName,
+                            user.profile_picture_url
+                        )
+                    )
+                },
                 viewModel = viewModel
             )
         }
@@ -254,7 +281,7 @@ fun RepNavigation(
                     navController.navigate(
                         Screen.IndividualChat.createRoute(
                             user.id,
-                            user.firstName ?: "User",
+                            user.displayName,
                             user.profile_picture_url
                         )
                     )

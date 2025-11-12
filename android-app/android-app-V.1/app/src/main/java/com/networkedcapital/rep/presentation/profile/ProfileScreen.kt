@@ -27,6 +27,8 @@ import com.networkedcapital.rep.domain.model.User
 import com.networkedcapital.rep.domain.model.Portal
 import com.networkedcapital.rep.domain.model.Goal
 import com.networkedcapital.rep.domain.model.WriteBlock
+import com.networkedcapital.rep.presentation.goals.GoalListItem
+import com.networkedcapital.rep.presentation.main.EnhancedPortalItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -161,13 +163,11 @@ fun ProfileScreen(
                             }
                         } else {
                             items(uiState.portals) { portal ->
-                                PortalListItem(
+                                EnhancedPortalItem(
                                     portal = portal,
-                                    onClick = { onNavigateToPortal(portal.id) }
+                                    onClick = { onNavigateToPortal(portal.id) },
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                                 )
-                                if (portal != uiState.portals.last()) {
-                                    HorizontalDivider(color = Color(0xFFE4E4E4))
-                                }
                             }
                         }
                     }
@@ -189,13 +189,11 @@ fun ProfileScreen(
                             }
                         } else {
                             items(uiState.goals) { goal ->
-                                GoalListItemProfile(
+                                GoalListItem(
                                     goal = goal,
-                                    onClick = { onNavigateToGoal(goal.id) }
+                                    onClick = { onNavigateToGoal(goal.id) },
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                                 )
-                                if (goal != uiState.goals.last()) {
-                                    HorizontalDivider(color = Color(0xFFE4E4E4))
-                                }
                             }
                         }
                     }
@@ -254,41 +252,48 @@ fun ProfileScreen(
     // Action Sheet for Current User
     if (showActionSheet && viewModel.isCurrentUser) {
         ModalBottomSheet(
-            onDismissRequest = { showActionSheet = false }
+            onDismissRequest = { showActionSheet = false },
+            containerColor = Color.White
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(vertical = 16.dp, horizontal = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                Text(
-                    text = "Edit Profile",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = repGreen,
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
                             showActionSheet = false
                             onNavigateToEditProfile()
                         }
-                        .padding(vertical = 12.dp)
-                )
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Edit Profile",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = repGreen
+                    )
+                }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider()
 
-                Text(
-                    text = "Cancel",
-                    fontSize = 16.sp,
-                    color = Color.Gray,
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { showActionSheet = false }
-                        .padding(vertical = 12.dp)
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Cancel",
+                        fontSize = 16.sp,
+                        color = Color.Gray
+                    )
+                }
             }
         }
     }
@@ -296,19 +301,16 @@ fun ProfileScreen(
     // Action Sheet for Other Users
     if (showActionSheet && !viewModel.isCurrentUser) {
         ModalBottomSheet(
-            onDismissRequest = { showActionSheet = false }
+            onDismissRequest = { showActionSheet = false },
+            containerColor = Color.White
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(vertical = 16.dp, horizontal = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                Text(
-                    text = "+ to NTWK",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = repGreen,
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
@@ -316,17 +318,21 @@ fun ProfileScreen(
                                 showActionSheet = false
                             }
                         }
-                        .padding(vertical = 12.dp)
-                )
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "+ to NTWK",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = repGreen
+                    )
+                }
 
                 HorizontalDivider()
 
                 if (uiState.isBlocked) {
-                    Text(
-                        text = "Unblock User",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Red,
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
@@ -334,13 +340,18 @@ fun ProfileScreen(
                                     showActionSheet = false
                                 }
                             }
-                            .padding(vertical = 12.dp)
-                    )
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Unblock User",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Red
+                        )
+                    }
                 } else {
-                    Text(
-                        text = "Block User",
-                        fontSize = 16.sp,
-                        color = Color.Red,
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
@@ -348,38 +359,51 @@ fun ProfileScreen(
                                     showActionSheet = false
                                 }
                             }
-                            .padding(vertical = 12.dp)
-                    )
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Block User",
+                            fontSize = 16.sp,
+                            color = Color.Red
+                        )
+                    }
                 }
 
                 HorizontalDivider()
 
-                Text(
-                    text = "Flag as Inappropriate",
-                    fontSize = 16.sp,
-                    color = Color.Red,
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
                             showActionSheet = false
                             showFlagDialog = true
                         }
-                        .padding(vertical = 12.dp)
-                )
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Flag as Inappropriate",
+                        fontSize = 16.sp,
+                        color = Color.Red
+                    )
+                }
 
                 HorizontalDivider()
 
-                Text(
-                    text = "Cancel",
-                    fontSize = 16.sp,
-                    color = Color.Gray,
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { showActionSheet = false }
-                        .padding(vertical = 12.dp)
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Cancel",
+                        fontSize = 16.sp,
+                        color = Color.Gray
+                    )
+                }
             }
         }
     }
@@ -603,87 +627,6 @@ private fun ProfileSegmentedPicker(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun PortalListItem(
-    portal: Portal,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        AsyncImage(
-            model = portal.mainImageUrl,
-            contentDescription = portal.name,
-            modifier = Modifier
-                .size(60.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.Gray.copy(alpha = 0.3f)),
-            contentScale = ContentScale.Crop
-        )
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Column {
-            Text(
-                text = portal.name,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-            portal.subtitle?.let {
-                Text(
-                    text = it,
-                    fontSize = 14.sp,
-                    color = Color.Gray
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun GoalListItemProfile(
-    goal: Goal,
-    onClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(16.dp)
-    ) {
-        Text(
-            text = goal.title,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold
-        )
-        Text(
-            text = goal.description ?: "",
-            fontSize = 14.sp,
-            color = Color.Gray
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        val progress = (goal.progressPercent / 100.0).toFloat()
-
-        LinearProgressIndicator(
-            progress = { progress.coerceIn(0f, 1f) },
-            modifier = Modifier.fillMaxWidth(),
-            color = Color(red = 0.549f, green = 0.78f, blue = 0.365f)
-        )
-
-        Text(
-            text = "${goal.filledQuota.toInt()} / ${goal.quota.toInt()} (${goal.progressPercent.toInt()}%)",
-            fontSize = 12.sp,
-            color = Color.Gray
-        )
     }
 }
 
