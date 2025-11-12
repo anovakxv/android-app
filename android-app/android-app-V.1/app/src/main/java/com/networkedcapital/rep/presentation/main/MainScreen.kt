@@ -256,9 +256,10 @@ fun MainActionSheet(
                 .padding(vertical = 16.dp, horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Show option (Safe/All)
+            // Show option (Safe/All) - centered like other action sheet items
             Row(
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -266,8 +267,8 @@ fun MainActionSheet(
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
-                Spacer(modifier = Modifier.width(24.dp))
-                
+                Spacer(modifier = Modifier.width(16.dp))
+
                 // All button
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -296,9 +297,9 @@ fun MainActionSheet(
                         color = Color.Gray
                     )
                 }
-                
-                Spacer(modifier = Modifier.width(24.dp))
-                
+
+                Spacer(modifier = Modifier.width(16.dp))
+
                 // Safe button
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -404,6 +405,7 @@ fun MainActionSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
+    userId: Int,
     onNavigateToProfile: (Int) -> Unit,
     onNavigateToPortalDetail: (Int) -> Unit,
     onNavigateToPersonDetail: (Int) -> Unit,
@@ -440,8 +442,8 @@ fun MainScreen(
         }
     }
 
-    LaunchedEffect(uiState.currentUser?.id) {
-        val userId = uiState.currentUser?.id ?: 0
+    // Load data when screen first appears or userId changes
+    LaunchedEffect(userId) {
         viewModel.loadData(userId)
 
         // TODO: Setup socket notifications - requires baseURL and token from auth context
@@ -502,7 +504,6 @@ fun MainScreen(
                 segments = segments,
                 selectedIndex = uiState.selectedSection,
                 onSelect = { section ->
-                    val userId = uiState.currentUser?.id ?: 0
                     viewModel.onSectionChanged(section, userId)
                 },
                 attentionDotIndices = attentionDotIndices
@@ -575,7 +576,7 @@ fun MainScreen(
             } else if (!uiState.errorMessage.isNullOrBlank()) {
                 ErrorStateView(
                     message = uiState.errorMessage ?: "An error occurred.",
-                    onRetry = { viewModel.loadData(uiState.currentUser?.id ?: 0) }
+                    onRetry = { viewModel.loadData(userId) }
                 )
             } else {
                 // Section 0 always shows chats (matching iOS behavior)
@@ -661,7 +662,6 @@ fun MainScreen(
                     modifier = Modifier
                         .size(44.dp)
                         .clickable {
-                            val userId = uiState.currentUser?.id ?: 0
                             viewModel.togglePage(userId)
                         }
                 )

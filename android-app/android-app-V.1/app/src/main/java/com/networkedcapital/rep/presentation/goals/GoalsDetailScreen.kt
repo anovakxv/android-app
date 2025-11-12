@@ -440,7 +440,7 @@ fun GoalsDetailScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 16.dp, horizontal = 24.dp),
+                        .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     // Check if user is already on the team
@@ -449,7 +449,11 @@ fun GoalsDetailScreen(
 
                     // Show "Join Team" only if user is not already on the team
                     if (!isOnTeam && !isCreator && goal?.typeName == "Recruiting") {
-                        Row(
+                        Text(
+                            text = "Join Team",
+                            fontSize = 22.sp, // .title2 equivalent
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF8CC75D), // RGB(0.549, 0.78, 0.365)
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
@@ -460,114 +464,88 @@ fun GoalsDetailScreen(
                                         }
                                     }
                                 }
-                                .padding(vertical = 8.dp),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = "Join Team",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF8CC55D)
-                            )
-                        }
-                        HorizontalDivider()
+                                .padding(vertical = 5.dp),
+                            textAlign = TextAlign.Center
+                        )
                     }
 
                     // Show "Invite to Team" only if user is on the team or is creator
                     if (isOnTeam || isCreator) {
-                        Row(
+                        Text(
+                            text = "Invite to Team",
+                            fontSize = 22.sp, // .title2 equivalent
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF8CC75D),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
                                     showSheet = false
-                                    // Show invite team sheet
+                                    // TODO: Show invite team sheet
                                 }
-                                .padding(vertical = 8.dp),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = "Invite to Team",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF8CC55D)
-                            )
-                        }
-                        HorizontalDivider()
+                                .padding(vertical = 5.dp),
+                            textAlign = TextAlign.Center
+                        )
                     }
 
                     // Update Progress for non-Recruiting goals
                     if (goal?.typeName != "Recruiting") {
-                        Row(
+                        Text(
+                            text = "Update Progress",
+                            fontSize = 22.sp, // .title2 equivalent
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF8CC75D),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
                                     showSheet = false
                                     onUpdateGoal()
                                 }
-                                .padding(vertical = 8.dp),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = "Update Progress",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF8CC55D)
-                            )
-                        }
-                        HorizontalDivider()
+                                .padding(vertical = 5.dp),
+                            textAlign = TextAlign.Center
+                        )
                     }
 
-                    Row(
+                    Text(
+                        text = "Edit Goal",
+                        fontSize = 22.sp, // .title2 equivalent - same as other primary actions
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF8CC75D),
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
                                 showSheet = false
                                 onEditGoal()
                             }
-                            .padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "Edit Goal",
-                            fontSize = 16.sp,
-                            color = Color(0xFF8CC55D)
-                        )
-                    }
+                            .padding(vertical = 5.dp),
+                        textAlign = TextAlign.Center
+                    )
 
-                    HorizontalDivider()
-
-                    Row(
+                    Text(
+                        text = "Delete Goal",
+                        fontSize = 16.sp, // .body equivalent
+                        fontWeight = FontWeight.Normal,
+                        color = Color.Red, // Destructive role
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
                                 showSheet = false
-                                // Show delete confirmation
+                                // TODO: Show delete confirmation alert
                             }
-                            .padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "Delete Goal",
-                            fontSize = 16.sp,
-                            color = Color.Red
-                        )
-                    }
+                            .padding(vertical = 5.dp),
+                        textAlign = TextAlign.Center
+                    )
 
-                    HorizontalDivider()
-
-                    Row(
+                    Text(
+                        text = "Cancel",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = Color.Gray, // .secondary equivalent
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { showSheet = false }
-                            .padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "Cancel",
-                            fontSize = 16.sp,
-                            color = Color.Gray
-                        )
-                    }
+                            .padding(vertical = 5.dp),
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }

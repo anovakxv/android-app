@@ -112,7 +112,7 @@ fun PortalDetailScreen(
         bottomBar = {
             if (uiState.portalDetail != null) {
                 PortalBottomBar(
-                    onAddClick = { /* TODO: Implement Join Team logic */ },
+                    onAddClick = { showActionSheet = true },
                     onMessageClick = {
                         // Find lead user to message
                         val lead = uiState.portalDetail?.aLeads?.firstOrNull()
@@ -664,56 +664,56 @@ fun PortalBottomBar(
     onAddClick: () -> Unit,
     onMessageClick: () -> Unit
 ) {
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .shadow(8.dp, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-            .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
-        color = Color.White
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            HorizontalDivider(
-                color = Color(0xFFE4E4E4),
-                thickness = 1.dp,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Row(
+    Column(modifier = modifier.fillMaxWidth()) {
+        // Top divider
+        HorizontalDivider(
+            color = Color(0xFFE4E4E4),
+            thickness = 1.dp
+        )
+
+        // Bottom bar - matches iOS BottomBarView
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(51.dp)
+                .background(Color.White)
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(30.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Green "+" button (matches iOS)
+            Button(
+                onClick = onAddClick,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .width(291.dp)
+                    .height(41.dp),
+                shape = RoundedCornerShape(6.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF7BBF4B) // RGB(0.482, 0.749, 0.294)
+                ),
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 3.dp
+                )
             ) {
-                Button(
-                    onClick = onAddClick,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(44.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black
-                    ),
-                    border = BorderStroke(1.dp, Color(0xFFE4E4E4))
-                ) {
-                    Text("Join Team", color = Color.Black, fontWeight = FontWeight.SemiBold)
-                }
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add",
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
 
-                Spacer(modifier = Modifier.width(16.dp))
-
-                IconButton(
-                    onClick = onMessageClick,
-                    modifier = Modifier
-                        .size(44.dp)
-                        .border(1.dp, Color(0xFFE4E4E4), CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ChatBubble,
-                        contentDescription = "Message",
-                        tint = Color.Black,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
+            // Message icon button (matches iOS - no border, just black icon)
+            IconButton(
+                onClick = onMessageClick,
+                modifier = Modifier.size(44.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Message,
+                    contentDescription = "Message",
+                    tint = Color.Black,
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
     }

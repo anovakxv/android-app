@@ -112,6 +112,16 @@ class MainViewModel @Inject constructor(
         )
     }
 
+    /**
+     * Patches an ActiveChat's profilePictureUrl with S3 base URL.
+     */
+    private fun patchActiveChatImage(chat: ActiveChat): ActiveChat {
+        val patchedUrl = patchImageUrl(chat.profilePictureUrl)
+        return chat.copy(
+            profilePictureUrl = patchedUrl
+        )
+    }
+
     init {
         // Debounced search
         searchQuery
@@ -244,7 +254,8 @@ class MainViewModel @Inject constructor(
                     try {
                         if (to == 0) {
                             val chats = portalRepository.getActiveChats(userId)
-                            backgroundUsersTab0.value = chats
+                            val patchedChats = chats.map { patchActiveChatImage(it) }
+                            backgroundUsersTab0.value = patchedChats
                         } else {
                             val tab = if (to == 1) "ntwk" else "all"
                             val users = portalRepository.getFilteredPeople(userId, tab)
@@ -295,10 +306,42 @@ class MainViewModel @Inject constructor(
     }
 
     // ENHANCED: Use background cached data and load background data
+    // Matches iOS behavior: section 0 (Chats) always switches to PEOPLE page
     fun onSectionChanged(section: Int, userId: Int) {
         val oldSection = _uiState.value.selectedSection
         _uiState.update { state -> state.copy(selectedSection = section) }
-        
+
+        // iOS: Section 0 (Chats) always switches to People page
+        if (section == 0 && _uiState.value.currentPage == MainPage.PORTALS) {
+            // Switch to People page and show chats
+            _uiState.update { state ->
+                state.copy(
+                    currentPage = MainPage.PEOPLE,
+                    searchQuery = "",
+                    searchPortals = emptyList(),
+                    searchUsers = emptyList()
+                )
+            }
+            _searchQuery.value = ""
+
+            // Load chats
+            val backgroundChats = backgroundUsersTab0.value
+            if (backgroundChats.isNotEmpty()) {
+                _uiState.update { it.copy(activeChats = backgroundChats) }
+            }
+            viewModelScope.launch {
+                fetchPeople(userId, 0)
+            }
+
+            // Load background data
+            viewModelScope.launch {
+                delay(500)
+                loadBackgroundData(0, 1, userId)
+                loadBackgroundData(0, 2, userId)
+            }
+            return
+        }
+
         // Use background data first if available
         when (_uiState.value.currentPage) {
             MainPage.PORTALS -> {
@@ -326,7 +369,7 @@ class MainViewModel @Inject constructor(
                 }
             }
         }
-        
+
         // Then fetch fresh data
         viewModelScope.launch {
             when (_uiState.value.currentPage) {
@@ -334,7 +377,7 @@ class MainViewModel @Inject constructor(
                 MainPage.PEOPLE -> fetchPeople(userId, section)
             }
         }
-        
+
         // Load other sections in background after a delay
         viewModelScope.launch {
             delay(500)
@@ -475,23 +518,24 @@ class MainViewModel @Inject constructor(
             if (section == 0) {
                 // Fetch active chats
                 val chats = portalRepository.getActiveChats(userId)
+                val patchedChats = chats.map { patchActiveChatImage(it) }
                 _uiState.update { state ->
                     state.copy(
                         isLoading = false,
-                        activeChats = chats,
+                        activeChats = patchedChats,
                         users = emptyList(),
                         errorMessage = null
                     )
                 }
-                
+
                 // Update cache
-                backgroundUsersTab0.value = chats
+                backgroundUsersTab0.value = patchedChats
 
                 // Check for unread messages using unreadCount
-                val hasUnreadDM = chats.any {
+                val hasUnreadDM = patchedChats.any {
                     it.type == "DM" && it.unreadCount > 0
                 }
-                val hasUnreadGroup = chats.any {
+                val hasUnreadGroup = patchedChats.any {
                     it.type == "GROUP" && it.unreadCount > 0
                 }
                 _hasUnreadDirectMessages.value = hasUnreadDM

@@ -15,6 +15,7 @@ data class User(
     val phone: String? = null,
     val cities_id: Int? = null,
     val users_types_id: Int? = null,
+    val name: String? = null, // Full name from backend (used in iOS)
     val fname: String? = null,
     val lname: String? = null,
     val username: String? = null,
@@ -48,7 +49,7 @@ data class User(
     val is_admin: Boolean? = false
 ) : Parcelable {
     val displayName: String
-        get() = fullName ?: fname?.let { fn ->
+        get() = name ?: fullName ?: fname?.let { fn ->
             lname?.let { ln -> "$fn $ln" } ?: fn
         } ?: firstName?.let { fn ->
             lastName?.let { ln -> "$fn $ln" } ?: fn

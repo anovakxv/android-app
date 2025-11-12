@@ -7,11 +7,11 @@
 > Task :app:mapDebugSourceSetPaths
 > Task :app:generateDebugResources
 > Task :app:checkDebugAarMetadata
+> Task :app:mergeDebugResources
 > Task :app:packageDebugResources
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
 > Task :app:parseDebugLocalResources
-> Task :app:mergeDebugResources
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
 > Task :app:processDebugManifestForPackage
@@ -21,8 +21,36 @@
 warning: Kapt support in Moshi Kotlin Code Gen is deprecated and will be removed in 2.0. Please migrate to KSP. https://github.com/square/moshi#codegen
 
 > Task :app:compileDebugKotlin
-e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/main/MainScreen.kt:486:64 Unresolved reference: ic_launcher_foreground
-e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/main/MainScreen.kt:487:70 Unresolved reference: ic_launcher_foreground
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/data/repository/AuthRepository.kt:173:7 Unresolved reference: catch
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/data/repository/AuthRepository.kt:173:15 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/data/repository/AuthRepository.kt:174:9 Unresolved reference: emit
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/data/repository/AuthRepository.kt:191:7 Unresolved reference: catch
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/data/repository/AuthRepository.kt:191:15 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/data/repository/AuthRepository.kt:192:9 Unresolved reference: emit
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/data/repository/AuthRepository.kt:207:7 Unresolved reference: catch
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/data/repository/AuthRepository.kt:207:15 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/data/repository/AuthRepository.kt:208:9 Unresolved reference: emit
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:32:7 Unresolved reference: catch
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:32:15 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:33:9 Unresolved reference: emit
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:83:7 Unresolved reference: catch
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:83:15 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:84:9 Unresolved reference: emit
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:95:7 Unresolved reference: catch
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:95:15 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:98:9 Unresolved reference: emit
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:113:7 Unresolved reference: catch
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:113:15 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:114:9 Unresolved reference: emit
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:131:7 Unresolved reference: catch
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:131:15 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:132:9 Unresolved reference: emit
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:147:7 Unresolved reference: catch
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:147:15 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:148:9 Unresolved reference: emit
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:163:7 Unresolved reference: catch
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:163:15 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/auth/AuthState.kt:164:9 Unresolved reference: emit
 
 > Task :app:compileDebugKotlin FAILED
 
@@ -232,5 +260,5 @@ Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilat
 	... 2 more
 
 
-BUILD FAILED in 3m 31s
+BUILD FAILED in 5m 50s
 18 actionable tasks: 18 executed

@@ -5,6 +5,7 @@ import com.networkedcapital.rep.domain.model.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.catch
 import okhttp3.MultipartBody
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -159,59 +160,53 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun getProfile(): Flow<Result<User>> = flow {
-        try {
-            val response = authApiService.getProfile()
-            if (response.isSuccessful) {
-                val userResponse = response.body()
-                if (userResponse != null) {
-                    emit(Result.success(userResponse.result))
-                } else {
-                    emit(Result.failure(Exception("User not found")))
-                }
+        val response = authApiService.getProfile()
+        if (response.isSuccessful) {
+            val userResponse = response.body()
+            if (userResponse != null) {
+                emit(Result.success(userResponse.result))
             } else {
-                emit(Result.failure(Exception("Failed to get profile: ${response.message()}")))
+                throw Exception("User not found")
             }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        } else {
+            throw Exception("Failed to get profile: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e))
     }
 
     suspend fun getCurrentUser(): Flow<Result<User>> = getProfile()
 
     suspend fun updateProfile(user: User): Flow<Result<User>> = flow {
-        try {
-            val response = authApiService.updateProfile(user)
-            if (response.isSuccessful) {
-                val editResponse = response.body()
-                if (editResponse != null && editResponse.result != null) {
-                    emit(Result.success(editResponse.result))
-                } else {
-                    emit(Result.failure(Exception("Update failed: missing user data")))
-                }
+        val response = authApiService.updateProfile(user)
+        if (response.isSuccessful) {
+            val editResponse = response.body()
+            if (editResponse != null && editResponse.result != null) {
+                emit(Result.success(editResponse.result))
             } else {
-                emit(Result.failure(Exception("Profile update failed: ${response.message()}")))
+                throw Exception("Update failed: missing user data")
             }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        } else {
+            throw Exception("Profile update failed: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e))
     }
 
     suspend fun uploadProfileImage(image: MultipartBody.Part): Flow<Result<String>> = flow {
-        try {
-            val response = authApiService.uploadProfileImage(image)
-            if (response.isSuccessful) {
-                val uploadResponse = response.body()
-                if (uploadResponse != null) {
-                    emit(Result.success(uploadResponse.imageUrl))
-                } else {
-                    emit(Result.failure(Exception("Upload failed")))
-                }
+        val response = authApiService.uploadProfileImage(image)
+        if (response.isSuccessful) {
+            val uploadResponse = response.body()
+            if (uploadResponse != null) {
+                emit(Result.success(uploadResponse.imageUrl))
             } else {
-                emit(Result.failure(Exception("Image upload failed: ${response.message()}")))
+                throw Exception("Upload failed")
             }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        } else {
+            throw Exception("Image upload failed: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e))
     }
 
     fun isLoggedIn(): Boolean {

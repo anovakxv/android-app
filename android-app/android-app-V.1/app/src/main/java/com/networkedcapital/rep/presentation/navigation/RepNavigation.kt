@@ -128,6 +128,7 @@ fun RepNavigation(
 
         composable(Screen.Main.route) {
             MainScreen(
+                userId = authState.userId,
                 onNavigateToProfile = { userId ->
                     navController.navigate(Screen.Profile.createRoute(userId))
                 },
