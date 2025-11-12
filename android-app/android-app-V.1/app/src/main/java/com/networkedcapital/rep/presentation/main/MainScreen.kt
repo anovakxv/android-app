@@ -466,10 +466,15 @@ fun MainScreen(
             // Profile image (left)
             Box(modifier = Modifier.size(40.dp)) {
                 IconButton(onClick = {
-                    uiState.currentUser?.id?.let { onNavigateToProfile(it) }
+                    uiState.currentUser?.id?.let { userId ->
+                        Log.d("MainScreen", "Navigating to profile with userId: $userId")
+                        onNavigateToProfile(userId)
+                    } ?: Log.w("MainScreen", "Current user ID is null, cannot navigate to profile")
                 }) {
-                    // Image URL already patched by MainViewModel
+                    // Image URL patched by MainViewModel with S3 base URL
                     val profileImageUrl = uiState.currentUser?.profile_picture_url
+                    Log.d("MainScreen", "Profile picture URL: $profileImageUrl, currentUser: ${uiState.currentUser?.id}")
+
                     if (!profileImageUrl.isNullOrEmpty()) {
                         AsyncImage(
                             model = profileImageUrl,
@@ -480,6 +485,7 @@ fun MainScreen(
                             contentScale = ContentScale.Crop
                         )
                     } else {
+                        Log.w("MainScreen", "Profile picture URL is null or empty")
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Profile"

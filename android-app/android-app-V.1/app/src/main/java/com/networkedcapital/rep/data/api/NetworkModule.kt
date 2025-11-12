@@ -1,6 +1,7 @@
 package com.networkedcapital.rep.data.api
 
 import android.content.Context
+import com.networkedcapital.rep.domain.model.SkillsJsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -23,6 +24,7 @@ object NetworkModule {
     @Singleton
     fun provideMoshi(): Moshi {
         return Moshi.Builder()
+            .add(SkillsJsonAdapter())
             .add(KotlinJsonAdapterFactory())
             .build()
     }
