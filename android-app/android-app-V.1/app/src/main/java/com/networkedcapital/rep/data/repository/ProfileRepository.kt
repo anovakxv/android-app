@@ -137,77 +137,67 @@ class ProfileRepositoryImpl @Inject constructor(
     }
 
     override suspend fun isBlocked(userId: Int): Flow<Result<Boolean>> = flow {
-        try {
-            val response = profileApiService.isBlocked(userId)
-            if (response.isSuccessful && response.body() != null) {
-                emit(Result.success(response.body()!!.is_blocked))
-            } else {
-                emit(Result.failure(Exception("Failed to check block status: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val response = profileApiService.isBlocked(userId)
+        if (response.isSuccessful && response.body() != null) {
+            emit(Result.success(response.body()!!.is_blocked))
+        } else {
+            throw Exception("Failed to check block status: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     override suspend fun blockUser(userId: Int): Flow<Result<Unit>> = flow {
-        try {
-            val params = mapOf("users_id" to userId)
-            val response = profileApiService.blockUser(params)
-            if (response.isSuccessful) {
-                emit(Result.success(Unit))
-            } else {
-                emit(Result.failure(Exception("Failed to block user: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val params = mapOf("users_id" to userId)
+        val response = profileApiService.blockUser(params)
+        if (response.isSuccessful) {
+            emit(Result.success(Unit))
+        } else {
+            throw Exception("Failed to block user: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     override suspend fun unblockUser(userId: Int): Flow<Result<Unit>> = flow {
-        try {
-            val params = mapOf("users_id" to userId)
-            val response = profileApiService.unblockUser(params)
-            if (response.isSuccessful) {
-                emit(Result.success(Unit))
-            } else {
-                emit(Result.failure(Exception("Failed to unblock user: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val params = mapOf("users_id" to userId)
+        val response = profileApiService.unblockUser(params)
+        if (response.isSuccessful) {
+            emit(Result.success(Unit))
+        } else {
+            throw Exception("Failed to unblock user: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     override suspend fun flagUser(userId: Int, reason: String): Flow<Result<Unit>> = flow {
-        try {
-            val params = mapOf(
-                "users_id" to userId,
-                "reason" to reason
-            )
-            val response = profileApiService.flagUser(params)
-            if (response.isSuccessful) {
-                emit(Result.success(Unit))
-            } else {
-                emit(Result.failure(Exception("Failed to flag user: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val params = mapOf(
+            "users_id" to userId,
+            "reason" to reason
+        )
+        val response = profileApiService.flagUser(params)
+        if (response.isSuccessful) {
+            emit(Result.success(Unit))
+        } else {
+            throw Exception("Failed to flag user: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     override suspend fun addToNetwork(targetUserId: Int): Flow<Result<Unit>> = flow {
-        try {
-            val params = mapOf(
-                "action" to "add",
-                "target_user_id" to targetUserId
-            )
-            val response = profileApiService.networkAction(params)
-            if (response.isSuccessful) {
-                emit(Result.success(Unit))
-            } else {
-                emit(Result.failure(Exception("Failed to add to network: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val params = mapOf(
+            "action" to "add",
+            "target_user_id" to targetUserId
+        )
+        val response = profileApiService.networkAction(params)
+        if (response.isSuccessful) {
+            emit(Result.success(Unit))
+        } else {
+            throw Exception("Failed to add to network: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 }

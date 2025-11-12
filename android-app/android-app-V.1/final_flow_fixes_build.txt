@@ -1,4 +1,3 @@
-Starting a Gradle Daemon (subsequent builds will be faster)
 > Task :app:clean
 > Task :app:checkKotlinGradlePluginConfigurationErrors
 > Task :app:preBuild UP-TO-DATE
@@ -12,10 +11,10 @@ Starting a Gradle Daemon (subsequent builds will be faster)
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
 > Task :app:parseDebugLocalResources
-> Task :app:mergeDebugResources
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
 > Task :app:processDebugManifestForPackage
+> Task :app:mergeDebugResources
 > Task :app:processDebugResources
 > Task :app:kaptGenerateStubsDebugKotlin
 
@@ -100,5 +99,5 @@ w: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1
 w: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/profile/ProfileScreen.kt:808:5 Parameter 'repGreen' is never used
 w: file:///C:/Users/Stephanie/Desktop/my-android-app/android-app/android-app-V.1/app/src/main/java/com/networkedcapital/rep/presentation/test/ApiTestScreen.kt:23:9 Variable 'context' is never used
 
-BUILD SUCCESSFUL in 5m 23s
+BUILD SUCCESSFUL in 3m
 18 actionable tasks: 18 executed

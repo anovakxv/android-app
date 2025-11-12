@@ -25,6 +25,7 @@ fun GoalListItem(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 0.dp)
+            .shadow(2.dp, RoundedCornerShape(12.dp))
             .background(Color.White, RoundedCornerShape(12.dp))
             .clickable { onClick() }
     ) {
@@ -80,13 +81,6 @@ fun GoalListItem(
             }
             Spacer(modifier = Modifier.width(8.dp))
         }
-        // Card shadow and rounded corners
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(Color.White, RoundedCornerShape(12.dp))
-                .shadow(2.dp, RoundedCornerShape(12.dp))
-        )
     }
 }
 
