@@ -177,11 +177,9 @@ class IndividualChatViewModel @Inject constructor(
                 try {
                     val message = MessageModel(
                         id = (payload["id"] as? Number)?.toInt() ?: (payload["message_id"] as? Number)?.toInt() ?: 0,
-                        senderId = senderId ?: 0,
-                        senderName = payload["sender_name"] as? String,
-                        recipientId = recipientId,
-                        text = payload["text"] as? String ?: "",
-                        timestamp = payload["timestamp"] as? String ?: "",
+                        sender_id = senderId,
+                        text = payload["text"] as? String,
+                        created_at = payload["timestamp"] as? String,
                         read = payload["read"] as? String
                     )
 
@@ -333,11 +331,9 @@ class IndividualChatViewModel @Inject constructor(
         val tempId = -System.currentTimeMillis().toInt() // Temporary negative ID
         val optimisticMessage = MessageModel(
             id = tempId,
-            senderId = currentUserId,
-            senderName = "You", // Will be replaced by server response
-            recipientId = otherUserId,
+            sender_id = currentUserId,
             text = trimmed,
-            timestamp = java.time.Instant.now().toString(),
+            created_at = java.time.Instant.now().toString(),
             read = null
         )
         

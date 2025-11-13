@@ -70,10 +70,13 @@ class ProfileViewModel @Inject constructor(
 
     /**
      * Patch main image URL in Portal
+     * Backend returns mainImageUrl, but UI uses imageUrl, so we must copy it over.
      */
     private fun patchPortalImages(portal: Portal): Portal {
+        val patchedMainImage = patchImageUrl(portal.mainImageUrl)
         return portal.copy(
-            mainImageUrl = patchImageUrl(portal.mainImageUrl)
+            mainImageUrl = patchedMainImage,
+            imageUrl = patchedMainImage  // Copy mainImageUrl to imageUrl for UI compatibility
         )
     }
 

@@ -20,9 +20,13 @@ import coil.compose.rememberAsyncImagePainter
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.zIndex
 import android.util.Log
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
@@ -192,6 +196,7 @@ fun AboutRepScreen(
 @Composable
 fun EditProfileScreen(
     onProfileSaved: () -> Unit,
+    onBack: (() -> Unit)? = null,
     viewModel: com.networkedcapital.rep.presentation.auth.AuthViewModel = hiltViewModel()
 ) {
     var firstName by remember { mutableStateOf("") }
@@ -231,6 +236,23 @@ fun EditProfileScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
+            // Back button at top left
+            if (onBack != null) {
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(16.dp)
+                        .zIndex(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -334,16 +356,32 @@ fun EditProfileScreen(
                         Spacer(modifier = Modifier.height(18.dp))
                         // Skills
                         Text("Skills", style = MaterialTheme.typography.titleMedium)
-                        Column {
-                            allSkills.forEach { skill ->
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Checkbox(
-                                        checked = selectedSkills.contains(skill),
-                                        onCheckedChange = { checked ->
-                                            selectedSkills = if (checked) selectedSkills + skill else selectedSkills - skill
-                                        }
-                                    )
-                                    Text(skill.displayName)
+                        // Scrollable skills box (displays ~10 skills at a time)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 400.dp)
+                                .border(1.dp, Color.Gray.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                                .padding(8.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .verticalScroll(rememberScrollState())
+                            ) {
+                                allSkills.forEach { skill ->
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Checkbox(
+                                            checked = selectedSkills.contains(skill),
+                                            onCheckedChange = { checked ->
+                                                selectedSkills = if (checked) selectedSkills + skill else selectedSkills - skill
+                                            }
+                                        )
+                                        Text(skill.displayName)
+                                    }
                                 }
                             }
                         }

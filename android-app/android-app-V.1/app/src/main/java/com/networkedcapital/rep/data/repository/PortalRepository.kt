@@ -99,19 +99,17 @@ class PortalRepository @Inject constructor(
 
             if (response.isSuccessful) {
                 val chats = response.body()?.result ?: emptyList()
-                // Cache active chats in Room
-                val entities = chats.map { ActiveChatEntity.fromDomainModel(it) }
-                activeChatDao.insertChats(entities)
+                // TODO: Re-enable caching after updating ActiveChatEntity to use String id
+                // val entities = chats.map { ActiveChatEntity.fromDomainModel(it) }
+                // activeChatDao.insertChats(entities)
                 chats
             } else {
-                // On network error, try to load from cache
-                val cachedEntities = activeChatDao.getAllChats()
-                cachedEntities.map { it.toDomainModel() }
+                // On network error, return empty list for now (caching disabled)
+                emptyList()
             }
         } catch (e: Exception) {
-            // On exception, fallback to cache
-            val cachedEntities = activeChatDao.getAllChats()
-            cachedEntities.map { it.toDomainModel() }
+            // On exception, return empty list for now (caching disabled)
+            emptyList()
         }
     }
 

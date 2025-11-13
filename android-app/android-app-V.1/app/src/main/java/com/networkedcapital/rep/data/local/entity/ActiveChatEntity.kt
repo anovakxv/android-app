@@ -23,37 +23,21 @@ data class ActiveChatEntity(
 ) {
     /**
      * Converts ActiveChatEntity to ActiveChat domain model
+     * TODO: Update to match new ActiveChat structure with String id
      */
     fun toDomainModel(): ActiveChat {
-        return ActiveChat(
-            id = id,
-            usersId = usersId,
-            chatsId = chatsId,
-            name = name,
-            type = type,
-            unreadCount = unreadCount,
-            lastMessage = lastMessage,
-            timestamp = timestamp,
-            profilePictureUrl = profilePictureUrl
-        )
+        // Temporarily disabled - ActiveChat model changed to match backend
+        throw UnsupportedOperationException("ActiveChat caching disabled - model structure changed")
     }
 
     companion object {
         /**
          * Converts ActiveChat domain model to ActiveChatEntity
+         * TODO: Update to match new ActiveChat structure with String id
          */
         fun fromDomainModel(chat: ActiveChat): ActiveChatEntity {
-            return ActiveChatEntity(
-                id = chat.id,
-                usersId = chat.usersId,
-                chatsId = chat.chatsId,
-                name = chat.name,
-                type = chat.type,
-                unreadCount = chat.unreadCount,
-                lastMessage = chat.lastMessage,
-                timestamp = chat.timestamp,
-                profilePictureUrl = chat.profilePictureUrl
-            )
+            // Temporarily disabled - ActiveChat model changed to match backend
+            throw UnsupportedOperationException("ActiveChat caching disabled - model structure changed")
         }
     }
 }

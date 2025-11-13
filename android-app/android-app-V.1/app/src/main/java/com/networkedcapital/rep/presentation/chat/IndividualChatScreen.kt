@@ -332,7 +332,7 @@ fun MessageBubble(
                 shape = RoundedCornerShape(18.dp)
             ) {
                 Text(
-                    text = message.text,
+                    text = message.text ?: "",
                     color = if (isCurrentUser) Color(0xFF8CC55D) else Color.Black,
                     modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp)
                 )

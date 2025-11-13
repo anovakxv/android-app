@@ -102,6 +102,9 @@ fun RepNavigation(
                     navController.navigate(Screen.Onboarding.route) {
                         popUpTo(Screen.EditProfile.route) { inclusive = true }
                     }
+                },
+                onBack = {
+                    navController.popBackStack()
                 }
             )
         }
@@ -140,13 +143,13 @@ fun RepNavigation(
                     navController.navigate(Screen.Profile.createRoute(personId))
                 },
                 onNavigateToChat = { chat ->
-                    // Differentiate between DM and GROUP chats
+                    // Differentiate between direct and group chats
                     if (chat is com.networkedcapital.rep.domain.model.ActiveChat) {
-                        if (chat.type == "DM") {
+                        if (chat.type == "direct") {
                             // Navigate to individual chat with user info
                             navController.navigate(
                                 Screen.IndividualChat.createRoute(
-                                    chat.usersId ?: chat.id,
+                                    chat.usersId ?: 0,
                                     chat.name,
                                     chat.profilePictureUrl
                                 )
@@ -154,7 +157,7 @@ fun RepNavigation(
                         } else {
                             // Navigate to group chat
                             navController.navigate(
-                                Screen.GroupChat.createRoute(chat.chatsId ?: chat.id)
+                                Screen.GroupChat.createRoute(chat.chatsId ?: 0)
                             )
                         }
                     }

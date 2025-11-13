@@ -116,9 +116,12 @@ class MainViewModel @Inject constructor(
      * Patches an ActiveChat's profilePictureUrl with S3 base URL.
      */
     private fun patchActiveChatImage(chat: ActiveChat): ActiveChat {
-        val patchedUrl = patchImageUrl(chat.profilePictureUrl)
+        // For direct chats, patch the user's profile picture
+        val patchedUser = chat.user?.let { user ->
+            patchUserImage(user)
+        }
         return chat.copy(
-            profilePictureUrl = patchedUrl
+            user = patchedUser
         )
     }
 
@@ -533,10 +536,10 @@ class MainViewModel @Inject constructor(
 
                 // Check for unread messages using unreadCount
                 val hasUnreadDM = patchedChats.any {
-                    it.type == "DM" && it.unreadCount > 0
+                    it.type == "direct" && it.unreadCount > 0
                 }
                 val hasUnreadGroup = patchedChats.any {
-                    it.type == "GROUP" && it.unreadCount > 0
+                    it.type == "group" && it.unreadCount > 0
                 }
                 _hasUnreadDirectMessages.value = hasUnreadDM
                 _hasUnreadGroupMessages.value = hasUnreadGroup

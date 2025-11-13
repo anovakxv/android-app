@@ -245,21 +245,39 @@ data class Team(
 // Chat models for main screen
 @Parcelize
 data class ActiveChat(
-    val id: Int,
-    val usersId: Int? = null,
-    val chatsId: Int? = null,
-    val name: String,
-    val type: String, // "DM" or "GROUP"
-    val unreadCount: Int = 0,
-    val lastMessage: String? = null,
-    val timestamp: String? = null,
-    val profilePictureUrl: String? = null,
-    // Legacy compatibility fields
-    val user: User? = null,
-    val chat: ChatModel? = null,
+    val id: String,  // "direct-<userId>" or "group-<chatId>"
+    val type: String, // "direct" or "group"
+    val user: User? = null,  // For direct chats
+    val chat: ChatModel? = null,  // For group chats
     val last_message: MessageModel? = null,
-    val last_message_time: String? = null
-) : Parcelable
+    @SerializedName("last_message_time") val last_message_time: String? = null
+) : Parcelable {
+    // Computed properties for convenience
+    val usersId: Int?
+        get() = user?.id
+
+    val chatsId: Int?
+        get() = chat?.id
+
+    val name: String
+        get() = when (type) {
+            "direct" -> user?.displayName ?: "Unknown User"
+            "group" -> chat?.name ?: "Group Chat"
+            else -> "Chat"
+        }
+
+    val profilePictureUrl: String?
+        get() = user?.profile_picture_url
+
+    val lastMessage: String?
+        get() = last_message?.text
+
+    val timestamp: String?
+        get() = last_message_time
+
+    val unreadCount: Int
+        get() = if (last_message?.read == "0") 1 else 0
+}
 
 @Parcelize
 data class ChatModel(
@@ -270,13 +288,18 @@ data class ChatModel(
 @Parcelize
 data class MessageModel(
     val id: Int,
-    val senderId: Int,
-    val senderName: String? = null,
-    val recipientId: Int? = null,
-    val text: String,
-    val timestamp: String,
+    @SerializedName("sender_id") val sender_id: Int? = null,
+    val text: String? = null,
+    @SerializedName("created_at") val created_at: String? = null,
     val read: String? = null
-) : Parcelable
+) : Parcelable {
+    // Legacy compatibility properties
+    val senderId: Int
+        get() = sender_id ?: 0
+
+    val timestamp: String
+        get() = created_at ?: ""
+}
 
 // Auth models
 data class LoginRequest(

@@ -871,8 +871,8 @@ fun EnhancedActiveChatItem(
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (chat.type == "DM") {
-            // Profile picture for DM
+        if (chat.type == "direct") {
+            // Profile picture for direct chat
             if (!chat.profilePictureUrl.isNullOrEmpty()) {
                 AsyncImage(
                     model = chat.profilePictureUrl,
@@ -916,9 +916,9 @@ fun EnhancedActiveChatItem(
                         overflow = TextOverflow.Ellipsis
                     )
 
-                    if (chat.timestamp != null) {
+                    chat.timestamp?.let { timestamp ->
                         Text(
-                            text = formatTimeAgo(chat.timestamp),
+                            text = formatTimeAgo(timestamp),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
@@ -933,7 +933,7 @@ fun EnhancedActiveChatItem(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-        } else if (chat.type == "GROUP") {
+        } else if (chat.type == "group") {
             // Group chat avatar (circle with first 2 letters)
             Box(
                 modifier = Modifier
@@ -966,9 +966,9 @@ fun EnhancedActiveChatItem(
                         overflow = TextOverflow.Ellipsis
                     )
 
-                    if (chat.timestamp != null) {
+                    chat.timestamp?.let { timestamp ->
                         Text(
-                            text = formatTimeAgo(chat.timestamp),
+                            text = formatTimeAgo(timestamp),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
