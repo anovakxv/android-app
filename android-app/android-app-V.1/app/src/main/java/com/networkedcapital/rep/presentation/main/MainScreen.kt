@@ -410,6 +410,8 @@ fun MainScreen(
     onNavigateToPortalDetail: (Int) -> Unit,
     onNavigateToPersonDetail: (Int) -> Unit,
     onNavigateToChat: (ActiveChat) -> Unit,
+    onNavigateToAddPurpose: () -> Unit,
+    onNavigateToCreateGroupChat: () -> Unit,
     onLogout: () -> Unit,
     viewModel: MainViewModel = hiltViewModel()
 ) {
@@ -425,8 +427,8 @@ fun MainScreen(
     val openNeedsAttention by viewModel.openNeedsAttention.collectAsState()
     val attentionDotIndices = remember(hasUnreadMessages, hasUnreadGroupMessages, openNeedsAttention) {
         buildSet {
-            if (openNeedsAttention) add(0)
-            if (hasUnreadMessages || hasUnreadGroupMessages) add(1) 
+            // Show dot on Chats tab (index 0) when there are unread messages OR open needs attention
+            if (hasUnreadMessages || hasUnreadGroupMessages || openNeedsAttention) add(0)
         }
     }
 
@@ -673,12 +675,16 @@ fun MainScreen(
     if (showActionSheet) {
         MainActionSheet(
             showOnlySafePortals = uiState.showOnlySafePortals,
-            onToggleSafe = { 
+            onToggleSafe = {
                 val userId = uiState.currentUser?.id ?: 0
-                viewModel.toggleSafePortals(userId) 
+                viewModel.toggleSafePortals(userId)
             },
-            onAddPurpose = { /* TODO: Navigate to add purpose */ },
-            onTeamChat = { /* TODO: Navigate to team chat */ },
+            onAddPurpose = {
+                onNavigateToAddPurpose()
+            },
+            onTeamChat = {
+                onNavigateToCreateGroupChat()
+            },
             onSearch = { viewModel.toggleSearch() },
             onDismiss = { showActionSheet = false }
         )

@@ -309,41 +309,10 @@ class MainViewModel @Inject constructor(
     }
 
     // ENHANCED: Use background cached data and load background data
-    // Matches iOS behavior: section 0 (Chats) always switches to PEOPLE page
+    // Tab changes should NOT switch between People/Portals pages - only Rep Logo does that
     fun onSectionChanged(section: Int, userId: Int) {
         val oldSection = _uiState.value.selectedSection
         _uiState.update { state -> state.copy(selectedSection = section) }
-
-        // iOS: Section 0 (Chats) always switches to People page
-        if (section == 0 && _uiState.value.currentPage == MainPage.PORTALS) {
-            // Switch to People page and show chats
-            _uiState.update { state ->
-                state.copy(
-                    currentPage = MainPage.PEOPLE,
-                    searchQuery = "",
-                    searchPortals = emptyList(),
-                    searchUsers = emptyList()
-                )
-            }
-            _searchQuery.value = ""
-
-            // Load chats
-            val backgroundChats = backgroundUsersTab0.value
-            if (backgroundChats.isNotEmpty()) {
-                _uiState.update { it.copy(activeChats = backgroundChats) }
-            }
-            viewModelScope.launch {
-                fetchPeople(userId, 0)
-            }
-
-            // Load background data
-            viewModelScope.launch {
-                delay(500)
-                loadBackgroundData(0, 1, userId)
-                loadBackgroundData(0, 2, userId)
-            }
-            return
-        }
 
         // Use background data first if available
         when (_uiState.value.currentPage) {
@@ -450,6 +419,54 @@ class MainViewModel @Inject constructor(
     fun onSearchQueryChange(query: String) {
         _searchQuery.value = query
         _uiState.update { state -> state.copy(searchQuery = query) }
+
+        // Clear search results if query is empty
+        if (query.isBlank()) {
+            _uiState.update { state ->
+                state.copy(
+                    searchPortals = emptyList(),
+                    searchUsers = emptyList(),
+                    isSearching = false
+                )
+            }
+            return
+        }
+
+        // Perform search based on current page
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSearching = true) }
+            try {
+                when (_uiState.value.currentPage) {
+                    MainPage.PORTALS -> {
+                        val results = portalRepository.searchPortals(query, limit = 50)
+                        val patchedResults = results.map { patchPortalImage(it) }
+                        _uiState.update { state ->
+                            state.copy(
+                                searchPortals = patchedResults,
+                                isSearching = false
+                            )
+                        }
+                    }
+                    MainPage.PEOPLE -> {
+                        val results = portalRepository.searchPeople(query, limit = 50)
+                        val patchedResults = results.map { patchUserImage(it) }
+                        _uiState.update { state ->
+                            state.copy(
+                                searchUsers = patchedResults,
+                                isSearching = false
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update { state ->
+                    state.copy(
+                        errorMessage = "Search failed: ${e.message}",
+                        isSearching = false
+                    )
+                }
+            }
+        }
     }
 
     fun toggleSearch() {

@@ -667,52 +667,45 @@ fun PortalBottomBar(
     Column(modifier = modifier.fillMaxWidth()) {
         // Top divider
         HorizontalDivider(
-            color = Color(0xFFE4E4E4),
-            thickness = 1.dp
+            color = Color(0xFFE4E4E4)
         )
 
-        // Bottom bar - matches iOS BottomBarView
+        // Bottom bar - consistent with Profile and GoalsDetail pages
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(51.dp)
+                .height(64.dp)
                 .background(Color.White)
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(30.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Green "+" button (matches iOS)
+            // Green "+" button
             Button(
                 onClick = onAddClick,
                 modifier = Modifier
-                    .width(291.dp)
+                    .weight(1f)
                     .height(41.dp),
-                shape = RoundedCornerShape(6.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF7BBF4B) // RGB(0.482, 0.749, 0.294)
+                    containerColor = Color(red = 0.482f, green = 0.749f, blue = 0.294f)
                 ),
-                elevation = ButtonDefaults.buttonElevation(
-                    defaultElevation = 3.dp
-                )
+                shape = RoundedCornerShape(6.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add",
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp)
+                    tint = Color.White
                 )
             }
 
-            // Message icon button (matches iOS - no border, just black icon)
-            IconButton(
-                onClick = onMessageClick,
-                modifier = Modifier.size(44.dp)
-            ) {
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Message icon button
+            IconButton(onClick = onMessageClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.Message,
                     contentDescription = "Message",
-                    tint = Color.Black,
-                    modifier = Modifier.size(20.dp)
+                    tint = Color.Black
                 )
             }
         }

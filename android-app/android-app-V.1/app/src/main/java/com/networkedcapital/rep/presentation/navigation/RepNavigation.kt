@@ -14,6 +14,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import java.net.URLEncoder
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 import com.networkedcapital.rep.presentation.auth.AuthViewModel
 import com.networkedcapital.rep.presentation.auth.LoginScreen
 import com.networkedcapital.rep.presentation.auth.RegisterScreen
@@ -162,6 +165,13 @@ fun RepNavigation(
                         }
                     }
                 },
+                onNavigateToAddPurpose = {
+                    // Navigate to EditPortal with portalId = 0 for creating new portal
+                    navController.navigate(Screen.EditPortal.createRoute(0))
+                },
+                onNavigateToCreateGroupChat = {
+                    navController.navigate(Screen.CreateGroupChat.route)
+                },
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
@@ -305,9 +315,12 @@ fun RepNavigation(
         // Individual Chat Screen
         composable(Screen.IndividualChat.route) { backStackEntry ->
             val chatId = backStackEntry.arguments?.getString("chatId")?.toIntOrNull()
-            val userName = backStackEntry.arguments?.getString("userName") ?: "User"
+            val userName = backStackEntry.arguments?.getString("userName")?.let {
+                URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+            } ?: "User"
             val userPhotoUrl = backStackEntry.arguments?.getString("userPhotoUrl")?.let {
-                if (it == "null") null else it
+                val decoded = URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+                if (decoded == "null") null else decoded
             }
 
             // Safety check - if chatId is invalid, go back
@@ -343,6 +356,21 @@ fun RepNavigation(
             com.networkedcapital.rep.presentation.chat.GroupChatScreen(
                 chatId = chatId,
                 currentUserId = authState.userId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Create Group Chat Screen
+        composable(Screen.CreateGroupChat.route) {
+            com.networkedcapital.rep.presentation.chat.CreateGroupChatScreen(
+                currentUserId = authState.userId,
+                onNavigateToChat = { chatId ->
+                    // Navigate to the newly created group chat
+                    navController.navigate(Screen.GroupChat.createRoute(chatId)) {
+                        // Remove CreateGroupChat from back stack
+                        popUpTo(Screen.CreateGroupChat.route) { inclusive = true }
+                    }
+                },
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -542,12 +570,16 @@ sealed class Screen(val route: String) {
         fun createRoute(goalId: Int) = "goal_detail/$goalId"
     }
     object IndividualChat : Screen("individual_chat/{chatId}/{userName}/{userPhotoUrl}") {
-        fun createRoute(chatId: Int, userName: String, userPhotoUrl: String?) =
-            "individual_chat/$chatId/$userName/${userPhotoUrl ?: "null"}"
+        fun createRoute(chatId: Int, userName: String, userPhotoUrl: String?): String {
+            val encodedUserName = URLEncoder.encode(userName, StandardCharsets.UTF_8.toString())
+            val encodedPhotoUrl = URLEncoder.encode(userPhotoUrl ?: "null", StandardCharsets.UTF_8.toString())
+            return "individual_chat/$chatId/$encodedUserName/$encodedPhotoUrl"
+        }
     }
     object GroupChat : Screen("group_chat/{chatId}") {
         fun createRoute(chatId: Int) = "group_chat/$chatId"
     }
+    object CreateGroupChat : Screen("create_group_chat")
     object ApiTest : Screen("api_test")
 
     // Payment & Subscription screens

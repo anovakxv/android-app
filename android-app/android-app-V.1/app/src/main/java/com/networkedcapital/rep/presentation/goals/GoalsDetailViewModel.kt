@@ -98,17 +98,6 @@ class GoalsDetailViewModel @Inject constructor(
                     val teamDict = patchedTeam.associateBy { it.id }
                     _team.value = patchedTeam
 
-                    // Debug logging
-                    println("[GoalsDetailViewModel] Team size: ${patchedTeam.size}")
-                    println("[GoalsDetailViewModel] Team IDs: ${patchedTeam.map { it.id }}")
-                    patchedTeam.take(3).forEach { user ->
-                        println("[GoalsDetailViewModel] Team user ${user.id}: name='${user.name}', fname='${user.fname}', lname='${user.lname}', displayName='${user.displayName}'")
-                    }
-                    println("[GoalsDetailViewModel] Progress logs count: ${goalDetailData.aLatestProgress?.size ?: 0}")
-                    goalDetailData.aLatestProgress?.take(3)?.forEach { log ->
-                        println("[GoalsDetailViewModel] Log ${log.id}: usersId=${log.usersId}, note=${log.note}")
-                    }
-
                     // Convert progress logs to FeedItem list
                     _feed.value = convertProgressLogsToFeed(goalDetailData.aLatestProgress, teamDict)
                 } else {
@@ -150,17 +139,9 @@ class GoalsDetailViewModel @Inject constructor(
     ): List<FeedItem> {
         if (logs == null) return emptyList()
 
-        return logs.sortedByDescending { it.timestamp }.take(20).mapIndexed { index, log ->
+        return logs.sortedByDescending { it.timestamp }.take(20).map { log ->
             val user = log.usersId?.let { teamDict[it] }
             val userName = user?.displayName ?: "Unknown User"
-
-            // Debug logging for first few items
-            if (index < 3) {
-                println("[GoalsDetailViewModel] Feed item ${log.id}: usersId=${log.usersId}, teamDict keys: ${teamDict.keys}, user found: ${user != null}, userName: '$userName'")
-                if (user != null) {
-                    println("[GoalsDetailViewModel]   User details: name='${user.name}', fname='${user.fname}', lname='${user.lname}', displayName='${user.displayName}'")
-                }
-            }
 
             // User already has patched profile_picture_url from teamDict
             val profilePictureUrl = user?.profile_picture_url

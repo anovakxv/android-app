@@ -1,6 +1,7 @@
 package com.networkedcapital.rep.data.api
 
 import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 import com.networkedcapital.rep.domain.model.*
 import retrofit2.Response
 import retrofit2.http.*
@@ -112,9 +113,9 @@ data class GoalDetailData(
     val subtitle: String? = null,
     val description: String? = null,
     val progress: Double? = null,
-    @SerializedName("progress_percent") val progressPercent: Double? = null,
+    @Json(name = "progress_percent") val progressPercent: Double? = null,
     val quota: Double? = null,
-    @SerializedName("filled_quota") val filledQuota: Double? = null,
+    @Json(name = "filled_quota") val filledQuota: Double? = null,
     val metricName: String? = null,
     val typeName: String? = null,
     val reportingName: String? = null,
@@ -125,13 +126,13 @@ data class GoalDetailData(
     val portalId: Int? = null,
     val portalName: String? = null,
     val team: List<User>? = null,
-    @SerializedName("aLatestProgress") val aLatestProgress: List<ProgressLog>? = null
+    val aLatestProgress: List<ProgressLog>? = null
 )
 
 data class ProgressLog(
     val id: Int,
-    @SerializedName("users_id") val usersId: Int? = null,
-    @SerializedName("added_value") val addedValue: Double? = null,
+    @Json(name = "users_id") val usersId: Int? = null,
+    @Json(name = "added_value") val addedValue: Double? = null,
     val note: String? = null,
     val value: Double? = null,
     val timestamp: String? = null,
@@ -140,6 +141,6 @@ data class ProgressLog(
 
 data class ProgressAttachment(
     val id: Int,
-    @SerializedName("file_url") val fileUrl: String? = null,
-    @SerializedName("is_image") val isImage: Boolean? = null
+    @Json(name = "file_url") val fileUrl: String? = null,
+    @Json(name = "is_image") val isImage: Boolean? = null
 )
