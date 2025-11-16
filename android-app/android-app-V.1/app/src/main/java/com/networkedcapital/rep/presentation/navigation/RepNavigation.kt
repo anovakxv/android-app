@@ -180,8 +180,13 @@ fun RepNavigation(
             )
         }
 
-        composable(Screen.Profile.route) { backStackEntry ->
-            val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull()
+        composable(
+            route = Screen.Profile.route,
+            arguments = listOf(
+                navArgument("userId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getInt("userId")
 
             // Safety check - if userId is invalid, go back
             if (userId == null || userId <= 0) {
@@ -215,11 +220,17 @@ fun RepNavigation(
             )
         }
 
-        composable(Screen.PortalDetail.route) { backStackEntry ->
-            val portalId = backStackEntry.arguments?.getString("portalId")?.toIntOrNull()
-            val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull()
+        composable(
+            route = Screen.PortalDetail.route,
+            arguments = listOf(
+                navArgument("portalId") { type = NavType.IntType },
+                navArgument("userId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val portalId = backStackEntry.arguments?.getInt("portalId")
+            val userId = backStackEntry.arguments?.getInt("userId")
 
-            // Safety check - if parameters are invalid, go back
+            // Safety check - if portalId is invalid, go back
             if (portalId == null || portalId <= 0) {
                 android.util.Log.w("RepNavigation", "Invalid portalId for PortalDetailScreen")
                 LaunchedEffect(Unit) {
@@ -228,7 +239,8 @@ fun RepNavigation(
                 return@composable
             }
 
-            val finalUserId = userId ?: authState.userId
+            // Use provided userId or fall back to current user
+            val finalUserId = if (userId != null && userId > 0) userId else authState.userId
             val viewModel: com.networkedcapital.rep.presentation.portal.PortalDetailViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsState()
 
@@ -275,8 +287,13 @@ fun RepNavigation(
             )
         }
 
-        composable(Screen.GoalDetail.route) { backStackEntry ->
-            val goalId = backStackEntry.arguments?.getString("goalId")?.toIntOrNull()
+        composable(
+            route = Screen.GoalDetail.route,
+            arguments = listOf(
+                navArgument("goalId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val goalId = backStackEntry.arguments?.getInt("goalId")
 
             // Safety check - if goalId is invalid, go back
             if (goalId == null || goalId <= 0) {
@@ -313,8 +330,18 @@ fun RepNavigation(
         }
 
         // Individual Chat Screen
-        composable(Screen.IndividualChat.route) { backStackEntry ->
-            val chatId = backStackEntry.arguments?.getString("chatId")?.toIntOrNull()
+        composable(
+            route = Screen.IndividualChat.route,
+            arguments = listOf(
+                navArgument("chatId") { type = NavType.IntType },
+                navArgument("userName") { type = NavType.StringType },
+                navArgument("userPhotoUrl") {
+                    type = NavType.StringType
+                    nullable = true
+                }
+            )
+        ) { backStackEntry ->
+            val chatId = backStackEntry.arguments?.getInt("chatId")
             val userName = backStackEntry.arguments?.getString("userName")?.let {
                 URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
             } ?: "User"
@@ -341,8 +368,13 @@ fun RepNavigation(
         }
 
         // Group Chat Screen
-        composable(Screen.GroupChat.route) { backStackEntry ->
-            val chatId = backStackEntry.arguments?.getString("chatId")?.toIntOrNull()
+        composable(
+            route = Screen.GroupChat.route,
+            arguments = listOf(
+                navArgument("chatId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val chatId = backStackEntry.arguments?.getInt("chatId")
 
             // Safety check - if chatId is invalid, go back
             if (chatId == null || chatId <= 0) {
