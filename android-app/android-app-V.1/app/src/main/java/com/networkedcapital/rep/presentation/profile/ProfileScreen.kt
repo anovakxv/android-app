@@ -39,7 +39,7 @@ fun ProfileScreen(
     onNavigateToPortal: (Int) -> Unit = {},
     onNavigateToGoal: (Int) -> Unit = {},
     onNavigateToEditProfile: () -> Unit = {},
-    onNavigateToMessage: (Int, String) -> Unit = { _, _ -> },
+    onNavigateToMessage: (Int, String, String?) -> Unit = { _, _, _ -> },
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -232,7 +232,7 @@ fun ProfileScreen(
                 onAddAction = { showActionSheet = true },
                 onMessage = {
                     uiState.user?.let { user ->
-                        onNavigateToMessage(user.id, user.displayName)
+                        onNavigateToMessage(user.id, user.displayName, user.profile_picture_url)
                     }
                 }
             )

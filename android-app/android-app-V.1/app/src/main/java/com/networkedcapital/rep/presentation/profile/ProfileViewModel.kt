@@ -86,12 +86,28 @@ class ProfileViewModel @Inject constructor(
             authRepository.getCurrentUser()
                 .catch { /* Handle silently */ }
                 .firstOrNull()?.fold(
-                        onSuccess = { user ->
+                        onSuccess = { currentUser ->
                             _uiState.value = _uiState.value.copy(
-                                currentUserId = user.id,
+                                currentUserId = currentUser.id,
                                 viewedUserId = viewedUserId
                             )
-                            loadProfile()
+                            // If viewing own profile, use the current user data directly
+                            if (viewedUserId == currentUser.id) {
+                                val patchedUser = patchUserImages(currentUser)
+                                _uiState.value = _uiState.value.copy(
+                                    user = patchedUser,
+                                    isLoaded = true,
+                                    isLoading = false
+                                )
+                                // Still fetch other data (portals, goals, writes)
+                                fetchPortals()
+                                fetchGoals()
+                                fetchWrites()
+                                fetchAvailableSkills()
+                            } else {
+                                // Viewing another user's profile - fetch all data
+                                loadProfile()
+                            }
                         },
                         onFailure = {
                             _uiState.value = _uiState.value.copy(

@@ -22,6 +22,7 @@ import androidx.compose.material.icons.automirrored.filled.*
 fun EditGoalScreen(
     existingGoal: Goal? = null,
     portalId: Int? = null,
+    portalName: String? = null,
     userId: Int = 0,
     onSave: (Goal) -> Unit,
     onCancel: () -> Unit,
@@ -174,6 +175,19 @@ fun EditGoalScreen(
                     }
                 }
             }
+
+            // Associated Portal section
+            Text(
+                text = "Associated Portal",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+            Text(
+                text = portalName ?: existingGoal?.portalName ?: "N/A",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
             if (uiState.errorMessage != null) {
                 Text(uiState.errorMessage!!, color = MaterialTheme.colorScheme.error)

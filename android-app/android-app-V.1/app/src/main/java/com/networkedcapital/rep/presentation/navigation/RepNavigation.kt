@@ -209,8 +209,8 @@ fun RepNavigation(
                 onNavigateToEditProfile = {
                     navController.navigate(Screen.EditProfile.route)
                 },
-                onNavigateToMessage = { userId, userName ->
-                    navController.navigate(Screen.IndividualChat.createRoute(userId, userName, null))
+                onNavigateToMessage = { userId, userName, userPhotoUrl ->
+                    navController.navigate(Screen.IndividualChat.createRoute(userId, userName, userPhotoUrl))
                 }
             )
         }
@@ -493,15 +493,15 @@ fun RepNavigation(
             )
         ) { backStackEntry ->
             val portalId = backStackEntry.arguments?.getInt("portalId") ?: 0
-            // TODO: Load existing portal by portalId
+            // TODO: Load existing portal by portalId via ViewModel
             EditPortalScreen(
-                existingPortal = null, // Will be loaded via ViewModel in future
-                onSave = { portal ->
-                    // TODO: Save portal via API
+                portalDetail = null, // Will be loaded via ViewModel when portalId != 0
+                userId = authState.userId,
+                onNavigateBack = {
                     navController.popBackStack()
                 },
-                onCancel = {
-                    navController.popBackStack()
+                onNavigateToPaymentSettings = { portalId, portalName ->
+                    // TODO: Navigate to payment settings screen when implemented
                 }
             )
         }

@@ -255,26 +255,42 @@ The Android app connects to the same Flask backend routes as iOS:
 
 ## 🎯 Recent Updates (Latest Session)
 
-### 1. Fixed GoalDetail Feed Tab User Display
-**Issue**: User pictures and names not displaying in Feed tab
-**Fix**: Updated `GoalsDetailViewModel.kt` to properly patch profile picture URLs before creating team dictionary for feed items
+### 1. Group Chat Creation Feature
+**Added**: Complete group chat creation flow
+**New Files**:
+- `CreateGroupChatScreen.kt` - UI for creating group chats with member selection
+- `CreateGroupChatViewModel.kt` - State management for group creation
+**Features**:
+- Loads network members via `getFilteredPeople` API
+- Member selection with checkmarks
+- Group name input validation
+- Auto-navigation to newly created chat
 
-### 2. Fixed Chat Navigation from All Pages
-**Issue**: Chats not navigating correctly - all routed to GroupChat regardless of type
-**Fixes**:
-- **MainScreen**: Updated to differentiate between DM and GROUP chats, passing full `ActiveChat` object
-- **GoalDetailScreen**: Fixed to use `user.displayName` instead of `user.firstName`
-- **PortalDetailScreen**: Added `onMessage` parameter and wired Message button to navigate to DM
+### 2. MainScreen Tab Behavior Fix
+**Issue**: Clicking Chats tab auto-switched from Portals page to People page
+**Fix**: Removed auto-page-switching logic in `MainViewModel.kt` - now only Rep Logo button toggles between Portals/People pages
+**Result**: ✅ Page state correctly maintained when switching tabs (matches iOS behavior)
 
-### 3. Chat Type Differentiation
-**Updated `RepNavigation.kt`** to check `chat.type`:
-- **DM chats** → Navigate to `IndividualChatScreen` with `usersId`, `name`, and `profilePictureUrl`
-- **GROUP chats** → Navigate to `GroupChatScreen` with `chatsId`
+### 3. Notification Dot Placement Fix
+**Issue**: Green notification dot showed on Network tab instead of Chats tab
+**Fix**: Updated `MainScreen.kt` attention dot logic to show on index 0 (Chats) when unread messages exist
+**Result**: ✅ Notification dot now correctly displays on Chats tab (matches iOS)
 
-### 4. Fixed Profile API Response
-**Updated `AuthState.kt`** to extract user from `UserProfileApiResponse` wrapper
+### 4. Search Functionality Implementation
+**Issue**: Search bar appeared but didn't actually search
+**Fix**: Implemented backend API calls in `MainViewModel.kt`:
+- `GET /api/search_portals?q={query}` for Portals page
+- `GET /api/search_people?q={query}` for People page
+- Added 350ms debouncing and proper image URL patching
+**Result**: ✅ Search now works correctly with live results from backend
 
-**Result**: ✅ All chat navigation now working correctly from MainScreen, Portal Page, and Goal Detail page!
+### Previous Session Updates
+- Fixed GoalDetail Feed Tab user display with proper image patching
+- Fixed chat navigation to differentiate between DM and GROUP chats
+- Updated `RepNavigation.kt` for proper chat type routing
+- Fixed Profile API response extraction
+
+**Result**: ✅ All MainScreen features now working correctly with proper search, navigation, and notifications!
 
 ---
 

@@ -28,7 +28,9 @@
       "Bash(Select-Object -First 200)",
       "Bash(tee:*)",
       "Bash(Select-Object -Last 50)",
-      "Bash(nul)"
+      "Bash(nul)",
+      "Bash(Select-Object -First 100)",
+      "Bash(./gradlew compileDebugKotlin:*)"
     ],
     "deny": [],
     "ask": []

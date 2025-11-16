@@ -90,6 +90,25 @@ interface PortalApiService {
     
     @POST("api/portal/flag_portal")
     suspend fun flagPortal(@Body request: FlagPortalRequest): Response<Unit>
+
+    // Portal creation/edit with multipart (images + form data)
+    @Multipart
+    @POST("api/portal/")
+    suspend fun createPortalWithImages(
+        @Part parts: List<okhttp3.MultipartBody.Part>
+    ): Response<Portal>
+
+    @Multipart
+    @POST("api/portal/edit")
+    suspend fun editPortalWithImages(
+        @Part parts: List<okhttp3.MultipartBody.Part>
+    ): Response<Portal>
+
+    // Delete portal endpoint
+    @POST("api/portal/delete")
+    suspend fun deletePortalPost(
+        @Body request: DeletePortalRequest
+    ): Response<Unit>
 }
 
 data class PortalFilterRequest(
@@ -128,4 +147,9 @@ data class LeavePortalRequest(
 data class FlagPortalRequest(
     val portal_id: Int,
     val reason: String = ""
+)
+
+data class DeletePortalRequest(
+    val portal_id: Int,
+    val user_id: Int
 )

@@ -17,8 +17,8 @@ import javax.inject.Inject
 data class MainUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val currentPage: MainViewModel.MainPage = MainViewModel.MainPage.PORTALS,
-    val selectedSection: Int = 2, // 0=OPEN, 1=NTWK, 2=ALL
+    val currentPage: MainViewModel.MainPage = MainViewModel.MainPage.PEOPLE, // Start with People to show Chats
+    val selectedSection: Int = 0, // Start on Chats tab (0=Chats, 1=Network, 2=Purpose)
     val showSearch: Boolean = false,
     val searchQuery: String = "",
     val isSearching: Boolean = false,
@@ -359,7 +359,15 @@ class MainViewModel @Inject constructor(
     }
 
     // ENHANCED: Use background data when toggling pages
+    // NOTE: Matches iOS behavior - only works for sections 1 & 2, not section 0 (Chats)
     fun togglePage(userId: Int) {
+        val section = _uiState.value.selectedSection
+
+        // Section 0 (Chats) always shows people/chats, so don't toggle
+        if (section == 0) {
+            return
+        }
+
         val newPage = when (_uiState.value.currentPage) {
             MainPage.PORTALS -> MainPage.PEOPLE
             MainPage.PEOPLE -> MainPage.PORTALS
@@ -373,12 +381,10 @@ class MainViewModel @Inject constructor(
             )
         }
         _searchQuery.value = ""
-        
+
         // Use background data first if available
-        val section = _uiState.value.selectedSection
         if (newPage == MainPage.PORTALS) {
             val backgroundData = when (section) {
-                0 -> backgroundPortalsTab0.value
                 1 -> backgroundPortalsTab1.value
                 2 -> backgroundPortalsTab2.value
                 else -> emptyList()
@@ -387,27 +393,20 @@ class MainViewModel @Inject constructor(
                 _uiState.update { it.copy(portals = backgroundData) }
             }
         } else {
-            if (section == 0) {
-                val backgroundChats = backgroundUsersTab0.value
-                if (backgroundChats.isNotEmpty()) {
-                    _uiState.update { it.copy(activeChats = backgroundChats) }
-                }
-            } else {
-                val backgroundUsers = if (section == 1) backgroundUsersTab1.value else backgroundUsersTab2.value
-                if (backgroundUsers.isNotEmpty()) {
-                    _uiState.update { it.copy(users = backgroundUsers) }
-                }
+            val backgroundUsers = if (section == 1) backgroundUsersTab1.value else backgroundUsersTab2.value
+            if (backgroundUsers.isNotEmpty()) {
+                _uiState.update { it.copy(users = backgroundUsers) }
             }
         }
-        
+
         // Then fetch fresh data
         viewModelScope.launch {
             when (newPage) {
-                MainPage.PORTALS -> fetchPortals(userId, _uiState.value.selectedSection, _uiState.value.showOnlySafePortals)
-                MainPage.PEOPLE -> fetchPeople(userId, _uiState.value.selectedSection)
+                MainPage.PORTALS -> fetchPortals(userId, section, _uiState.value.showOnlySafePortals)
+                MainPage.PEOPLE -> fetchPeople(userId, section)
             }
         }
-        
+
         // Load background data for other tabs
         viewModelScope.launch {
             delay(500)

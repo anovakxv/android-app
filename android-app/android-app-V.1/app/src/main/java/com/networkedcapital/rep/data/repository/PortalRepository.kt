@@ -392,4 +392,48 @@ class PortalRepository @Inject constructor(
             entities.map { it.toDomainModel() }
         }
     }
+
+    /**
+     * Save portal with images (multipart upload)
+     * Used for creating new portals or editing existing ones with image uploads
+     */
+    suspend fun savePortalWithImages(portalId: Int, parts: List<okhttp3.MultipartBody.Part>): Flow<Result<Portal>> = flow {
+        try {
+            val response = if (portalId == 0) {
+                portalApiService.createPortalWithImages(parts)
+            } else {
+                portalApiService.editPortalWithImages(parts)
+            }
+
+            if (response.isSuccessful) {
+                val portal = response.body()
+                if (portal != null) {
+                    emit(Result.success(portal))
+                } else {
+                    emit(Result.failure(Exception("Portal save succeeded but no data returned")))
+                }
+            } else {
+                emit(Result.failure(Exception("Failed to save portal: ${response.message()}")))
+            }
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
+    /**
+     * Delete portal (POST method with JSON body)
+     */
+    suspend fun deletePortal(portalId: Int, userId: Int): Flow<Result<Unit>> = flow {
+        try {
+            val request = DeletePortalRequest(portal_id = portalId, user_id = userId)
+            val response = portalApiService.deletePortalPost(request)
+            if (response.isSuccessful) {
+                emit(Result.success(Unit))
+            } else {
+                emit(Result.failure(Exception("Failed to delete portal: ${response.message()}")))
+            }
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
 }
