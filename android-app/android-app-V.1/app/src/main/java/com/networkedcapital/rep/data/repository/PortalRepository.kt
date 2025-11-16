@@ -23,17 +23,15 @@ class PortalRepository @Inject constructor(
 ) {
 
     suspend fun getPortals(): Flow<Result<List<Portal>>> = flow {
-        try {
-            val response = portalApiService.getPortals()
-            if (response.isSuccessful) {
-                val portals = response.body() ?: emptyList()
-                emit(Result.success(portals))
-            } else {
-                emit(Result.failure(Exception("Failed to get portals: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val response = portalApiService.getPortals()
+        if (response.isSuccessful) {
+            val portals = response.body() ?: emptyList()
+            emit(Result.success(portals))
+        } else {
+            throw Exception("Failed to get portals: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     suspend fun getFilteredPortals(userId: Int, tab: String, safeOnly: Boolean = false): List<Portal> {
@@ -138,36 +136,32 @@ class PortalRepository @Inject constructor(
         category: String? = null,
         location: String? = null
     ): Flow<Result<List<Portal>>> = flow {
-        try {
-            val request = PortalFilterRequest(searchTerm, category, location)
-            val response = portalApiService.filterPortals(request)
-            if (response.isSuccessful) {
-                val portals = response.body() ?: emptyList()
-                emit(Result.success(portals))
-            } else {
-                emit(Result.failure(Exception("Failed to filter portals: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val request = PortalFilterRequest(searchTerm, category, location)
+        val response = portalApiService.filterPortals(request)
+        if (response.isSuccessful) {
+            val portals = response.body() ?: emptyList()
+            emit(Result.success(portals))
+        } else {
+            throw Exception("Failed to filter portals: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     suspend fun getPortalDetails(portalId: String): Flow<Result<Portal>> = flow {
-        try {
-            val response = portalApiService.getPortalDetails(portalId)
-            if (response.isSuccessful) {
-                val portal = response.body()
-                if (portal != null) {
-                    emit(Result.success(portal))
-                } else {
-                    emit(Result.failure(Exception("Portal not found")))
-                }
+        val response = portalApiService.getPortalDetails(portalId)
+        if (response.isSuccessful) {
+            val portal = response.body()
+            if (portal != null) {
+                emit(Result.success(portal))
             } else {
-                emit(Result.failure(Exception("Failed to get portal details: ${response.message()}")))
+                throw Exception("Portal not found")
             }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        } else {
+            throw Exception("Failed to get portal details: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     suspend fun createPortal(
@@ -178,22 +172,20 @@ class PortalRepository @Inject constructor(
         isPrivate: Boolean,
         storyBlocks: List<StoryBlock>? = null
     ): Flow<Result<Portal>> = flow {
-        try {
-            val request = CreatePortalRequest(name, description, category, location, isPrivate, storyBlocks)
-            val response = portalApiService.createPortal(request)
-            if (response.isSuccessful) {
-                val portal = response.body()
-                if (portal != null) {
-                    emit(Result.success(portal))
-                } else {
-                    emit(Result.failure(Exception("Failed to create portal")))
-                }
+        val request = CreatePortalRequest(name, description, category, location, isPrivate, storyBlocks)
+        val response = portalApiService.createPortal(request)
+        if (response.isSuccessful) {
+            val portal = response.body()
+            if (portal != null) {
+                emit(Result.success(portal))
             } else {
-                emit(Result.failure(Exception("Portal creation failed: ${response.message()}")))
+                throw Exception("Failed to create portal")
             }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        } else {
+            throw Exception("Portal creation failed: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     suspend fun updatePortal(
@@ -205,95 +197,83 @@ class PortalRepository @Inject constructor(
         isPrivate: Boolean,
         storyBlocks: List<StoryBlock>? = null
     ): Flow<Result<Portal>> = flow {
-        try {
-            val request = UpdatePortalRequest(portalId, name, description, category, location, isPrivate, storyBlocks)
-            val response = portalApiService.updatePortal(request)
-            if (response.isSuccessful) {
-                val portal = response.body()
-                if (portal != null) {
-                    emit(Result.success(portal))
-                } else {
-                    emit(Result.failure(Exception("Failed to update portal")))
-                }
+        val request = UpdatePortalRequest(portalId, name, description, category, location, isPrivate, storyBlocks)
+        val response = portalApiService.updatePortal(request)
+        if (response.isSuccessful) {
+            val portal = response.body()
+            if (portal != null) {
+                emit(Result.success(portal))
             } else {
-                emit(Result.failure(Exception("Portal update failed: ${response.message()}")))
+                throw Exception("Failed to update portal")
             }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        } else {
+            throw Exception("Portal update failed: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     suspend fun deletePortal(portalId: String): Flow<Result<Unit>> = flow {
-        try {
-            val response = portalApiService.deletePortal(portalId)
-            if (response.isSuccessful) {
-                emit(Result.success(Unit))
-            } else {
-                emit(Result.failure(Exception("Portal deletion failed: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val response = portalApiService.deletePortal(portalId)
+        if (response.isSuccessful) {
+            emit(Result.success(Unit))
+        } else {
+            throw Exception("Portal deletion failed: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     suspend fun uploadPortalImage(image: MultipartBody.Part, portalId: RequestBody): Flow<Result<String>> = flow {
-        try {
-            val response = portalApiService.uploadPortalImage(image, portalId)
-            if (response.isSuccessful) {
-                val uploadResponse = response.body()
-                if (uploadResponse != null) {
-                    emit(Result.success(uploadResponse.imageUrl))
-                } else {
-                    emit(Result.failure(Exception("Upload failed")))
-                }
+        val response = portalApiService.uploadPortalImage(image, portalId)
+        if (response.isSuccessful) {
+            val uploadResponse = response.body()
+            if (uploadResponse != null) {
+                emit(Result.success(uploadResponse.imageUrl))
             } else {
-                emit(Result.failure(Exception("Image upload failed: ${response.message()}")))
+                throw Exception("Upload failed")
             }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        } else {
+            throw Exception("Image upload failed: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     suspend fun searchPeople(searchTerm: String): Flow<Result<List<User>>> = flow {
-        try {
-            val response = portalApiService.searchPeople(searchTerm)
-            if (response.isSuccessful) {
-                val users = response.body() ?: emptyList()
-                emit(Result.success(users))
-            } else {
-                emit(Result.failure(Exception("People search failed: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val response = portalApiService.searchPeople(searchTerm)
+        if (response.isSuccessful) {
+            val users = response.body() ?: emptyList()
+            emit(Result.success(users))
+        } else {
+            throw Exception("People search failed: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     suspend fun joinPortal(portalId: String): Flow<Result<Unit>> = flow {
-        try {
-            val request = JoinPortalRequest(portalId)
-            val response = portalApiService.joinPortal(request)
-            if (response.isSuccessful) {
-                emit(Result.success(Unit))
-            } else {
-                emit(Result.failure(Exception("Failed to join portal: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val request = JoinPortalRequest(portalId)
+        val response = portalApiService.joinPortal(request)
+        if (response.isSuccessful) {
+            emit(Result.success(Unit))
+        } else {
+            throw Exception("Failed to join portal: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     suspend fun leavePortal(portalId: String): Flow<Result<Unit>> = flow {
-        try {
-            val request = LeavePortalRequest(portalId)
-            val response = portalApiService.leavePortal(request)
-            if (response.isSuccessful) {
-                emit(Result.success(Unit))
-            } else {
-                emit(Result.failure(Exception("Failed to leave portal: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val request = LeavePortalRequest(portalId)
+        val response = portalApiService.leavePortal(request)
+        if (response.isSuccessful) {
+            emit(Result.success(Unit))
+        } else {
+            throw Exception("Failed to leave portal: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     suspend fun getPortalDetail(portalId: Int, userId: Int): Flow<Result<PortalDetail>> = flow {
@@ -353,17 +333,15 @@ class PortalRepository @Inject constructor(
     }
 
     suspend fun flagPortal(portalId: Int, reason: String = ""): Flow<Result<Unit>> = flow {
-        try {
-            val request = FlagPortalRequest(portalId, reason)
-            val response = portalApiService.flagPortal(request)
-            if (response.isSuccessful) {
-                emit(Result.success(Unit))
-            } else {
-                emit(Result.failure(Exception("Failed to flag portal: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val request = FlagPortalRequest(portalId, reason)
+        val response = portalApiService.flagPortal(request)
+        if (response.isSuccessful) {
+            emit(Result.success(Unit))
+        } else {
+            throw Exception("Failed to flag portal: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     /**
@@ -398,42 +376,38 @@ class PortalRepository @Inject constructor(
      * Used for creating new portals or editing existing ones with image uploads
      */
     suspend fun savePortalWithImages(portalId: Int, parts: List<okhttp3.MultipartBody.Part>): Flow<Result<Portal>> = flow {
-        try {
-            val response = if (portalId == 0) {
-                portalApiService.createPortalWithImages(parts)
-            } else {
-                portalApiService.editPortalWithImages(parts)
-            }
-
-            if (response.isSuccessful) {
-                val portal = response.body()
-                if (portal != null) {
-                    emit(Result.success(portal))
-                } else {
-                    emit(Result.failure(Exception("Portal save succeeded but no data returned")))
-                }
-            } else {
-                emit(Result.failure(Exception("Failed to save portal: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val response = if (portalId == 0) {
+            portalApiService.createPortalWithImages(parts)
+        } else {
+            portalApiService.editPortalWithImages(parts)
         }
+
+        if (response.isSuccessful) {
+            val portal = response.body()
+            if (portal != null) {
+                emit(Result.success(portal))
+            } else {
+                throw Exception("Portal save succeeded but no data returned")
+            }
+        } else {
+            throw Exception("Failed to save portal: ${response.message()}")
+        }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     /**
      * Delete portal (POST method with JSON body)
      */
     suspend fun deletePortal(portalId: Int, userId: Int): Flow<Result<Unit>> = flow {
-        try {
-            val request = DeletePortalRequest(portal_id = portalId, user_id = userId)
-            val response = portalApiService.deletePortalPost(request)
-            if (response.isSuccessful) {
-                emit(Result.success(Unit))
-            } else {
-                emit(Result.failure(Exception("Failed to delete portal: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val request = DeletePortalRequest(portal_id = portalId, user_id = userId)
+        val response = portalApiService.deletePortalPost(request)
+        if (response.isSuccessful) {
+            emit(Result.success(Unit))
+        } else {
+            throw Exception("Failed to delete portal: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 }

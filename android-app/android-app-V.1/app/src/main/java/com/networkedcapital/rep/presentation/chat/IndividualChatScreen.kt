@@ -148,18 +148,28 @@ fun IndividualChatContent(
                     EmptyConversationView(otherUserName = userName)
                 } else {
                     val listState = rememberLazyListState()
-                    
-                    // Auto scroll to bottom on new messages
-                    LaunchedEffect(shouldScrollToBottom, messages.size) {
+
+                    // Auto scroll to bottom on new messages (when shouldScrollToBottom flag is set)
+                    LaunchedEffect(shouldScrollToBottom) {
                         if (shouldScrollToBottom && messages.isNotEmpty()) {
                             listState.animateScrollToItem(messages.size - 1)
                         }
                     }
-                    
-                    // Initial scroll to bottom
-                    LaunchedEffect(Unit) {
-                        if (messages.isNotEmpty()) {
+
+                    // Initial scroll to bottom when messages first load (matching iOS behavior)
+                    LaunchedEffect(isInitialized) {
+                        if (isInitialized && messages.isNotEmpty()) {
+                            // Add slight delay like iOS (0.15s) to ensure layout is ready
+                            kotlinx.coroutines.delay(150)
                             listState.scrollToItem(messages.size - 1)
+                        }
+                    }
+
+                    // Scroll to bottom when message count changes (matching iOS onChange behavior)
+                    LaunchedEffect(messages.size) {
+                        if (messages.isNotEmpty() && !isLoadingOlder) {
+                            // Only auto-scroll on count changes if we're not loading older messages
+                            listState.animateScrollToItem(messages.size - 1)
                         }
                     }
                     

@@ -65,53 +65,47 @@ class ProfileRepositoryImpl @Inject constructor(
     }
 
     override suspend fun addWrite(title: String, content: String): Flow<Result<WriteBlock>> = flow {
-        try {
-            val params = mapOf(
-                "title" to title,
-                "content" to content
-            )
-            val response = profileApiService.addWrite(params)
-            if (response.isSuccessful && response.body() != null) {
-                emit(Result.success(response.body()!!))
-            } else {
-                emit(Result.failure(Exception("Failed to add write: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val params = mapOf(
+            "title" to title,
+            "content" to content
+        )
+        val response = profileApiService.addWrite(params)
+        if (response.isSuccessful && response.body() != null) {
+            emit(Result.success(response.body()!!))
+        } else {
+            throw Exception("Failed to add write: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     override suspend fun editWrite(writeId: Int, title: String, content: String, order: Int?): Flow<Result<WriteBlock>> = flow {
-        try {
-            val params = mutableMapOf<String, Any>(
-                "title" to title,
-                "content" to content
-            )
-            if (order != null) {
-                params["order"] = order
-            }
-            val response = profileApiService.editWrite(writeId, params)
-            if (response.isSuccessful && response.body() != null) {
-                emit(Result.success(response.body()!!))
-            } else {
-                emit(Result.failure(Exception("Failed to edit write: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val params = mutableMapOf<String, Any>(
+            "title" to title,
+            "content" to content
+        )
+        if (order != null) {
+            params["order"] = order
         }
+        val response = profileApiService.editWrite(writeId, params)
+        if (response.isSuccessful && response.body() != null) {
+            emit(Result.success(response.body()!!))
+        } else {
+            throw Exception("Failed to edit write: ${response.message()}")
+        }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     override suspend fun deleteWrite(writeId: Int): Flow<Result<Unit>> = flow {
-        try {
-            val response = profileApiService.deleteWrite(writeId)
-            if (response.isSuccessful) {
-                emit(Result.success(Unit))
-            } else {
-                emit(Result.failure(Exception("Failed to delete write: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val response = profileApiService.deleteWrite(writeId)
+        if (response.isSuccessful) {
+            emit(Result.success(Unit))
+        } else {
+            throw Exception("Failed to delete write: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(e as? Exception ?: Exception(e.message)))
     }
 
     override suspend fun getUserPortals(userId: Int): Flow<Result<List<Portal>>> = flow {

@@ -52,23 +52,21 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun login(email: String, password: String): Flow<Result<User>> = flow {
-        try {
-            val response = authApiService.login(LoginRequest(email = email, password = password))
-            if (response.isSuccessful) {
-                val loginResponse = response.body()
-                if (loginResponse != null) {
-                    // Save token
-                    authInterceptor.saveToken(loginResponse.token)
-                    emit(Result.success(loginResponse.result))
-                } else {
-                    emit(Result.failure(Exception("Invalid response")))
-                }
+        val response = authApiService.login(LoginRequest(email = email, password = password))
+        if (response.isSuccessful) {
+            val loginResponse = response.body()
+            if (loginResponse != null) {
+                // Save token
+                authInterceptor.saveToken(loginResponse.token)
+                emit(Result.success(loginResponse.result))
             } else {
-                emit(Result.failure(Exception("Login failed: ${response.message()}")))
+                throw Exception("Invalid response")
             }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        } else {
+            throw Exception("Login failed: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(Exception("Login error", e)))
     }
 
     suspend fun register(
@@ -81,82 +79,78 @@ class AuthRepository @Inject constructor(
         about: String? = null,
         city: String? = null
     ): Flow<Result<User>> = flow {
-        try {
-            val emailBody = email.toRequestBody()
-            val passwordBody = password.toRequestBody()
-            val firstNameBody = firstName.toRequestBody()
-            val lastNameBody = lastName.toRequestBody()
-            val userTypeIdBody = userTypeId.toString().toRequestBody()
-            val phoneBody = phone?.toRequestBody()
-            val aboutBody = about?.toRequestBody()
-            val cityBody = city?.toRequestBody()
+        val emailBody = email.toRequestBody()
+        val passwordBody = password.toRequestBody()
+        val firstNameBody = firstName.toRequestBody()
+        val lastNameBody = lastName.toRequestBody()
+        val userTypeIdBody = userTypeId.toString().toRequestBody()
+        val phoneBody = phone?.toRequestBody()
+        val aboutBody = about?.toRequestBody()
+        val cityBody = city?.toRequestBody()
 
-            val response = authApiService.register(
-                email = emailBody,
-                password = passwordBody,
-                firstName = firstNameBody,
-                lastName = lastNameBody,
-                userTypeId = userTypeIdBody,
-                phone = phoneBody,
-                about = aboutBody,
-                city = cityBody
-            )
+        val response = authApiService.register(
+            email = emailBody,
+            password = passwordBody,
+            firstName = firstNameBody,
+            lastName = lastNameBody,
+            userTypeId = userTypeIdBody,
+            phone = phoneBody,
+            about = aboutBody,
+            city = cityBody
+        )
 
-            // Debug logging: print raw response
-            println("[AuthRepository] register raw response: ${response.raw()}\nBody: ${response.body()}")
+        // Debug logging: print raw response
+        println("[AuthRepository] register raw response: ${response.raw()}\nBody: ${response.body()}")
 
-            if (response.isSuccessful) {
-                val registerResponse = response.body()
-                if (registerResponse != null) {
-                    // Try to cast result to User
-                    val user = registerResponse.result as? User
-                    if (user != null) {
-                        authInterceptor.saveToken(registerResponse.token)
-                        emit(Result.success(user))
-                    } else if (registerResponse.result is String && (registerResponse.result as String).contains("success", ignoreCase = true)) {
-                        // Treat as success even if result is a string
-                        authInterceptor.saveToken(registerResponse.token)
-                        emit(Result.success(User(
-                            id = 0,
-                            fname = "",
-                            lname = "",
-                            email = "",
-                            broadcast = "",
-                            userType_string = "",
-                            manual_city = "",
-                            about = "",
-                            other_skill = "",
-                            skills = emptyList(),
-                            profile_picture_url = ""
-                        )))
-                    } else {
-                        emit(Result.failure(Exception("Registration failed: ${registerResponse.result}")))
-                    }
+        if (response.isSuccessful) {
+            val registerResponse = response.body()
+            if (registerResponse != null) {
+                // Try to cast result to User
+                val user = registerResponse.result as? User
+                if (user != null) {
+                    authInterceptor.saveToken(registerResponse.token)
+                    emit(Result.success(user))
+                } else if (registerResponse.result is String && (registerResponse.result as String).contains("success", ignoreCase = true)) {
+                    // Treat as success even if result is a string
+                    authInterceptor.saveToken(registerResponse.token)
+                    emit(Result.success(User(
+                        id = 0,
+                        fname = "",
+                        lname = "",
+                        email = "",
+                        broadcast = "",
+                        userType_string = "",
+                        manual_city = "",
+                        about = "",
+                        other_skill = "",
+                        skills = emptyList(),
+                        profile_picture_url = ""
+                    )))
                 } else {
-                    emit(Result.failure(Exception("Invalid response")))
+                    throw Exception("Registration failed: ${registerResponse.result}")
                 }
             } else {
-                emit(Result.failure(Exception("Registration failed: ${response.message()}")))
+                throw Exception("Invalid response")
             }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        } else {
+            throw Exception("Registration failed: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(Exception("Registration error", e)))
     }
 
     suspend fun logout(): Flow<Result<Unit>> = flow {
-        try {
-            val response = authApiService.logout()
-            authInterceptor.clearToken()
-            if (response.isSuccessful) {
-                emit(Result.success(Unit))
-            } else {
-                emit(Result.failure(Exception("Logout failed: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            // Clear token even if API call fails
-            authInterceptor.clearToken()
+        val response = authApiService.logout()
+        authInterceptor.clearToken()
+        if (response.isSuccessful) {
             emit(Result.success(Unit))
+        } else {
+            throw Exception("Logout failed: ${response.message()}")
         }
+    }.catch { e ->
+        // Clear token even if API call fails
+        authInterceptor.clearToken()
+        emit(Result.success(Unit))
     }
 
     suspend fun getProfile(): Flow<Result<User>> = flow {
@@ -218,37 +212,33 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun deleteProfile(): Flow<Result<Unit>> = flow {
-        try {
-            val response = authApiService.deleteProfile()
-            if (response.isSuccessful) {
-                authInterceptor.clearToken()
-                emit(Result.success(Unit))
-            } else {
-                emit(Result.failure(Exception("Delete failed: ${response.message()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        val response = authApiService.deleteProfile()
+        if (response.isSuccessful) {
+            authInterceptor.clearToken()
+            emit(Result.success(Unit))
+        } else {
+            throw Exception("Delete failed: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(Exception("Delete profile error", e)))
     }
 
     suspend fun forgotPassword(email: String): Flow<Result<String>> = flow {
-        try {
-            val response = authApiService.forgotPassword(ForgotPasswordRequest(email = email))
-            if (response.isSuccessful) {
-                val forgotPasswordResponse = response.body()
-                if (forgotPasswordResponse?.result == "sent") {
-                    emit(Result.success("Password reset email sent to $email"))
-                } else if (forgotPasswordResponse?.error != null) {
-                    emit(Result.failure(Exception(forgotPasswordResponse.error)))
-                } else {
-                    emit(Result.failure(Exception("Failed to send reset email")))
-                }
+        val response = authApiService.forgotPassword(ForgotPasswordRequest(email = email))
+        if (response.isSuccessful) {
+            val forgotPasswordResponse = response.body()
+            if (forgotPasswordResponse?.result == "sent") {
+                emit(Result.success("Password reset email sent to $email"))
+            } else if (forgotPasswordResponse?.error != null) {
+                throw Exception(forgotPasswordResponse.error)
             } else {
-                emit(Result.failure(Exception("Failed to send reset email: ${response.message()}")))
+                throw Exception("Failed to send reset email")
             }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        } else {
+            throw Exception("Failed to send reset email: ${response.message()}")
         }
+    }.catch { e ->
+        emit(Result.failure(Exception("Forgot password error", e)))
     }
 }
 
