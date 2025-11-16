@@ -17,8 +17,8 @@ import javax.inject.Inject
 data class MainUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val currentPage: MainViewModel.MainPage = MainViewModel.MainPage.PEOPLE, // Start with People to show Chats
-    val selectedSection: Int = 0, // Start on Chats tab (0=Chats, 1=Network, 2=Purpose)
+    val currentPage: MainViewModel.MainPage = MainViewModel.MainPage.PORTALS, // Start with Portals on Purpose tab
+    val selectedSection: Int = 2, // Start on Purpose tab (0=Chats, 1=Network, 2=Purpose)
     val showSearch: Boolean = false,
     val searchQuery: String = "",
     val isSearching: Boolean = false,
@@ -525,6 +525,13 @@ class MainViewModel @Inject constructor(
                     errorMessage = e.message ?: "Failed to load portals"
                 )
             }
+        }
+    }
+
+    // Public function to refresh active chats (called when returning from chat screen)
+    fun refreshActiveChats(userId: Int) {
+        viewModelScope.launch {
+            fetchPeople(userId, 0, force = true)
         }
     }
 

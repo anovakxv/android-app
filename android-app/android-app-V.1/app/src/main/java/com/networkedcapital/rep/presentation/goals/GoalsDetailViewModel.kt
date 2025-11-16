@@ -46,6 +46,8 @@ class GoalsDetailViewModel @Inject constructor(
     private val _currentUserId = MutableStateFlow(0)
     val currentUserId: StateFlow<Int> = _currentUserId
 
+    private val _currentUser = MutableStateFlow<User?>(null)
+
     private val _isCreatingChat = MutableStateFlow(false)
     val isCreatingChat: StateFlow<Boolean> = _isCreatingChat
 
@@ -59,6 +61,12 @@ class GoalsDetailViewModel @Inject constructor(
                 .collect { result ->
                     result.onSuccess { user ->
                         _currentUserId.value = user.id
+                        // Patch profile picture URL for current user
+                        _currentUser.value = user.copy(
+                            profile_picture_url = patchProfilePictureUrl(
+                                user.profile_picture_url ?: user.imageName
+                            )
+                        )
                     }
                 }
         }
@@ -140,10 +148,19 @@ class GoalsDetailViewModel @Inject constructor(
         if (logs == null) return emptyList()
 
         return logs.sortedByDescending { it.timestamp }.take(20).map { log ->
-            val user = log.usersId?.let { teamDict[it] }
+            // Check if this feed item is from the current user
+            val isCurrentUser = log.usersId == _currentUserId.value
+            val user = if (isCurrentUser && _currentUser.value != null) {
+                // Use complete current user data from authRepository
+                _currentUser.value
+            } else {
+                // Use data from teamDict for other users
+                log.usersId?.let { teamDict[it] }
+            }
+
             val userName = user?.displayName ?: "Unknown User"
 
-            // User already has patched profile_picture_url from teamDict
+            // User already has patched profile_picture_url from teamDict or currentUser
             val profilePictureUrl = user?.profile_picture_url
 
             // Convert attachments

@@ -455,6 +455,23 @@ fun MainScreen(
         viewModel.checkForUnreadMessages()
     }
 
+    // Refresh active chats when screen is resumed (e.g., returning from chat screen)
+    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                // Refresh active chats if we're on the Chats tab
+                if (uiState.selectedSection == 0 && uiState.currentPage == MainViewModel.MainPage.PEOPLE) {
+                    viewModel.refreshActiveChats(userId)
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -553,25 +570,38 @@ fun MainScreen(
         // Main Content: Portals/People List
         Box(modifier = Modifier.weight(1f)) {
             if (uiState.isLoading) {
-                when (uiState.currentPage) {
-                    MainPage.PORTALS -> {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 16.dp, vertical = 24.dp),
-                            verticalArrangement = Arrangement.Top
-                        ) {
-                            repeat(4) { ShimmerPortalItem() }
-                        }
+                // Section 0 (Chats) always shows people shimmer
+                if (uiState.selectedSection == 0) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp, vertical = 24.dp),
+                        verticalArrangement = Arrangement.Top
+                    ) {
+                        repeat(4) { ShimmerPersonItem() }
                     }
-                    MainPage.PEOPLE -> {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 16.dp, vertical = 24.dp),
-                            verticalArrangement = Arrangement.Top
-                        ) {
-                            repeat(4) { ShimmerPersonItem() }
+                } else {
+                    // For sections 1 & 2, show shimmer based on current page
+                    when (uiState.currentPage) {
+                        MainPage.PORTALS -> {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 16.dp, vertical = 24.dp),
+                                verticalArrangement = Arrangement.Top
+                            ) {
+                                repeat(4) { ShimmerPortalItem() }
+                            }
+                        }
+                        MainPage.PEOPLE -> {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 16.dp, vertical = 24.dp),
+                                verticalArrangement = Arrangement.Top
+                            ) {
+                                repeat(4) { ShimmerPersonItem() }
+                            }
                         }
                     }
                 }

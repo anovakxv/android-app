@@ -47,7 +47,6 @@ fun IndividualChatScreen(
     
     LaunchedEffect(chatId) {
         viewModel.initialize(
-            currentUserId = viewModel.currentUserId, // Using the currentUserId from ViewModel 
             otherUserId = chatId,
             otherUserName = userName,
             otherUserPhotoUrl = userPhotoUrl

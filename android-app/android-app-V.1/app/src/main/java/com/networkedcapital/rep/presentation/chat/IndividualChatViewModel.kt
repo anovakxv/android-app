@@ -37,7 +37,8 @@ data class IndividualChatUiState(
  */
 @HiltViewModel
 class IndividualChatViewModel @Inject constructor(
-    private val messageRepository: MessageRepository
+    private val messageRepository: MessageRepository,
+    private val authRepository: com.networkedcapital.rep.data.repository.AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(IndividualChatUiState())
@@ -46,7 +47,7 @@ class IndividualChatViewModel @Inject constructor(
     // Scroll position management
     private val _shouldScrollToBottom = MutableStateFlow(false)
     val shouldScrollToBottom: StateFlow<Boolean> = _shouldScrollToBottom.asStateFlow()
-    
+
     // Socket connection status
     private val _isConnected = MutableStateFlow(false)
     val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
@@ -59,6 +60,18 @@ class IndividualChatViewModel @Inject constructor(
         private set
     var otherUserId: Int = 0
         private set
+
+    init {
+        // Get current user ID from auth repository
+        viewModelScope.launch {
+            authRepository.getCurrentUser()
+                .firstOrNull()
+                ?.onSuccess { user ->
+                    currentUserId = user.id
+                    android.util.Log.d("IndividualChatVM", "Current user ID set to: $currentUserId")
+                }
+        }
+    }
 
     // Helper function for image URL patching
     private fun patchProfilePictureUrl(imageUrl: String?): String? {
@@ -110,8 +123,7 @@ class IndividualChatViewModel @Inject constructor(
         }
     }
 
-    fun initialize(currentUserId: Int, otherUserId: Int, otherUserName: String = "", otherUserPhotoUrl: String? = null) {
-        this.currentUserId = currentUserId
+    fun initialize(otherUserId: Int, otherUserName: String = "", otherUserPhotoUrl: String? = null) {
         this.otherUserId = otherUserId
 
         // Update UI state with other user info
