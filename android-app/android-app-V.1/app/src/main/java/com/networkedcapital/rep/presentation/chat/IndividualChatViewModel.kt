@@ -53,6 +53,7 @@ class IndividualChatViewModel @Inject constructor(
     val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
 
     private var socketObserverId: UUID? = null
+    private var connectionStatusObserverId: UUID? = null
     private var isFetchingMessages = false
     private var isSettingUpSocket = false
 
@@ -133,17 +134,14 @@ class IndividualChatViewModel @Inject constructor(
         )}
 
         // Socket connection awareness
-        _isConnected.value = SocketManager.isConnected
-
-        // Add connection observer
-        // TODO: SocketManager.onConnectionStatusChange doesn't exist yet
-        // SocketManager.onConnectionStatusChange { connected ->
-        //     _isConnected.value = connected
-        //     if (connected && _uiState.value.isInitialized) {
-        //         // Re-setup socket on reconnection
-        //         setupSocketListener()
-        //     }
-        // }
+        connectionStatusObserverId = SocketManager.onConnectionStatusChange { connected ->
+            _isConnected.value = connected
+            if (connected && _uiState.value.isInitialized) {
+                android.util.Log.d("IndividualChatVM", "🔄 Reconnected - re-setup socket listener")
+                // Re-setup socket on reconnection
+                setupSocketListener()
+            }
+        }
 
         android.util.Log.d("IndividualChatVM", "✨ INIT for otherUserId: $otherUserId")
 
@@ -420,7 +418,13 @@ class IndividualChatViewModel @Inject constructor(
             SocketManager.removeDirectMessageObserver(id)
         }
 
+        connectionStatusObserverId?.let { id ->
+            android.util.Log.d("IndividualChatVM", "   Removing connection status observer $id")
+            SocketManager.removeConnectionStatusObserver(id)
+        }
+
         socketObserverId = null
+        connectionStatusObserverId = null
         isFetchingMessages = false
         isSettingUpSocket = false
     }

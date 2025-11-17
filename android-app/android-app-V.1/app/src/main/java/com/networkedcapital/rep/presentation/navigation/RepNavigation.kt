@@ -206,10 +206,20 @@ fun RepNavigation(
                     navController.navigate(Screen.Settings.route)
                 },
                 onNavigateToPortal = { portalId ->
-                    navController.navigate(Screen.PortalDetail.createRoute(portalId, authState.userId))
+                    // Navigate to EditPortal for creating/editing, PortalDetail for viewing
+                    if (portalId == 0) {
+                        navController.navigate(Screen.EditPortal.createRoute(0))
+                    } else {
+                        navController.navigate(Screen.PortalDetail.createRoute(portalId, authState.userId))
+                    }
                 },
                 onNavigateToGoal = { goalId ->
-                    navController.navigate(Screen.GoalDetail.createRoute(goalId))
+                    // Navigate to EditGoal for creating/editing, GoalDetail for viewing
+                    if (goalId == 0) {
+                        navController.navigate(Screen.EditGoal.createRoute(0))
+                    } else {
+                        navController.navigate(Screen.GoalDetail.createRoute(goalId))
+                    }
                 },
                 onNavigateToEditProfile = {
                     navController.navigate(Screen.EditProfile.route)

@@ -261,6 +261,45 @@ fun ProfileScreen(
                     .padding(vertical = 16.dp, horizontal = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
+                // Add Purpose Button
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showActionSheet = false
+                            onNavigateToPortal(0) // Navigate to edit portal with ID 0 for new portal
+                        }
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Add Purpose",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = repGreen
+                    )
+                }
+
+                // Add Goal Button
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showActionSheet = false
+                            onNavigateToGoal(0) // Navigate to edit goal with ID 0 for new goal
+                        }
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Add Goal",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = repGreen
+                    )
+                }
+
+                // Edit Profile Button
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -281,6 +320,7 @@ fun ProfileScreen(
 
                 HorizontalDivider()
 
+                // Cancel Button
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

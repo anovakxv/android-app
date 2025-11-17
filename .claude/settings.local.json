@@ -30,7 +30,9 @@
       "Bash(Select-Object -Last 50)",
       "Bash(nul)",
       "Bash(Select-Object -First 100)",
-      "Bash(./gradlew compileDebugKotlin:*)"
+      "Bash(./gradlew compileDebugKotlin:*)",
+      "Bash(./gradlew :app:tasks:*)",
+      "Bash(./gradlew :app:testDebugUnitTest:*)"
     ],
     "deny": [],
     "ask": []

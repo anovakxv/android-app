@@ -59,6 +59,8 @@ fun GoalsDetailScreen(
     val team by viewModel.team.collectAsState()
     val loading by viewModel.loading.collectAsState()
     val error by viewModel.error.collectAsState()
+    val currentUserId by viewModel.currentUserId.collectAsState()
+    val currentUser by viewModel.currentUser.collectAsState()
     var selectedTab by remember { mutableStateOf(0) }
     var selectedProfileUser by remember { mutableStateOf<User?>(null) }
 
@@ -293,7 +295,12 @@ fun GoalsDetailScreen(
                                 } else {
                                     LazyColumn(modifier = Modifier.weight(1f)) {
                                         items(feed) { item ->
-                                            EnhancedFeedItemView(item, onProfileClick = { user -> selectedProfileUser = user })
+                                            EnhancedFeedItemView(
+                                                item = item,
+                                                currentUserId = currentUserId,
+                                                currentUser = currentUser,
+                                                onProfileClick = { user -> selectedProfileUser = user }
+                                            )
                                         }
                                     }
                                 }
@@ -759,14 +766,24 @@ private fun ActionButton(text: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun EnhancedFeedItemView(item: FeedItem, onProfileClick: (User) -> Unit) {
-    val user = User(
-        id = item.userId ?: 0,
-        username = item.userName,
-        fullName = item.userName,
-        fname = null,
-        profile_picture_url = item.profilePictureUrl
-    )
+fun EnhancedFeedItemView(
+    item: FeedItem,
+    currentUserId: Int,
+    currentUser: User?,
+    onProfileClick: (User) -> Unit
+) {
+    // If this feed item is from the current user, use their actual user data
+    val user = if (item.userId == currentUserId && currentUser != null) {
+        currentUser
+    } else {
+        User(
+            id = item.userId ?: 0,
+            username = item.userName,
+            fullName = item.userName,
+            fname = null,
+            profile_picture_url = item.profilePictureUrl
+        )
+    }
     val context = LocalContext.current
     
     Column(

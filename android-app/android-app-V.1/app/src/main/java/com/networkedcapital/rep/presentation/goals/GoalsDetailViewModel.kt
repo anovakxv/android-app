@@ -47,6 +47,7 @@ class GoalsDetailViewModel @Inject constructor(
     val currentUserId: StateFlow<Int> = _currentUserId
 
     private val _currentUser = MutableStateFlow<User?>(null)
+    val currentUser: StateFlow<User?> = _currentUser
 
     private val _isCreatingChat = MutableStateFlow(false)
     val isCreatingChat: StateFlow<Boolean> = _isCreatingChat

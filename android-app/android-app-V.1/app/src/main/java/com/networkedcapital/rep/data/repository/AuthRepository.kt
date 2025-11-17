@@ -29,8 +29,20 @@ class AuthRepository @Inject constructor(
         skills: List<String>,
         imageUrl: String?
     ): Flow<Result<User>> = flow {
+        // Construct full name for the 'name' field (used by iOS)
+        val fullNameString = if (firstName.isNotBlank() && lastName.isNotBlank()) {
+            "$firstName $lastName"
+        } else if (firstName.isNotBlank()) {
+            firstName
+        } else if (lastName.isNotBlank()) {
+            lastName
+        } else {
+            null
+        }
+
         val user = User(
             id = 0,
+            name = fullNameString, // Add the 'name' field for iOS compatibility
             fname = firstName,
             lname = lastName,
             email = email,

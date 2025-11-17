@@ -63,6 +63,7 @@ class GroupChatViewModel @Inject constructor(
 
     private var groupObsId: UUID? = null
     private var groupNotifObsId: UUID? = null
+    private var connectionStatusObserverId: UUID? = null
     private var isActive: Boolean = false
 
     var currentUserId: Int = 0
@@ -132,15 +133,13 @@ class GroupChatViewModel @Inject constructor(
         this.chatId = chatId
         
         // Socket connection awareness
-        _isConnected.value = SocketManager.isConnected
-        
-        // TODO: Add connection observer when SocketManager supports it
-        // SocketManager.onConnectionStatusChange { connected ->
-        //     _isConnected.value = connected
-        //     if (connected && isActive) {
-        //         SocketManager.joinGroupChat(chatId)
-        //     }
-        // }
+        connectionStatusObserverId = SocketManager.onConnectionStatusChange { connected ->
+            _isConnected.value = connected
+            if (connected && isActive) {
+                android.util.Log.d("GroupChatVM", "🔄 Reconnected - rejoining group chat")
+                SocketManager.joinGroupChat(chatId)
+            }
+        }
 
         android.util.Log.d("GroupChatVM", "✨ init chat_$chatId")
     }
@@ -580,5 +579,11 @@ class GroupChatViewModel @Inject constructor(
             SocketManager.leaveGroupChat(chatId)
             performImmediateCleanup()
         }
+
+        connectionStatusObserverId?.let { id ->
+            android.util.Log.d("GroupChatVM", "   Removing connection status observer $id")
+            SocketManager.removeConnectionStatusObserver(id)
+        }
+        connectionStatusObserverId = null
     }
 }

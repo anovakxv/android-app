@@ -51,9 +51,15 @@ object SocketManager {
         val callback: (Map<String, Any>) -> Unit
     )
 
+    private data class ConnectionStatusObserver(
+        val id: UUID,
+        val callback: (Boolean) -> Unit
+    )
+
     private val dmObservers = ConcurrentHashMap<UUID, DMObserver>()
     private val groupObservers = ConcurrentHashMap<UUID, GroupObserver>()
     private val groupNotifObservers = ConcurrentHashMap<UUID, GroupNotifObserver>()
+    private val connectionStatusObservers = ConcurrentHashMap<UUID, ConnectionStatusObserver>()
 
     // MARK: - Chat Registration
 
@@ -164,6 +170,7 @@ object SocketManager {
         socket.on(Socket.EVENT_CONNECT) {
             isConnected = true
             Log.d(TAG, "✅ Connected -> $lastBaseURL")
+            notifyConnectionStatus(true)
             pendingUserId?.let { userId ->
                 joinUserRoom(userId)
             } ?: Log.w(TAG, "⚠️ No pending user id at connect")
@@ -173,6 +180,7 @@ object SocketManager {
         socket.on(Socket.EVENT_DISCONNECT) { args ->
             isConnected = false
             Log.d(TAG, "❌ Disconnected: ${args.joinToString()}")
+            notifyConnectionStatus(false)
         }
 
         socket.on("error") { args ->
@@ -257,6 +265,12 @@ object SocketManager {
         }
     }
 
+    private fun notifyConnectionStatus(connected: Boolean) {
+        connectionStatusObservers.values.forEach { observer ->
+            observer.callback(connected)
+        }
+    }
+
     // MARK: - Public Listener Registration
 
     fun onDirectMessageNotification(callback: (Map<String, Any>) -> Unit): UUID {
@@ -287,6 +301,18 @@ object SocketManager {
 
     fun removeGroupMessageNotificationObserver(id: UUID) {
         groupNotifObservers.remove(id)
+    }
+
+    fun onConnectionStatusChange(callback: (Boolean) -> Unit): UUID {
+        val id = UUID.randomUUID()
+        connectionStatusObservers[id] = ConnectionStatusObserver(id, callback)
+        // Immediately call with current status
+        callback(isConnected)
+        return id
+    }
+
+    fun removeConnectionStatusObserver(id: UUID) {
+        connectionStatusObservers.remove(id)
     }
 
     // MARK: - Room Management
@@ -339,6 +365,7 @@ object SocketManager {
         dmObservers.clear()
         groupObservers.clear()
         groupNotifObservers.clear()
+        connectionStatusObservers.clear()
         Log.d(TAG, "🧹 All handlers cleaned up")
     }
 }
