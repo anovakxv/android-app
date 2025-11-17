@@ -208,18 +208,52 @@ fun EditProfileScreen(
     var otherSkill by remember { mutableStateOf("") }
 
     val authState = viewModel.authState.collectAsState().value
+    val currentUser = viewModel.currentUser.collectAsState().value
     var repType by remember { mutableStateOf(RepType.LEAD) }
     val repTypes = RepType.values().toList()
     var allSkills by remember { mutableStateOf(listOf<RepSkill>()) }
     var selectedSkills by remember { mutableStateOf(setOf<RepSkill>()) }
     val coroutineScope = rememberCoroutineScope()
 
-    // Fetch skills from API on first composition
+    // Fetch current user profile data and skills on first composition
     LaunchedEffect(Unit) {
+        // Load current user into viewModel
+        viewModel.loadCurrentUser()
+
         coroutineScope.launch {
-            val jwtToken = authState.jwtToken ?: ""
+            // Fetch skills
+            val jwtToken = authState.jwtToken
             val skills = fetchSkills(jwtToken)
-            if (skills.isNotEmpty()) allSkills = skills else allSkills = RepSkill.values().toList()
+            if (skills.isNotEmpty()) {
+                allSkills = skills
+            } else {
+                allSkills = RepSkill.values().toList()
+            }
+        }
+    }
+
+    // Pre-populate form when currentUser is loaded
+    LaunchedEffect(currentUser) {
+        if (currentUser != null) {
+            firstName = currentUser.fname ?: ""
+            lastName = currentUser.lname ?: ""
+            email = currentUser.email ?: ""
+            broadcast = currentUser.broadcast ?: ""
+            city = currentUser.manual_city ?: currentUser.city ?: ""
+            about = currentUser.about ?: ""
+            otherSkill = currentUser.other_skill ?: ""
+
+            // Set rep type (only LEAD and TEAM are supported)
+            repType = when (currentUser.userType?.name ?: currentUser.userType_string) {
+                "Team" -> RepType.TEAM
+                else -> RepType.LEAD
+            }
+
+            // Pre-select user's skills
+            val userSkillTitles = currentUser.skills ?: emptyList()
+            selectedSkills = allSkills.filter { skill ->
+                userSkillTitles.contains(skill.displayName)
+            }.toSet()
         }
     }
     // Profile image upload

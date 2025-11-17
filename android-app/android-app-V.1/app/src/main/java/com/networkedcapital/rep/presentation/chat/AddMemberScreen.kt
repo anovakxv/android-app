@@ -34,37 +34,48 @@ fun AddMembersScreen(
     LaunchedEffect(chatId) {
         viewModel.initialize(chatId, alreadySelected)
     }
-    
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Your NTWK") },
-                navigationIcon = {
-                    IconButton(onClick = onCancel) {
-                        Text("Cancel", color = Color(0xFF8CC55D))
-                    }
-                },
-                actions = {
-                    TextButton(
-                        onClick = { 
-                            val selectedUsers = uiState.users.filter { 
-                                uiState.selectedUserIds.contains(it.id) 
-                            }
-                            onMembersSelected(selectedUsers) 
-                        },
-                        enabled = uiState.selectedUserIds.isNotEmpty()
-                    ) {
-                        Text(
-                            "Done", 
-                            color = if (uiState.selectedUserIds.isNotEmpty()) 
-                                Color(0xFF8CC55D) else Color.Gray
-                        )
-                    }
-                }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(max = 600.dp)  // Constrain height for bottom sheet
+    ) {
+        // Custom header instead of TopAppBar
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextButton(onClick = onCancel) {
+                Text("Cancel", color = Color(0xFF8CC55D))
+            }
+            Text(
+                "Your NTWK",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
             )
+            TextButton(
+                onClick = {
+                    val selectedUsers = uiState.users.filter {
+                        uiState.selectedUserIds.contains(it.id)
+                    }
+                    onMembersSelected(selectedUsers)
+                },
+                enabled = uiState.selectedUserIds.isNotEmpty()
+            ) {
+                Text(
+                    "Done",
+                    color = if (uiState.selectedUserIds.isNotEmpty())
+                        Color(0xFF8CC55D) else Color.Gray
+                )
+            }
         }
-    ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
+
+        HorizontalDivider()
+
+        Box(modifier = Modifier.weight(1f)) {
             if (uiState.isLoading) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -85,7 +96,7 @@ fun AddMembersScreen(
                 }
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxWidth(),
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
                     items(uiState.users) { user ->

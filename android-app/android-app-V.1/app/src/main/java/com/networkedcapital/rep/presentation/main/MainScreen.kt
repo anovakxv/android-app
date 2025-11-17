@@ -41,6 +41,7 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.networkedcapital.rep.R
+import com.networkedcapital.rep.data.api.ApiConfig
 import com.networkedcapital.rep.domain.model.*
 import com.networkedcapital.rep.domain.model.User
 import com.networkedcapital.rep.presentation.main.MainViewModel.MainPage
@@ -406,6 +407,7 @@ fun MainActionSheet(
 @Composable
 fun MainScreen(
     userId: Int,
+    jwtToken: String,
     onNavigateToProfile: (Int) -> Unit,
     onNavigateToPortalDetail: (Int) -> Unit,
     onNavigateToPersonDetail: (Int) -> Unit,
@@ -448,8 +450,8 @@ fun MainScreen(
     LaunchedEffect(userId) {
         viewModel.loadData(userId)
 
-        // TODO: Setup socket notifications - requires baseURL and token from auth context
-        // viewModel.setupSocketNotifications(baseURL, token, userId)
+        // Setup socket notifications for real-time messaging
+        viewModel.setupSocketNotifications(ApiConfig.BASE_URL, jwtToken, userId)
 
         // NEW: Check for unread messages
         viewModel.checkForUnreadMessages()

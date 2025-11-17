@@ -150,24 +150,34 @@ fun GroupChatScreen(
     }
     // Add Members Sheet
     if (uiState.showAddMemberSheet) {
-        val currentMembers = uiState.groupMembers.map { it.id }.toSet()
-        AddMembersScreen(
-            chatId = chatId,
-            alreadySelected = currentMembers,
-            onMembersSelected = viewModel::onAddMembersSelected,
-            onCancel = viewModel::hideAddMemberSheet
-        )
+        ModalBottomSheet(
+            onDismissRequest = viewModel::hideAddMemberSheet,
+            containerColor = Color.White
+        ) {
+            val currentMembers = uiState.groupMembers.map { it.id }.toSet()
+            AddMembersScreen(
+                chatId = chatId,
+                alreadySelected = currentMembers,
+                onMembersSelected = viewModel::onAddMembersSelected,
+                onCancel = viewModel::hideAddMemberSheet
+            )
+        }
     }
 
     // Remove Members Sheet
     if (uiState.showRemoveMemberSheet) {
-        RemoveMembersScreen(
-            members = uiState.groupMembers,
-            currentUserId = currentUserId,
-            isCreator = uiState.isCreator,
-            onRemoveMember = viewModel::showRemoveMemberConfirmation,
-            onCancel = viewModel::hideRemoveMemberSheet
-        )
+        ModalBottomSheet(
+            onDismissRequest = viewModel::hideRemoveMemberSheet,
+            containerColor = Color.White
+        ) {
+            RemoveMembersScreen(
+                members = uiState.groupMembers,
+                currentUserId = currentUserId,
+                isCreator = uiState.isCreator,
+                onRemoveMember = viewModel::showRemoveMemberConfirmation,
+                onCancel = viewModel::hideRemoveMemberSheet
+            )
+        }
     }
 
     // Remove Member Confirmation

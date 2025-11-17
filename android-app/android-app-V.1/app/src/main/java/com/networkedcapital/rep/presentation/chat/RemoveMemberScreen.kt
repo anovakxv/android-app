@@ -25,27 +25,41 @@ fun RemoveMembersScreen(
     onRemoveMember: (GroupMemberModel) -> Unit,
     onCancel: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Remove Member(s)") },
-                navigationIcon = {
-                    IconButton(onClick = onCancel) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Cancel",
-                            tint = Color(0xFF8CC55D)
-                        )
-                    }
-                }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(max = 600.dp)  // Constrain height for bottom sheet
+    ) {
+        // Custom header instead of TopAppBar
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onCancel) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Cancel",
+                    tint = Color(0xFF8CC55D)
+                )
+            }
+            Text(
+                "Remove Member(s)",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
             )
+            Spacer(modifier = Modifier.width(48.dp)) // Balance the close icon
         }
-    ) { paddingValues ->
+
+        HorizontalDivider()
+
         if (members.isEmpty()) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+                    .fillMaxWidth()
+                    .weight(1f),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -57,8 +71,8 @@ fun RemoveMembersScreen(
         } else {
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+                    .fillMaxWidth()
+                    .weight(1f),
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
                 items(members.filter { 

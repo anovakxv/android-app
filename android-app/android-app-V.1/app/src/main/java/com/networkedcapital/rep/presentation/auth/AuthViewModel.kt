@@ -238,7 +238,7 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    private fun getCurrentUser() {
+    fun loadCurrentUser() {
         viewModelScope.launch {
             authRepository.getProfile()
                 .catch { /* Handle error silently for auto-fetch */ }

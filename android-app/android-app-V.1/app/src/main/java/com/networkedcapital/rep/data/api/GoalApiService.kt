@@ -76,7 +76,7 @@ data class GoalEditRequest(
 
 // Generic goal response
 data class GoalResponse(
-    val result: String? = null,
+    val result: Any? = null,  // Can be either a String message or a Goal object
     val error: String? = null,
     val goal: Goal? = null
 )

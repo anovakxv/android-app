@@ -61,11 +61,16 @@ class GoalRepository @Inject constructor(
             val response = goalApiService.createGoal(request)
             if (response.isSuccessful) {
                 val goalResponse = response.body()
-                if (goalResponse?.result != null) {
-                    // Note: Can't cache here without full goal object from API
-                    emit(Result.success(goalResponse.result))
-                } else if (goalResponse?.error != null) {
+                if (goalResponse?.error != null) {
                     emit(Result.failure(Exception(goalResponse.error)))
+                } else if (goalResponse?.result != null) {
+                    // Result can be a String message or a Goal object - just return success message
+                    val message = if (goalResponse.result is String) {
+                        goalResponse.result
+                    } else {
+                        "Goal created successfully"
+                    }
+                    emit(Result.success(message))
                 } else {
                     emit(Result.success("Goal created successfully"))
                 }
@@ -105,11 +110,16 @@ class GoalRepository @Inject constructor(
             val response = goalApiService.editGoal(request)
             if (response.isSuccessful) {
                 val goalResponse = response.body()
-                if (goalResponse?.result != null) {
-                    // Note: Can't cache here without full goal object from API
-                    emit(Result.success(goalResponse.result))
-                } else if (goalResponse?.error != null) {
+                if (goalResponse?.error != null) {
                     emit(Result.failure(Exception(goalResponse.error)))
+                } else if (goalResponse?.result != null) {
+                    // Result can be a String message or a Goal object - just return success message
+                    val message = if (goalResponse.result is String) {
+                        goalResponse.result
+                    } else {
+                        "Goal updated successfully"
+                    }
+                    emit(Result.success(message))
                 } else {
                     emit(Result.success("Goal updated successfully"))
                 }
