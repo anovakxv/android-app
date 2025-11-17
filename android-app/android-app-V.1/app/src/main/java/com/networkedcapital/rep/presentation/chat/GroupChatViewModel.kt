@@ -315,7 +315,7 @@ class GroupChatViewModel @Inject constructor(
                             groupMembers = chatResult.users,
                             groupName = chatResult.chat.name,
                             chatCreatorId = chatResult.chat.createdBy,
-                            isCreator = (currentUserId == chatResult.chat.createdBy)
+                            isCreator = (chatResult.chat.createdBy != null && currentUserId == chatResult.chat.createdBy)
                         )
                     }
                     

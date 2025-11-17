@@ -582,5 +582,5 @@ data class ChatInfo(
     val id: Int,
     val name: String,
     val description: String? = null,
-    @SerializedName("created_by") val createdBy: Int
+    @SerializedName("created_by") val createdBy: Int? = null
 ) : Parcelable
