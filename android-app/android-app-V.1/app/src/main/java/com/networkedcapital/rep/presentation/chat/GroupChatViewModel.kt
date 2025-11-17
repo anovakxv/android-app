@@ -135,8 +135,10 @@ class GroupChatViewModel @Inject constructor(
         // Socket connection awareness
         // Immediately sync with current connection state
         _isConnected.value = SocketManager.isConnected
+        android.util.Log.d("GroupChatVM", "🔌 Initial connection state: ${SocketManager.isConnected}, _isConnected=${_isConnected.value}")
 
         connectionStatusObserverId = SocketManager.onConnectionStatusChange { connected ->
+            android.util.Log.d("GroupChatVM", "🔌 Connection changed: $connected")
             _isConnected.value = connected
             if (connected && isActive) {
                 android.util.Log.d("GroupChatVM", "🔄 Reconnected - rejoining group chat")
@@ -312,10 +314,22 @@ class GroupChatViewModel @Inject constructor(
                 android.util.Log.d("GroupChatVM", "✅ Fetch completion for chat_$chatId")
 
                 result.onSuccess { chatResult ->
+                    // Patch member profile picture URLs
+                    val patchedMembers = chatResult.users.map { member ->
+                        member.copy(
+                            profilePictureUrl = patchProfilePictureUrl(member.profilePictureUrl)
+                        )
+                    }
+
+                    // DEBUG: Log message sender names
+                    chatResult.messages.forEach { msg ->
+                        android.util.Log.d("GroupChatVM", "Message ${msg.id}: senderName='${msg.senderName}', senderId=${msg.senderId}, text='${msg.text?.take(20)}'")
+                    }
+
                     _uiState.update { state ->
                         state.copy(
                             messages = chatResult.messages.sortedBy { it.timestamp ?: "" },
-                            groupMembers = chatResult.users,
+                            groupMembers = patchedMembers,
                             groupName = chatResult.chat.name ?: "Unnamed Chat",
                             chatCreatorId = chatResult.chat.createdBy,
                             isCreator = (chatResult.chat.createdBy != null && currentUserId == chatResult.chat.createdBy)

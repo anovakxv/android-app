@@ -136,8 +136,10 @@ class IndividualChatViewModel @Inject constructor(
         // Socket connection awareness
         // Immediately sync with current connection state
         _isConnected.value = SocketManager.isConnected
+        android.util.Log.d("IndividualChatVM", "🔌 Initial connection state: ${SocketManager.isConnected}, _isConnected=${_isConnected.value}")
 
         connectionStatusObserverId = SocketManager.onConnectionStatusChange { connected ->
+            android.util.Log.d("IndividualChatVM", "🔌 Connection changed: $connected")
             _isConnected.value = connected
             if (connected && _uiState.value.isInitialized) {
                 android.util.Log.d("IndividualChatVM", "🔄 Reconnected - re-setup socket listener")
