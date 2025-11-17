@@ -220,7 +220,7 @@ class GroupChatViewModel @Inject constructor(
             try {
                 val message = GroupMessageModel(
                     id = (payload["id"] as? Number)?.toInt() ?: 0,
-                    senderId = (payload["sender_id"] as? Number)?.toInt() ?: 0,
+                    senderId = (payload["sender_id"] as? Number)?.toInt(),
                     senderName = payload["sender_name"] as? String ?: "",
                     // Use image patching
                     senderPhotoUrl = patchProfilePictureUrl(payload["sender_photo_url"] as? String),
@@ -243,7 +243,7 @@ class GroupChatViewModel @Inject constructor(
                         } else {
                             state.messages + message
                         }
-                        
+
                         // Trigger scroll on new messages
                         if (message.senderId != currentUserId || optimisticIndex < 0) {
                             _shouldScrollToBottom.value = true
@@ -260,7 +260,7 @@ class GroupChatViewModel @Inject constructor(
                 }
 
                 // If someone else sent it while we're viewing, mark read
-                if (message.senderId != currentUserId) {
+                if (message.senderId != null && message.senderId != currentUserId) {
                     markCurrentChatReadIfNeeded(message.id)
                 }
 

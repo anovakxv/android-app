@@ -562,7 +562,7 @@ data class RespondToInviteRequest(
 @Parcelize
 data class GroupMessageModel(
     val id: Int,
-    @SerializedName("sender_id") val senderId: Int,
+    @SerializedName("sender_id") val senderId: Int? = null,
     @SerializedName("sender_name") val senderName: String,
     @SerializedName("sender_photo_url") val senderPhotoUrl: String? = null,
     val text: String,
