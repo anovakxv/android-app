@@ -409,102 +409,55 @@ fun MessageBubble(
     viewModel: GroupChatViewModel,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            horizontalArrangement = if (isFromCurrentUser) Arrangement.End else Arrangement.Start
+    // iOS Design: NO profile pictures in message bubbles, sender name only for incoming messages
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        horizontalArrangement = if (isFromCurrentUser) Arrangement.End else Arrangement.Start
+    ) {
+        if (isFromCurrentUser) {
+            Spacer(modifier = Modifier.weight(1f))
+        }
+
+        Column(
+            horizontalAlignment = if (isFromCurrentUser) Alignment.End else Alignment.Start,
+            modifier = Modifier.widthIn(max = 260.dp)
         ) {
+            // Sender name ONLY for incoming messages (iOS behavior)
             if (!isFromCurrentUser) {
-                // Sender Avatar
-                Box(
-                    modifier = Modifier
-                        .padding(end = 8.dp)
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFFE0E0E0)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    val senderPhotoUrl = message.senderPhotoUrl
-                    if (!senderPhotoUrl.isNullOrEmpty()) {
-                        AsyncImage(
-                            model = senderPhotoUrl,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        // Display initials if no photo
-                        val nameParts = (message.senderName ?: "Unknown").split(" ")
-                        val initials = buildString {
-                            if (nameParts.isNotEmpty() && nameParts[0].isNotEmpty()) {
-                                append(nameParts[0][0])
-                            }
-                            if (nameParts.size > 1 && nameParts[1].isNotEmpty()) {
-                                append(nameParts[1][0])
-                            }
-                        }.uppercase().take(2).ifEmpty { "?" }
-                        
-                        Text(
-                            text = initials,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.DarkGray
-                        )
-                    }
-                }
-            }
-            
-            Column(
-                horizontalAlignment = if (isFromCurrentUser) Alignment.End else Alignment.Start
-            ) {
-                // Sender name (only for messages from others)
-                if (!isFromCurrentUser) {
-                    Text(
-                        text = message.senderName ?: "Unknown",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(bottom = 2.dp, start = 4.dp)
-                    )
-                }
-                
-                // Message bubble
-                Box(
-                    modifier = Modifier.clip(
-                        RoundedCornerShape(
-                            topStart = if (isFromCurrentUser) 12.dp else 4.dp,
-                            topEnd = if (isFromCurrentUser) 4.dp else 12.dp,
-                            bottomStart = 12.dp,
-                            bottomEnd = 12.dp
-                        )
-                    )
-                ) {
-                    Surface(
-                        color = if (isFromCurrentUser) Color.Black else Color(0xFFF0F0F0),
-                        shape = RoundedCornerShape(
-                            topStart = if (isFromCurrentUser) 12.dp else 4.dp,
-                            topEnd = if (isFromCurrentUser) 4.dp else 12.dp,
-                            bottomStart = 12.dp,
-                            bottomEnd = 12.dp
-                        )
-                    ) {
-                        Text(
-                            text = message.text ?: "",
-                            color = if (isFromCurrentUser) Color(0xFF8CC55D) else Color.Black, // Green for own messages on black background
-                            modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-                
-                // Timestamp
                 Text(
-                    text = formattedTime,
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                    text = message.senderName ?: "Unknown",
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
                     color = Color.Gray,
-                    modifier = Modifier.padding(top = 2.dp, start = 4.dp, end = 4.dp)
+                    modifier = Modifier.padding(bottom = 2.dp, start = 4.dp)
                 )
             }
+
+            // Message bubble
+            Surface(
+                color = if (isFromCurrentUser) Color.Black else Color(0xFFF0F0F0),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = message.text ?: "",
+                    color = if (isFromCurrentUser) Color(0xFF8CC55D) else Color.Black,
+                    modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            // Timestamp below bubble
+            Text(
+                text = formattedTime,
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                color = Color.Gray,
+                modifier = Modifier.padding(top = 2.dp, start = 4.dp, end = 4.dp)
+            )
+        }
+
+        if (!isFromCurrentUser) {
+            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }

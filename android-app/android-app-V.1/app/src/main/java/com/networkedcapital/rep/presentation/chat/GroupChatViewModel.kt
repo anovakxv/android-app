@@ -133,6 +133,9 @@ class GroupChatViewModel @Inject constructor(
         this.chatId = chatId
         
         // Socket connection awareness
+        // Immediately sync with current connection state
+        _isConnected.value = SocketManager.isConnected
+
         connectionStatusObserverId = SocketManager.onConnectionStatusChange { connected ->
             _isConnected.value = connected
             if (connected && isActive) {
