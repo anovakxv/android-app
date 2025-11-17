@@ -79,7 +79,8 @@ class MessageRepository @Inject constructor(
             throw Exception("Failed to load group chat: ${response.message()}")
         }
     }.catch { e ->
-        emit(Result.failure(Exception("Failed to load group chat", e)))
+        android.util.Log.e("MessageRepository", "❌ Group chat parsing error", e)
+        emit(Result.failure(Exception("Failed to load group chat: ${e.message}", e)))
     }
 
     fun sendGroupMessage(
