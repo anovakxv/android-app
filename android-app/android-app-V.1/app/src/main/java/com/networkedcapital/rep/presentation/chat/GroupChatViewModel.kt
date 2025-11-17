@@ -58,7 +58,7 @@ class GroupChatViewModel @Inject constructor(
     val shouldScrollToBottom: StateFlow<Boolean> = _shouldScrollToBottom.asStateFlow()
     
     // Socket connection status
-    private val _isConnected = MutableStateFlow(false)
+    private val _isConnected = MutableStateFlow(SocketManager.isConnected)
     val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
 
     private var groupObsId: UUID? = null
@@ -311,9 +311,9 @@ class GroupChatViewModel @Inject constructor(
                 result.onSuccess { chatResult ->
                     _uiState.update { state ->
                         state.copy(
-                            messages = chatResult.messages.sortedBy { it.timestamp },
+                            messages = chatResult.messages.sortedBy { it.timestamp ?: "" },
                             groupMembers = chatResult.users,
-                            groupName = chatResult.chat.name,
+                            groupName = chatResult.chat.name ?: "Unnamed Chat",
                             chatCreatorId = chatResult.chat.createdBy,
                             isCreator = (chatResult.chat.createdBy != null && currentUserId == chatResult.chat.createdBy)
                         )

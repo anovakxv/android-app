@@ -563,24 +563,24 @@ data class RespondToInviteRequest(
 data class GroupMessageModel(
     val id: Int,
     @SerializedName("sender_id") val senderId: Int? = null,
-    @SerializedName("sender_name") val senderName: String,
+    @SerializedName("sender_name") val senderName: String? = null,
     @SerializedName("sender_photo_url") val senderPhotoUrl: String? = null,
-    val text: String,
-    val timestamp: String,
+    val text: String? = null,
+    val timestamp: String? = null,
     @SerializedName("chat_id") val chatId: Int? = null
 ) : Parcelable
 
 @Parcelize
 data class GroupMemberModel(
     val id: Int,
-    @SerializedName("full_name") val fullName: String,
+    @SerializedName("full_name") val fullName: String? = null,
     @SerializedName("profile_picture_url") val profilePictureUrl: String? = null
 ) : Parcelable
 
 @Parcelize
 data class ChatInfo(
     val id: Int,
-    val name: String,
+    val name: String? = null,
     val description: String? = null,
     @SerializedName("created_by") val createdBy: Int? = null
 ) : Parcelable

@@ -105,7 +105,7 @@ fun RemoveMembersScreen(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = member.fullName,
+                                text = member.fullName ?: "Unknown",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = Color.Red,
                                 fontWeight = FontWeight.SemiBold

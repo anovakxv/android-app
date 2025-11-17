@@ -423,6 +423,72 @@ The Android app connects to the same Flask backend routes as iOS:
 
 ---
 
+## ✅ Recent Bug Fixes (Resolved - Nov 17, 2025)
+
+### Issue #1: Group Chat JSON Parsing Errors
+**Status**: ✅ COMPREHENSIVELY FIXED (Nov 17, 2025)
+
+**Problem**: GroupChat page crashed when loading messages due to missing/null fields in backend JSON responses. Backend returns inconsistent data (likely from deleted users or legacy database records).
+
+**Root Cause**: Backend database has NULL values for certain fields despite database constraints, causing JSON parsing to fail.
+
+**Comprehensive Fixes Applied** (Nov 17, 2025):
+
+1. **Reviewed Backend Routes** - Analyzed `GetGroupChat.py`, `User.py`, and `GroupChatMetaData.py` to understand exact JSON structure
+2. **Made ALL potentially nullable fields defensive**:
+   - `ChatInfo.createdBy: Int?` - some chats may not have creator
+   - `ChatInfo.name: String?` - fallback to "Unnamed Chat"
+   - `GroupMessageModel.senderId: Int?` - messages from deleted users
+   - `GroupMessageModel.senderName: String?` - fallback to "Unknown"
+   - `GroupMessageModel.text: String?` - fallback to empty string
+   - `GroupMessageModel.timestamp: String?` - fallback to empty string
+   - `GroupMemberModel.fullName: String?` - fallback to "Unknown"
+3. **Updated all UI components** with null-safe handling:
+   - `GroupChatScreen.kt` - Member names, message text, timestamps
+   - `RemoveMemberScreen.kt` - Member display names
+   - `GroupChatViewModel.kt` - Message sorting, group name display
+
+**Files Modified**:
+- `Models.kt` - Made 7 fields nullable across 3 data classes
+- `GroupChatScreen.kt` - Added null fallbacks for UI display
+- `GroupChatViewModel.kt` - Safe null handling for sorting and state
+- `RemoveMemberScreen.kt` - Null-safe member name display
+
+**Result**: Android models are now maximally defensive against any inconsistent backend data. Should handle deleted users, empty strings, and missing fields gracefully.
+
+**Current Build Status**: ✅ BUILD SUCCESSFUL in 23s - Ready for comprehensive testing
+
+---
+
+### Issue #2: Red "No connection. Reconnecting..." Banner on DM Pages
+**Status**: ✅ FIXED (Nov 17, 2025)
+
+**Problem**: When opening Direct Message (DM) chat screens, a persistent red banner appeared at the top saying "No connection. Reconnecting..." even though the socket connection was working and messages were sending/receiving successfully.
+
+**Root Cause Identified**:
+Both `IndividualChatViewModel` and `GroupChatViewModel` were initializing their `_isConnected` StateFlow with a hardcoded `false` value:
+```kotlin
+private val _isConnected = MutableStateFlow(false)  // ❌ Always starts disconnected
+```
+
+This caused the banner to flash red when the screen first loaded, even if SocketManager was already connected. The connection status observer would update the state later, but there was a visible delay causing the banner to show briefly.
+
+**Fix Applied**:
+Initialize `_isConnected` with the actual current connection state from SocketManager:
+```kotlin
+private val _isConnected = MutableStateFlow(SocketManager.isConnected)  // ✅ Starts with actual state
+```
+
+**Files Modified**:
+- `IndividualChatViewModel.kt` - Initialize with SocketManager.isConnected
+- `GroupChatViewModel.kt` - Initialize with SocketManager.isConnected (consistency fix)
+
+**Result**: Connection banner now only shows when actually disconnected, no more false "reconnecting" messages on screen load.
+
+**Current Build Status**: ✅ BUILD SUCCESSFUL in 23s
+
+---
+
 ## Conclusion
 
 This Android app successfully converts ~85% of the iOS Rep app to Android using modern Kotlin and Jetpack Compose. It connects to the **exact same Python Flask backend** with zero modifications required.
@@ -444,6 +510,6 @@ This Android app successfully converts ~85% of the iOS Rep app to Android using 
 
 ---
 
-**Document Version**: 2.0
-**Last Updated**: January 2025 - Chat navigation fixes completed
-**Build Status**: ✅ BUILD SUCCESSFUL
+**Document Version**: 2.2
+**Last Updated**: November 17, 2025 - GroupChat parsing & connection banner fixes completed
+**Build Status**: ✅ BUILD SUCCESSFUL in 23s

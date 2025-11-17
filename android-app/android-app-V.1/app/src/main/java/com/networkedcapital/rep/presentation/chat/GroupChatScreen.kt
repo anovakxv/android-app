@@ -292,17 +292,18 @@ fun GroupMemberRow(
             ) {
                 MemberAvatar(
                     photoUrl = member.profilePictureUrl,
-                    fullName = member.fullName,
+                    fullName = member.fullName ?: "Unknown",
                     size = 40.dp
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
                 // Display name, truncated as needed
-                val displayName = if (member.fullName.length > 10) {
-                    member.fullName.take(8) + "..."
+                val memberName = member.fullName ?: "Unknown"
+                val displayName = if (memberName.length > 10) {
+                    memberName.take(8) + "..."
                 } else {
-                    member.fullName
+                    memberName
                 }
                 
                 Text(
@@ -388,7 +389,7 @@ fun MessagesList(
     ) {
         items(messages) { message ->
             val isFromCurrentUser = message.senderId == currentUserId
-            val formattedTime = viewModel.formatTimestamp(message.timestamp)
+            val formattedTime = message.timestamp?.let { viewModel.formatTimestamp(it) } ?: ""
             
             MessageBubble(
                 message = message,
@@ -435,7 +436,7 @@ fun MessageBubble(
                         )
                     } else {
                         // Display initials if no photo
-                        val nameParts = message.senderName.split(" ")
+                        val nameParts = (message.senderName ?: "Unknown").split(" ")
                         val initials = buildString {
                             if (nameParts.isNotEmpty() && nameParts[0].isNotEmpty()) {
                                 append(nameParts[0][0])
@@ -443,7 +444,7 @@ fun MessageBubble(
                             if (nameParts.size > 1 && nameParts[1].isNotEmpty()) {
                                 append(nameParts[1][0])
                             }
-                        }.uppercase().take(2)
+                        }.uppercase().take(2).ifEmpty { "?" }
                         
                         Text(
                             text = initials,
@@ -460,7 +461,7 @@ fun MessageBubble(
                 // Sender name (only for messages from others)
                 if (!isFromCurrentUser) {
                     Text(
-                        text = message.senderName,
+                        text = message.senderName ?: "Unknown",
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.Gray,
                         modifier = Modifier.padding(bottom = 2.dp, start = 4.dp)
@@ -488,7 +489,7 @@ fun MessageBubble(
                         )
                     ) {
                         Text(
-                            text = message.text,
+                            text = message.text ?: "",
                             color = if (isFromCurrentUser) Color(0xFF8CC55D) else Color.Black, // Green for own messages on black background
                             modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp),
                             style = MaterialTheme.typography.bodyMedium

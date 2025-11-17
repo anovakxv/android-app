@@ -49,7 +49,7 @@ class IndividualChatViewModel @Inject constructor(
     val shouldScrollToBottom: StateFlow<Boolean> = _shouldScrollToBottom.asStateFlow()
 
     // Socket connection status
-    private val _isConnected = MutableStateFlow(false)
+    private val _isConnected = MutableStateFlow(SocketManager.isConnected)
     val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
 
     private var socketObserverId: UUID? = null
