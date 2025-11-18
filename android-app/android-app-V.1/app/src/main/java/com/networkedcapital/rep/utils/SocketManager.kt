@@ -348,7 +348,7 @@ object SocketManager {
 
     fun disconnect() {
         socket?.disconnect()
-        isConnected = false
+        // isConnected is now a computed property, no need to set it manually
     }
 
     fun reconnectIfNeeded() {
