@@ -23,8 +23,8 @@ object SocketManager {
     private const val TAG = "SocketManager"
 
     private var socket: Socket? = null
-    var isConnected = false
-        private set
+    val isConnected: Boolean
+        get() = socket?.connected() == true
 
     private var handlersRegistered = false
     private val activelyViewingChats = mutableSetOf<Int>()
@@ -168,7 +168,6 @@ object SocketManager {
         val socket = this.socket ?: return
 
         socket.on(Socket.EVENT_CONNECT) {
-            isConnected = true
             Log.d(TAG, "✅ Connected -> $lastBaseURL")
             notifyConnectionStatus(true)
             pendingUserId?.let { userId ->
@@ -178,7 +177,6 @@ object SocketManager {
         }
 
         socket.on(Socket.EVENT_DISCONNECT) { args ->
-            isConnected = false
             Log.d(TAG, "❌ Disconnected: ${args.joinToString()}")
             notifyConnectionStatus(false)
         }

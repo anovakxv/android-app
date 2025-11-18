@@ -3,6 +3,7 @@ package com.networkedcapital.rep.domain.model
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import com.google.gson.annotations.JsonAdapter
+import com.squareup.moshi.Json
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 
@@ -562,19 +563,19 @@ data class RespondToInviteRequest(
 @Parcelize
 data class GroupMessageModel(
     val id: Int,
-    @SerializedName("sender_id") val senderId: Int? = null,
-    @SerializedName("sender_name") val senderName: String? = null,
-    @SerializedName("sender_photo_url") val senderPhotoUrl: String? = null,
+    @Json(name = "sender_id") val senderId: Int? = null,
+    @Json(name = "sender_name") val senderName: String? = null,
+    @Json(name = "sender_photo_url") val senderPhotoUrl: String? = null,
     val text: String? = null,
     val timestamp: String? = null,
-    @SerializedName("chat_id") val chatId: Int? = null
+    @Json(name = "chat_id") val chatId: Int? = null
 ) : Parcelable
 
 @Parcelize
 data class GroupMemberModel(
     val id: Int,
-    @SerializedName("full_name") val fullName: String? = null,
-    @SerializedName("profile_picture_url") val profilePictureUrl: String? = null
+    @Json(name = "full_name") val fullName: String? = null,
+    @Json(name = "profile_picture_url") val profilePictureUrl: String? = null
 ) : Parcelable
 
 @Parcelize
