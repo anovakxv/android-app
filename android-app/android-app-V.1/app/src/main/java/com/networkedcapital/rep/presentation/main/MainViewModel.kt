@@ -179,9 +179,11 @@ class MainViewModel @Inject constructor(
 
     // NEW: Set up socket connections for real-time updates
     fun setupSocketNotifications(baseURL: String, token: String, userId: Int) {
+        android.util.Log.d("MainViewModel", "🔧 setupSocketNotifications called - baseURL=$baseURL, userId=$userId, tokenEmpty=${token.isEmpty()}")
         viewModelScope.launch {
             try {
                 if (token.isNotEmpty() && userId > 0) {
+                    android.util.Log.d("MainViewModel", "📡 Calling SocketManager.connect()")
                     SocketManager.connect(baseURL, token, userId)
 
                     SocketManager.onDirectMessageNotification { payload ->
@@ -217,9 +219,11 @@ class MainViewModel @Inject constructor(
                             }
                         }
                     }
+                } else {
+                    android.util.Log.w("MainViewModel", "❌ Skipping socket connection - token empty or invalid userId")
                 }
             } catch (e: Exception) {
-                // Silently handle connection errors
+                android.util.Log.e("MainViewModel", "❌ Socket connection error: ${e.message}", e)
             }
         }
     }
