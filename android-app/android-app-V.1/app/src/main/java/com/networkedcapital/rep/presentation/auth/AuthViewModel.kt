@@ -159,7 +159,7 @@ class AuthViewModel @Inject constructor(
             isLoggedIn = false, // force login screen on app start
             isRegistered = true,
             onboardingComplete = true,
-            jwtToken = "", // do not auto-navigate based on token presence
+            jwtToken = token, // Keep the actual token for socket connections
             userId = userIdFromToken ?: _authState.value.userId
         )
         // Do not auto-fetch profile; wait until user logs in explicitly.
