@@ -336,6 +336,9 @@ fun RepNavigation(
                 },
                 onNavigateToPortal = { portalId ->
                     navController.navigate(Screen.PortalDetail.createRoute(portalId, authState.userId))
+                },
+                onNavigateToGroupChat = { chatId ->
+                    navController.navigate(Screen.GroupChat.createRoute(chatId))
                 }
             )
         }

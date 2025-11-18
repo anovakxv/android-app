@@ -52,6 +52,7 @@ fun GoalsDetailScreen(
     onEditGoal: () -> Unit,
     onUpdateGoal: () -> Unit,
     onNavigateToPortal: (Int) -> Unit = {}, // Added portal navigation
+    onNavigateToGroupChat: (Int) -> Unit = {}, // Added group chat navigation
     viewModel: GoalsDetailViewModel = hiltViewModel()
 ) {
     val goal by viewModel.goal.collectAsState()
@@ -72,7 +73,6 @@ fun GoalsDetailScreen(
     val showActionSheet = remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     var showSheet by remember { mutableStateOf(false) }
-    var showChatSheet by remember { mutableStateOf(false) }
     var showSupportSheet by remember { mutableStateOf(false) }
     
     // Payment sheet state
@@ -87,13 +87,13 @@ fun GoalsDetailScreen(
     // Function to open or create team chat
     fun openGoalTeamChat() {
         if (isCreatingTeamChat) return
-        
+
         if (teamChatId != null) {
-            // Show existing chat
-            showChatSheet = true
+            // Navigate to existing chat
+            onNavigateToGroupChat(teamChatId!!)
             return
         }
-        
+
         // Create new chat logic
         isCreatingTeamChat = true
         viewModel.createTeamChat(
@@ -105,7 +105,7 @@ fun GoalsDetailScreen(
                 chatCreationError = error
             } else if (chatId != null) {
                 teamChatId = chatId
-                showChatSheet = true
+                onNavigateToGroupChat(chatId)
             }
         }
     }
@@ -557,43 +557,18 @@ fun GoalsDetailScreen(
             }
         }
 
-        // Enhanced Team Chat Sheet
-        if (showChatSheet) {
-            ModalBottomSheet(
-                onDismissRequest = { showChatSheet = false },
-                sheetState = sheetState
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = "Team Chat",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    
-                    if (teamChatId != null) {
-                        Text("Chat ID: $teamChatId")
-                        // Here you would implement the actual chat UI
-                        Text("Chat implementation would go here")
-                    } else if (chatCreationError != null) {
-                        Text("Error: $chatCreationError", color = MaterialTheme.colorScheme.error)
-                    } else {
-                        Text("Creating team chat...")
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                    }
-                    
-                    TextButton(
-                        onClick = { showChatSheet = false },
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    ) {
-                        Text("Close")
+        // Chat creation error alert
+        if (chatCreationError != null) {
+            AlertDialog(
+                onDismissRequest = { chatCreationError = null },
+                title = { Text("Chat Error") },
+                text = { Text(chatCreationError!!) },
+                confirmButton = {
+                    TextButton(onClick = { chatCreationError = null }) {
+                        Text("OK")
                     }
                 }
-            }
+            )
         }
 
         // Enhanced Payment/Support Sheet
