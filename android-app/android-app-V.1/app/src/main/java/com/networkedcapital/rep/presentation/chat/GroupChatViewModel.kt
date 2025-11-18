@@ -223,16 +223,21 @@ class GroupChatViewModel @Inject constructor(
             if (incomingChatId != chatId) return@onGroupMessage
 
             try {
+                // DEBUG: Log socket payload fields
+                android.util.Log.d("GroupChatVM", "📦 Socket payload - sender_name='${payload["sender_name"]}', sender_id=${payload["sender_id"]}, text='${payload["text"]}'")
+
                 val message = GroupMessageModel(
                     id = (payload["id"] as? Number)?.toInt() ?: 0,
                     senderId = (payload["sender_id"] as? Number)?.toInt(),
-                    senderName = payload["sender_name"] as? String ?: "",
+                    senderName = payload["sender_name"] as? String, // Don't default to "" - use null so UI fallback works
                     // Use image patching
                     senderPhotoUrl = patchProfilePictureUrl(payload["sender_photo_url"] as? String),
-                    text = payload["text"] as? String ?: "",
-                    timestamp = payload["timestamp"] as? String ?: "",
+                    text = payload["text"] as? String,
+                    timestamp = payload["timestamp"] as? String,
                     chatId = incomingChatId
                 )
+
+                android.util.Log.d("GroupChatVM", "📬 Created message object - id=${message.id}, senderName='${message.senderName}', text='${message.text?.take(20)}'")
 
                 _uiState.update { state ->
                     if (!state.messages.any { it.id == message.id }) {

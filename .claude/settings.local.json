@@ -34,7 +34,8 @@
       "Bash(./gradlew :app:tasks:*)",
       "Bash(./gradlew :app:testDebugUnitTest:*)",
       "Bash(./gradlew :app:compileDebugKotlin:*)",
-      "Bash(./gradlew assembleDebug:*)"
+      "Bash(./gradlew assembleDebug:*)",
+      "Bash(./gradlew clean:*)"
     ],
     "deny": [],
     "ask": []
