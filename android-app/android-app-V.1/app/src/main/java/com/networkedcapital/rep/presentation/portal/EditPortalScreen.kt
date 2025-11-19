@@ -36,6 +36,7 @@ fun EditPortalScreen(
     portalDetail: PortalDetail?,
     userId: Int,
     onNavigateBack: () -> Unit,
+    onNavigateToPortalDetail: (Int) -> Unit = {},
     onNavigateToPaymentSettings: (Int, String) -> Unit = { _, _ -> },
     viewModel: EditPortalViewModel = hiltViewModel()
 ) {
@@ -70,7 +71,10 @@ fun EditPortalScreen(
                                 userId = userId,
                                 portalId = portalDetail?.id ?: 0,
                                 context = context,
-                                onSuccess = onNavigateBack
+                                onSuccess = { createdPortalId ->
+                                    // Navigate to the created/edited portal detail screen
+                                    onNavigateToPortalDetail(createdPortalId)
+                                }
                             )
                         },
                         enabled = !uiState.isSaving && uiState.name.isNotBlank()

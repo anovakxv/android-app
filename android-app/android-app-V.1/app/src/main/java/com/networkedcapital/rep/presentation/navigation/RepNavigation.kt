@@ -546,8 +546,15 @@ fun RepNavigation(
                 onNavigateBack = {
                     navController.popBackStack()
                 },
+                onNavigateToPortalDetail = { createdPortalId ->
+                    // Navigate to the newly created/edited portal detail screen
+                    navController.navigate(Screen.PortalDetail.createRoute(createdPortalId, authState.userId)) {
+                        // Remove EditPortal from back stack so back button goes to Main
+                        popUpTo(Screen.EditPortal.route) { inclusive = true }
+                    }
+                },
                 onNavigateToPaymentSettings = { portalId, portalName ->
-                    // TODO: Navigate to payment settings screen when implemented
+                    navController.navigate(Screen.PortalPaymentSetup.createRoute(portalId, portalName))
                 }
             )
         }

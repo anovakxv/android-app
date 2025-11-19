@@ -190,7 +190,7 @@ class EditPortalViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(selectedLeads = currentLeads)
     }
 
-    fun savePortal(userId: Int, portalId: Int, context: Context, onSuccess: () -> Unit) {
+    fun savePortal(userId: Int, portalId: Int, context: Context, onSuccess: (Int) -> Unit) {
         _uiState.value = _uiState.value.copy(isSaving = true, errorMessage = null)
 
         viewModelScope.launch {
@@ -253,12 +253,12 @@ class EditPortalViewModel @Inject constructor(
                 // Call repository to upload
                 portalRepository.savePortalWithImages(portalId, parts).collect { result ->
                     result.fold(
-                        onSuccess = {
+                        onSuccess = { portal ->
                             _uiState.value = _uiState.value.copy(
                                 isSaving = false,
                                 successMessage = "Portal saved successfully"
                             )
-                            onSuccess()
+                            onSuccess(portal.id)
                         },
                         onFailure = { throwable ->
                             _uiState.value = _uiState.value.copy(
