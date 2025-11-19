@@ -110,11 +110,11 @@ data class PortalDetail(
     val name: String,
     val subtitle: String? = null,
     val about: String? = null,
-    @SerializedName("categories_id") val categoriesId: Int? = null,
-    @SerializedName("cities_id") val citiesId: Int? = null,
-    @SerializedName("lead_id") val leadId: Int? = null,
-    @SerializedName("users_id") val usersId: Int? = null,
-    @SerializedName("_c_users_count") val usersCount: Int? = null,
+    @Json(name = "categories_id") val categoriesId: Int? = null,
+    @Json(name = "cities_id") val citiesId: Int? = null,
+    @Json(name = "lead_id") val leadId: Int? = null,
+    @Json(name = "users_id") val usersId: Int? = null,
+    @Json(name = "_c_users_count") val usersCount: Int? = null,
     val mainImageUrl: String? = null,
     val aGoals: List<Goal>? = null,
     val aPortalUsers: List<PortalUser>? = null,
@@ -132,12 +132,12 @@ data class PortalUser(
 @Parcelize
 data class PortalText(
     val id: Int,
-    @SerializedName("portal_id") val portalId: Int? = null,
+    @Json(name = "portal_id") val portalId: Int? = null,
     val title: String? = null,
     val text: String? = null,
     val section: String? = null,
-    @SerializedName("created_at") val createdAt: String? = null,
-    @SerializedName("updated_at") val updatedAt: String? = null
+    @Json(name = "created_at") val createdAt: String? = null,
+    @Json(name = "updated_at") val updatedAt: String? = null
 ) : Parcelable
 
 @Parcelize
