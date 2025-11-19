@@ -510,6 +510,108 @@ This Android app successfully converts ~85% of the iOS Rep app to Android using 
 
 ---
 
-**Document Version**: 2.2
-**Last Updated**: November 17, 2025 - GroupChat parsing & connection banner fixes completed
-**Build Status**: ✅ BUILD SUCCESSFUL in 23s
+## 🔔 Firebase Push Notifications Implementation (November 18, 2025)
+
+### What Was Implemented Today
+
+#### 1. Chat Card Text Color Fix
+**Issue**: Green text on chat cards stayed green even after messages were read
+**Fix**: Updated `MainScreen.kt` color logic to check both:
+- Message is unread (`read == "0"`)
+- Message is from someone else (`sender_id != userId`)
+**Result**: ✅ Chat text now correctly turns gray after reading, matching iOS behavior
+
+#### 2. Complete Firebase Cloud Messaging (FCM) Integration
+Implemented full push notification support to match the working iOS implementation.
+
+**New Files Created**:
+- `RepFirebaseMessagingService.kt` - Service to handle incoming push notifications
+  - Receives direct message and group message notifications
+  - Creates Android notification channels (required for Android 8+)
+  - Displays system notifications with sound, vibration, and lights
+  - Handles FCM token updates and sends to backend
+  - Includes deep linking data for navigation
+
+**Files Modified**:
+- `AndroidManifest.xml` - Added notification permissions and service registration
+  - POST_NOTIFICATIONS permission for Android 13+
+  - VIBRATE and C2DM permissions
+  - Registered FirebaseMessagingService with intent filter
+  - Added notification metadata (icon, color)
+
+- `MainActivity.kt` - Added runtime permission request for Android 13+
+  - Requests POST_NOTIFICATIONS permission on app launch
+  - Uses ActivityResultContracts for proper permission handling
+
+- `RepApp.kt` - Save FCM token on app startup
+  - Retrieves FCM token when app starts
+  - Saves to SharedPreferences for later use
+
+- `AuthViewModel.kt` - Send token to backend after login/registration
+  - Added `sendFCMTokenToBackend()` function
+  - Automatically sends token after successful login
+  - Automatically sends token after successful registration
+
+- `UserApiService.kt` - Added device token endpoint
+  - `POST /api/user/device_token` endpoint
+
+- `UserRepository.kt` & `UserRepositoryImpl.kt` - Repository implementation
+  - `updateDeviceToken()` function to send token to backend
+
+**How It Works**:
+1. **App Starts** → FCM token retrieved and saved to SharedPreferences
+2. **User Logs In** → Token sent to backend via `/api/user/device_token`
+3. **Backend Sends Push** → Uses Firebase Admin SDK (Python)
+4. **Service Receives** → RepFirebaseMessagingService handles notification
+5. **Notification Displayed** → User sees system notification
+6. **User Taps** → App opens with deep linking data
+
+**Notification Types Supported**:
+- Direct Messages: Shows sender name and message preview
+- Group Messages: Shows chat name, sender, and message preview
+
+### Next Steps to Verify Push Notifications
+
+#### 1. ✅ Verify Firebase Console Configuration
+- [ ] Open [Firebase Console](https://console.firebase.google.com)
+- [ ] Confirm Android app is registered in the SAME project as iOS
+- [ ] Package name should be: `com.networkedcapital.rep`
+- [ ] Verify `google-services.json` file is from the correct project
+
+#### 2. ✅ Check google-services.json File
+- [ ] Open `android-app-V.1/app/google-services.json`
+- [ ] Verify `project_id` matches your Firebase project
+- [ ] Confirm file is up-to-date (should have Android app configuration)
+
+#### 3. ✅ Backend Configuration (Should Already Work)
+Your Python backend already sends notifications to both iOS and Android:
+- Uses Firebase Admin SDK in `send_notification()` function
+- Automatically works for both platforms with same token system
+- No backend changes needed
+
+#### 4. 🧪 Testing Steps
+1. **Install app** on Android device/emulator
+2. **Login** with test account (watch logcat for FCM token logs)
+3. **Verify token sent** - Check backend logs for:
+   - `"Registered device_token for user_id=X: <token>"`
+4. **Send test message** from another user (iOS or Android)
+5. **Verify notification appears** on Android device
+
+#### 5. 🔍 Troubleshooting
+If notifications don't appear:
+- Check Android Logcat for:
+  - `"RepApp: FCM registration token: <token>"` (app start)
+  - `"AuthViewModel: Successfully sent FCM token to backend"` (after login)
+  - `"RepFCM: Message received from: <sender>"` (when notification received)
+- Check backend logs for:
+  - `"Registered device_token for user_id=X"` (token saved)
+  - Firebase Admin SDK errors (configuration issues)
+- Verify notification permissions granted on device
+
+**Expected Outcome**: Since iOS notifications are working and using the same Firebase project, Android should work automatically once tested. All code is implemented and ready.
+
+---
+
+**Document Version**: 2.3
+**Last Updated**: November 18, 2025 - Chat text color fix & Firebase push notifications implemented
+**Build Status**: ✅ BUILD SUCCESSFUL
