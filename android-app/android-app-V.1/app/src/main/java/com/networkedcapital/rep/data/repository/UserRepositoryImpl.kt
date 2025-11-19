@@ -96,6 +96,19 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun updateDeviceToken(token: String): Flow<Result<Unit>> = flow {
+        try {
+            val response = userApiService.updateDeviceToken(mapOf("device_token" to token))
+            if (response.isSuccessful) {
+                emit(Result.success(Unit))
+            } else {
+                emit(Result.failure(Exception("Failed to update device token: ${response.message()}")))
+            }
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
     /**
      * Get cached users as a Flow for reactive UI updates
      */

@@ -14,4 +14,6 @@ interface UserRepository {
     suspend fun blockUser(userId: Int): Flow<Result<Unit>>
 
     suspend fun flagUser(userId: Int, reason: String): Flow<Result<Unit>>
+
+    suspend fun updateDeviceToken(token: String): Flow<Result<Unit>>
 }

@@ -1,6 +1,7 @@
 package com.networkedcapital.rep
 
 import android.app.Application
+import android.content.Context
 import android.util.Log
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
@@ -18,7 +19,7 @@ class RepApp : Application() {
             return
         }
 
-        // Register for FCM token and send to backend if needed
+        // Register for FCM token
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task: Task<String> ->
             if (!task.isSuccessful) {
                 Log.w("RepApp", "Fetching FCM registration token failed", task.exception)
@@ -26,7 +27,11 @@ class RepApp : Application() {
             }
             val token = task.result
             Log.d("RepApp", "FCM registration token: $token")
-            // TODO: Send this token to your backend if user is logged in
+
+            // Save token to SharedPreferences for later use
+            val prefs = getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+            prefs.edit().putString("fcm_token", token).apply()
+            Log.d("RepApp", "FCM token saved to SharedPreferences")
         }
     }
 }

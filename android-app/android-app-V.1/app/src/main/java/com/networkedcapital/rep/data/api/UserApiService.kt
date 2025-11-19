@@ -27,4 +27,9 @@ interface UserApiService {
     suspend fun flagUser(
         @Body params: Map<String, Any>
     ): Response<Unit>
+
+    @POST("api/user/device_token")
+    suspend fun updateDeviceToken(
+        @Body params: Map<String, String>
+    ): Response<Unit>
 }

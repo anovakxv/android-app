@@ -1,14 +1,17 @@
 package com.networkedcapital.rep.presentation.auth
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.networkedcapital.rep.data.repository.AuthRepository
+import com.networkedcapital.rep.data.repository.UserRepository
 import com.networkedcapital.rep.domain.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import android.util.Base64
+import android.util.Log
 import org.json.JSONObject
 
 data class AuthState(
@@ -24,7 +27,9 @@ data class AuthState(
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository,
+    private val application: Application
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow(AuthState())
@@ -138,6 +143,8 @@ class AuthViewModel @Inject constructor(
                                 jwtToken = authRepository.getToken() ?: "",
                                 errorMessage = null
                             )
+                            // Send FCM token to backend after successful login
+                            sendFCMTokenToBackend()
                         },
                         onFailure = { throwable ->
                             _authState.value = _authState.value.copy(
@@ -199,6 +206,8 @@ class AuthViewModel @Inject constructor(
                                 errorMessage = null
                             )
                             println("[AuthViewModel] authState after registration: isRegistered=${_authState.value.isRegistered}, onboardingComplete=${_authState.value.onboardingComplete}, userId=${_authState.value.userId}")
+                            // Send FCM token to backend after successful registration
+                            sendFCMTokenToBackend()
                         },
                         onFailure = { throwable ->
                             println("[AuthViewModel] Registration result failure: ${throwable.message}")
@@ -312,5 +321,41 @@ class AuthViewModel @Inject constructor(
 
     fun clearForgotPasswordSuccess() {
         _authState.value = _authState.value.copy(forgotPasswordSuccess = null)
+    }
+
+    /**
+     * Send FCM token to backend after successful login/registration
+     */
+    private fun sendFCMTokenToBackend() {
+        viewModelScope.launch {
+            try {
+                val prefs = application.getSharedPreferences("auth_prefs", android.content.Context.MODE_PRIVATE)
+                val fcmToken = prefs.getString("fcm_token", null)
+
+                if (fcmToken.isNullOrEmpty()) {
+                    Log.d("AuthViewModel", "No FCM token found in SharedPreferences")
+                    return@launch
+                }
+
+                Log.d("AuthViewModel", "Sending FCM token to backend: $fcmToken")
+
+                userRepository.updateDeviceToken(fcmToken)
+                    .catch { throwable ->
+                        Log.e("AuthViewModel", "Failed to send FCM token: ${throwable.message}", throwable)
+                    }
+                    .collect { result ->
+                        result.fold(
+                            onSuccess = {
+                                Log.d("AuthViewModel", "Successfully sent FCM token to backend")
+                            },
+                            onFailure = { throwable ->
+                                Log.e("AuthViewModel", "Failed to send FCM token: ${throwable.message}", throwable)
+                            }
+                        )
+                    }
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "Error sending FCM token: ${e.message}", e)
+            }
+        }
     }
 }

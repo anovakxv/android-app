@@ -1,8 +1,13 @@
 package com.networkedcapital.rep
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,6 +19,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
+import androidx.core.content.ContextCompat
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,8 +44,24 @@ import com.networkedcapital.rep.presentation.main.MainScreen
 @androidx.compose.material3.ExperimentalMaterial3Api
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    // Register for activity result to request notification permission
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            Log.d("MainActivity", "Notification permission granted")
+        } else {
+            Log.d("MainActivity", "Notification permission denied")
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Request notification permission for Android 13+ (API 33+)
+        requestNotificationPermission()
+
         setContent {
             val navController = rememberNavController()
             Surface(color = Color.White) {
@@ -49,6 +71,33 @@ class MainActivity : ComponentActivity() {
                     authViewModel = authViewModel
                 )
             }
+        }
+    }
+
+    /**
+     * Request notification permission for Android 13+ (API 33+)
+     */
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    Log.d("MainActivity", "Notification permission already granted")
+                }
+                shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
+                    // Show rationale if needed (optional - you could show a dialog explaining why you need it)
+                    Log.d("MainActivity", "Should show permission rationale")
+                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+                else -> {
+                    // Directly request permission
+                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        } else {
+            Log.d("MainActivity", "No need to request notification permission (API < 33)")
         }
     }
 }
