@@ -568,12 +568,17 @@ class MainViewModel @Inject constructor(
                 // Update cache
                 backgroundUsersTab0.value = patchedChats
 
-                // Check for unread messages using unreadCount
+                // Check for unread messages - only count messages from OTHER users
+                // Matches iOS logic: only show green if last_message.read == "0" AND sender != currentUser
                 val hasUnreadDM = patchedChats.any {
-                    it.type == "direct" && it.unreadCount > 0
+                    it.type == "direct" &&
+                    it.last_message?.read == "0" &&
+                    it.last_message?.sender_id != userId
                 }
                 val hasUnreadGroup = patchedChats.any {
-                    it.type == "group" && it.unreadCount > 0
+                    it.type == "group" &&
+                    it.last_message?.read == "0" &&
+                    it.last_message?.sender_id != userId
                 }
                 _hasUnreadDirectMessages.value = hasUnreadDM
                 _hasUnreadGroupMessages.value = hasUnreadGroup
