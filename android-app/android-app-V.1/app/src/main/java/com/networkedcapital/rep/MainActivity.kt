@@ -41,7 +41,6 @@ import com.networkedcapital.rep.presentation.onboarding.AboutRepScreen
 import com.networkedcapital.rep.presentation.main.MainScreen
 // Removed unresolved import for OnboardingScreen
 
-@androidx.compose.material3.ExperimentalMaterial3Api
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
@@ -56,6 +55,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
