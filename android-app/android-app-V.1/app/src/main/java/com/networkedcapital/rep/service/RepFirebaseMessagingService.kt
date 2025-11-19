@@ -126,7 +126,7 @@ class RepFirebaseMessagingService : FirebaseMessagingService() {
         )
 
         val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // You may want to create a proper notification icon
+            .setSmallIcon(android.R.drawable.ic_dialog_info) // Using Android system icon
             .setContentTitle(title)
             .setContentText(body)
             .setAutoCancel(true)

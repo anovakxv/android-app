@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(git commit:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(findstr:*)",
+      "Bash(dir \"C:\\Users\\Stephanie\\Desktop\\my-android-app\\android-app\\android-app-V.1\\app\\src\\main\\res\")"
     ],
     "deny": [],
     "ask": []
