@@ -4,7 +4,13 @@
       "Bash(git commit:*)",
       "Bash(git add:*)",
       "Bash(findstr:*)",
-      "Bash(dir \"C:\\Users\\Stephanie\\Desktop\\my-android-app\\android-app\\android-app-V.1\\app\\src\\main\\res\")"
+      "Bash(dir \"C:\\Users\\Stephanie\\Desktop\\my-android-app\\android-app\\android-app-V.1\\app\\src\\main\\res\")",
+      "Bash(gradlew.bat assembleDebug:*)",
+      "Bash(.gradlew.bat assembleDebug:*)",
+      "Bash(dir \"C:\\Users\\Stephanie\\Desktop\\my-android-app\\android-app\\android-app-V.1\")",
+      "Bash(cmd.exe /c \"cd /d C:\\Users\\Stephanie\\Desktop\\my-android-app\\android-app\\android-app-V.1 && gradlew.bat assembleDebug\")",
+      "Bash(cmd.exe /c:*)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": []
