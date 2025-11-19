@@ -618,6 +618,7 @@ fun MainScreen(
                     if (uiState.activeChats.isNotEmpty()) {
                         ActiveChatsList(
                             chats = uiState.activeChats,
+                            userId = userId,
                             onChatClick = { chat ->
                                 if (chat is ActiveChat) {
                                     onNavigateToChat(chat)
@@ -900,6 +901,7 @@ fun UserProfileImageThumbnail(user: User, size: Dp = 40.dp) {
 @Composable
 fun EnhancedActiveChatItem(
     chat: ActiveChat,
+    userId: Int,
     onClick: () -> Unit
 ) {
     Row(
@@ -966,7 +968,7 @@ fun EnhancedActiveChatItem(
                 Text(
                     text = chat.lastMessage ?: "",
                     fontWeight = if (chat.unreadCount > 0) FontWeight.Bold else FontWeight.Normal,
-                    color = if (chat.unreadCount > 0) Color(0xFF8CC55D) else Color.Gray,
+                    color = if (chat.last_message?.read == "0" && chat.last_message?.sender_id != userId) Color(0xFF8CC55D) else Color.Gray,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -1016,7 +1018,7 @@ fun EnhancedActiveChatItem(
                 Text(
                     text = chat.lastMessage ?: "",
                     fontWeight = if (chat.unreadCount > 0) FontWeight.Bold else FontWeight.Normal,
-                    color = if (chat.unreadCount > 0) Color(0xFF8CC55D) else Color.Gray,
+                    color = if (chat.last_message?.read == "0" && chat.last_message?.sender_id != userId) Color(0xFF8CC55D) else Color.Gray,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -1229,6 +1231,7 @@ fun PortalsList(
 @Composable
 fun ActiveChatsList(
     chats: List<ActiveChat>,
+    userId: Int,
     onChatClick: (ActiveChat) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -1240,6 +1243,7 @@ fun ActiveChatsList(
         items(chats) { chat ->
             EnhancedActiveChatItem(
                 chat = chat,
+                userId = userId,
                 onClick = { onChatClick(chat) }
             )
             // Add divider between items
